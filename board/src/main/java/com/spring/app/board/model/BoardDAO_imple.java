@@ -1,9 +1,13 @@
 package com.spring.app.board.model;
 
+import java.util.List;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
+
+import com.spring.app.board.domain.TestVO;
 
 
 //==== #32. Repository(DAO) 선언 ====
@@ -20,7 +24,7 @@ public class BoardDAO_imple implements BoardDAO {
     //                       스프링 컨테이너에 담겨진 의존객체를 주입할때 타입을 찾아서 연결(의존객체주입)한다. ==> 가장 많이 사용
    
     //     2. @Resource  ==> Java 에서 지원하는 어노테이션이다.
-    //                       스프링 컨테이너에 담겨진 의존객체를 주입할때 필드명(이름)을 찾아서 연결(의존객체주입)한다.
+    //                       스프링 컨테이너에 담겨진 의존객체를 주입할때 필드명(이름)을 찾아서 연결(의존객체주입)한다. ==> jdk 11은 존재하지 않음 ==> 1번만 사용!
    
     //     3. @Inject    ==> Java 에서 지원하는 어노테이션이다.
     //                       스프링 컨테이너에 담겨진 의존객체를 주입할때 타입을 찾아서 연결(의존객체주입)한다.
@@ -79,5 +83,18 @@ public class BoardDAO_imple implements BoardDAO {
 		return n1*n2;
 		
 	} // end of public int test_insert()
+
+
+
+
+	// spring_test 테이블에 select 하기 
+	@Override
+	public List<TestVO> test_select() {
+	
+		List<TestVO> testvoList = sqlsession.selectList("board.test_select");	// 한개는 selectone(pk), 복수개는 selectList
+		
+		return testvoList;
+		
+	} // end of public List<TestVO> test_select()
 
 }

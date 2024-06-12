@@ -1,11 +1,15 @@
 package com.spring.app.board.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.service.BoardService;
 
 /*
@@ -28,19 +32,20 @@ import com.spring.app.board.service.BoardService;
 	실행되어진 결과값을 @Controller 단으로 넘겨준다.
 */
 
-
-
 /* 	
   	XML에서 빈을 만드는 대신에 클래스명 앞에 @Component 어노테이션을 적어주면 해당 클래스는 bean으로 자동 등록된다. 
 	그리고 bean의 이름(첫글자는 소문자)은 해당 클래스명이 된다. 
 	즉, 여기서 bean의 이름은 boardController 이 된다. 
 	여기서는 @Controller 를 사용하므로 @Component 기능이 이미 있으므로 @Component를 명기하지 않아도 BoardController 는 bean 으로 등록되어 스프링컨테이너가 자동적으로 관리해준다. 
 */
+
+
+
 //@Component 빼버릴 수 있다!
 @Controller		// @Controller 속에는 @Component 기능이 포함되어 있음
 public class BoardController {
 	// === #35. 의존객체 주입하기(DI: Dependency Injection) ===
-	// ※ 의존객체주입(DI : Dependency Injection) 
+	// ※ 의존객체 주입(DI : Dependency Injection : 의존객체 주입) 
     //  ==> 스프링 프레임워크는 객체를 관리해주는 컨테이너를 제공해주고 있다.
     //      스프링 컨테이너는 bean으로 등록되어진 BoardController 클래스 객체가 사용되어질때, 
     //      BoardController 클래스의 인스턴스 객체변수(의존객체)인 BoardService service 에 
@@ -53,12 +58,13 @@ public class BoardController {
 	//      객체 생성 및 관리를 스프링 프레임워크가 가지고 있는 객체 관리기능을 사용하므로 Inversion of Control == 제어의 역전 이라고 부른다.  
     //      그래서 스프링 컨테이너를 IoC 컨테이너라고도 부른다.
   
-	//  IOC(Inversion of Control) 란 ?
+	//  IOC(Inversion of Control : 제어의 역전) 란 ?
 	//  ==> 스프링 프레임워크는 사용하고자 하는 객체를 빈형태로 이미 만들어 두고서 컨테이너(Container)에 넣어둔후
 	//      필요한 객체사용시 컨테이너(Container)에서 꺼내어 사용하도록 되어있다.
 	//      이와 같이 객체 생성 및 소멸에 대한 제어권을 개발자가 하는것이 아니라 스프링 Container 가 하게됨으로써 
 	//      객체에 대한 제어역할이 개발자에게서 스프링 Container로 넘어가게 됨을 뜻하는 의미가 제어의 역전 
 	//      즉, IOC(Inversion of Control) 이라고 부른다.
+	//		스프링 컨테이너가 알아서 bean을 주입시켰다가 없앴다가 해줌.
   
   
 	//  === 느슨한 결합 ===
@@ -67,8 +73,8 @@ public class BoardController {
 	//      느스한 결합은 BoardController 객체가 메모리에서 삭제되더라도 BoardService service 객체는 메모리에서 동시에 삭제되는 것이 아니라 남아 있다.
   
 	// ===> 단단한 결합(개발자가 인스턴스 변수 객체를 필요에 의해서 생성해주던 것)
-	// private InterBoardService service = new BoardService(); 
-	// ===> BoardController 객체가 메모리에서 삭제 되어지면  BoardService service 객체는 멤버변수(필드)이므로 메모리에서 자동적으로 삭제되어진다.
+	// 		private InterBoardService service = new BoardService(); 
+	// 		===> BoardController 객체가 메모리에서 삭제 되어지면  BoardService service 객체는 멤버변수(필드)이므로 메모리에서 자동적으로 삭제되어진다.
 	
 	@Autowired		// Type에 따라 알아서 Bean 을 주입해준다.
 	private BoardService service;	// 처음에는 null, 주입시키면 null 이 아니게 됨.
@@ -99,7 +105,45 @@ public class BoardController {
 		// /WEB-INF/views/ 접두어(servlet-context.xml)
 		// .jsp 접미어
 		// 즉, /WEB-INF/views/test/test_insert.jsp 뷰단 페이지를 만들어야 한다.
-	}
+	} // end of public String test_insert(HttpServletRequest request) 
+	
+	
+	
+	
+	@RequestMapping(value = "/test/test_select.action")
+	public String test_select(HttpServletRequest request) {
+		
+		List<TestVO> testvoList = service.test_select();
+		
+		request.setAttribute("testvoList", testvoList);
+		
+		return "test/test_select";
+		// /WEB-INF/views/test/test_select.jsp 페이지를 만든다.
+		
+	} // end of public String test_select(HttpServletRequest request)
+	
+	
+	
+	
+//	@RequestMapping(value = "/test/test_form1.action", method= {RequestMethod.GET})	// GET 방식만 허락해준다.
+//	@RequestMapping(value = "/test/test_form1.action", method= {RequestMethod.POST})	// POST 방식만 허락해준다.
+	
+	@RequestMapping(value = "/test/test_form1.action")	// GET 방식 또는 POST 방식 모두 허락해준다.
+	public String test_form1(HttpServletRequest request) {
+		
+		String method = request.getMethod();
+		
+		if("GET".equalsIgnoreCase(method)) {	// GET 방식이라면
+			return "test/test_form1"; 	// view 단 페이지를 띄운다.
+			// /WEB-INF/views/test/test_form1.jsp 페이지를 만든다.
+		}
+		else {	// POST 방식이라면
+			return "";
+		}
+		
+		
+	} // end of public String test_form1(HttpServletRequest request)
+	
 	// ==== **** spring 기초 끝  **** ==== //
 	
 }

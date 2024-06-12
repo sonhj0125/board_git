@@ -1,8 +1,12 @@
 package com.spring.app.board.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+
+import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.model.BoardDAO;
 
 //==== #31. Service 선언 ====
@@ -25,5 +29,16 @@ public class BoardService_imple implements BoardService {
 		return n;
 		
 	} // end of public int test_insert()
+
+	
+	
+	
+	@Override
+	public List<TestVO> test_select() {
+
+		List<TestVO> testvoList = dao.test_select();
+		
+		return testvoList;
+	} // end of public List<TestVO> test_select()
 
 }

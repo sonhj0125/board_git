@@ -134,7 +134,7 @@
 		
 		
 		
-		<!-- JDK 11 용 시작 -->
+		<!-- JDK 11 용 시작 (원래는 필요없는 것인데, @Resource를 사용하기 위해 넣어준 것)-->
 	    <!-- JDK 1.8 까지는 내장되었던 JAXB를 JDK 11 에서는 내장하고 있지 않기 때문에  JDK 11 에서 제거 되었던 JAXB를 사용할 수 있도록 하는 것-->
 		<dependency>
             <groupId>javax.xml.bind</groupId>

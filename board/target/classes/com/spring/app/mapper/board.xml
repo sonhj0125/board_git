@@ -10,6 +10,12 @@
 		insert into spring_test(no, name, writeday)
 		values(101, '이순신', default)
 	</insert>
-
+	
+	<!--  !!!! 주의해야할 사항은 리턴타입이 List<E> 이더라도 resultType 은 E 으로 해야만 한다. !!!! --> 
+	<select id="test_select" resultType="com.spring.app.board.domain.TestVO"> 
+		select no, name, to_char(writeday, 'yyyy-mm-dd hh24:mi:ss') AS writeday
+		from spring_test
+		order by no asc
+	</select>
 
 </mapper>

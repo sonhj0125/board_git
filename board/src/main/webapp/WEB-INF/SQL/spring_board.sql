@@ -14,11 +14,7 @@ create table spring_test
 select *
 from spring_test;
 
-
-
 --------------------------------------------------------------------------------------
-
-
 
 show user;
 -- USER이(가) "HR"입니다.
@@ -33,6 +29,45 @@ create table spring_exam
 
 select *
 from spring_exam;
+
+--------------------------------------------------------------------------------------
+
+show user;
+-- USER이(가) "MYMVC_USER"입니다.
+
+insert into spring_test(no, name, writeday)
+values(102, '박보영', default);
+
+insert into spring_test(no, name, writeday)
+values(103, '변우석', default);
+
+commit;
+
+select *
+from spring_test
+order by no asc;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
