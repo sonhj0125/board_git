@@ -41,4 +41,15 @@ public class BoardService_imple implements BoardService {
 		return testvoList;
 	} // end of public List<TestVO> test_select()
 
+
+
+
+	@Override
+	public int test_insert(TestVO tvo) {
+		
+		int n = dao.test_insert(tvo);
+		
+		return n;
+	} // end of public int test_insert(TestVO tvo)
+
 }

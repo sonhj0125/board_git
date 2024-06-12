@@ -97,4 +97,15 @@ public class BoardDAO_imple implements BoardDAO {
 		
 	} // end of public List<TestVO> test_select()
 
+
+
+	// view단의 form 태그에서 입력받은 값을 spring_test 테이블에 insert 하기 
+	@Override
+	public int test_insert(TestVO tvo) {
+		
+		int n = sqlsession.insert("board.test_insert_vo", tvo);
+		
+		return n;
+	} // end of public int test_insert(TestVO tvo)
+
 }

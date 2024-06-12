@@ -10,5 +10,7 @@ public interface BoardService {
 
 	List<TestVO> test_select();
 
+	int test_insert(TestVO tvo);	// 메소드의 이름은 같고, 파라미터는 다른 method의 오버로딩
+
 	
 }

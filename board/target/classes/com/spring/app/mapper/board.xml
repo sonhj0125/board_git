@@ -17,5 +17,10 @@
 		from spring_test
 		order by no asc
 	</select>
+	
+	<insert id="test_insert_vo" parameterType="com.spring.app.board.domain.TestVO">
+		insert into spring_test(no, name, writeday)
+		values(#{no},#{name}, default)	<!-- #{get 다음에 어떤것(예:getNo, getName)}이 들어간다. -->
+	</insert>
 
 </mapper>

@@ -43,13 +43,14 @@ values(103, '변우석', default);
 
 commit;
 
-select *
+select no, name, to_char(writeday, 'yyyy-mm-dd hh24:mi:ss') AS writeday
 from spring_test
 order by no asc;
 
+delete from spring_test
+where no = 1009;
 
-
-
+commit;
 
 
 

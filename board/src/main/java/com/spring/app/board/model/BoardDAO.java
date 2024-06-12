@@ -11,6 +11,9 @@ public interface BoardDAO {
 
 	// spring_test 테이블에 select 하기 
 	List<TestVO> test_select();
+
+	// view단의 form 태그에서 입력받은 값을 spring_test 테이블에 insert 하기 
+	int test_insert(TestVO tvo);
 	
 	
 	
