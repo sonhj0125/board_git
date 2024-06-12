@@ -328,31 +328,40 @@ public class BoardController {
 	
 	
 	// ************ tiles 연습 시작  ************ //
-	@RequestMapping(value = "/test/test_form3.action", method={RequestMethod.GET})
-	public String test_form_tiles() {
+	@GetMapping("test/tiles_test1.action")
+	public String tiles_test1() {
 		
-		// ==> tiles의 형태에 따라 1, 2, 3, 4로 나뉨 <==
-		// return "member/adult/user.tiles1"; 	
-		// /WEB-INF/views/tiles1/member/adult/user.jsp 라고 뷰단 페이지를 만든다는 것.!! a,b까지 폴더. 이후 c.jsp 파일이 들어있다.
-		// return "*/*.tiles1";
-		// return "*.tiles1";
+		return "tiles_test1.tiles1";
+	//	/WEB-INF/views/tiles1/tiles_test1.jsp 페이지를 만들어야 한다.
 		
-		// return "cart/mycart.tiles2";
-		// /WEB-INF/views/tiles2/cart/mycart.jsp
-		
-		// return "*.tiles2";
-		// return "*/*/*.tiles2"; 
-		
-		return "order/myorder";
-		// /WEB-INF/views/order/myorder.jsp
-		
-	} // end of public String test_form3()
+	} // end of public String tiles_test1()
 	
 	
 	
-	
-	
+	@GetMapping("test/tiles_test2.action")
+	public String tiles_test2() {
+		
+		return "test/tiles_test2.tiles1";
+	//	/WEB-INF/views/tiles1/test/tiles_test2.jsp 페이지를 만들어야 한다.
+		
+	} // end of public String tiles_test2()
 
+	
+	
+	@GetMapping("test/tiles_test3.action")
+	public String tiles_test3() {
+		
+		return "test/sample/tiles_test3.tiles1";
+	//	/WEB-INF/views/tiles1/test/sample/tiles_test3.jsp 페이지를 만들어야 한다.
+		
+	} // end of public String tiles_test3()
+	
+	
+	
+	
+	
+	
+	
 	// ************ tiles 연습 끝  ************ //
 	
 	
