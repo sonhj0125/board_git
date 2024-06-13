@@ -1,13 +1,16 @@
 package com.spring.app.board.model;
 
 import java.util.List;
+import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
+import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
+import com.spring.app.board.domain.TestVO2;
 
 
 //==== #32. Repository(DAO) 선언 ====
@@ -87,7 +90,7 @@ public class BoardDAO_imple implements BoardDAO {
 
 
 
-	// spring_test 테이블에 select 하기 
+	// spring_test 테이블에 select 하기 (날짜 String)
 	@Override
 	public List<TestVO> test_select() {
 	
@@ -99,13 +102,108 @@ public class BoardDAO_imple implements BoardDAO {
 
 
 
-	// view단의 form 태그에서 입력받은 값을 spring_test 테이블에 insert 하기 
+	// spring_test 테이블에 select 하기 3 (날짜 Date)
+	@Override
+	public List<TestVO2> test_select_vo2() {
+		
+		List<TestVO2> testvoList = sqlsession.selectList("board.test_select_vo2");	
+		
+		return testvoList;
+		
+	} // end of public List<TestVO2> test_select_vo2()
+
+
+	// spring_test 테이블에 select 하기 2
+	@Override
+	public List<Map<String, String>> test_select_map() {
+		
+		List<Map<String, String>> mapList = sqlsession.selectList("board.test_select_map");	
+		
+		return mapList;
+		
+	} // end of public List<Map<String, String>> test_select_map()
+
+	
+	
+
+	// view단의 form 태그에서 입력받은 값을 spring_test 테이블에 insert 하기 (날짜 String)
 	@Override
 	public int test_insert(TestVO tvo) {
 		
 		int n = sqlsession.insert("board.test_insert_vo", tvo);
 		
 		return n;
+		
 	} // end of public int test_insert(TestVO tvo)
+
+
+	
+
+	// view단의 form 태그에서 입력받은 값을 spring_test 테이블에 insert 하기 3 (날짜 Date)
+	@Override
+	public int test_insert_vo2(TestVO2 tvo) {
+	
+		int n = sqlsession.insert("board.test_insert_vo2", tvo);
+		
+		return n;
+		
+	} // end of public int test_insert_vo2(TestVO2 tvo)
+	
+	
+	
+
+	// view단의 form 태그에서 입력받은 값을 spring_test 테이블에 insert 하기 2
+	@Override
+	public int test_insert(Map<String, String> paraMap) {
+		
+		int n = sqlsession.insert("board.test_insert_map", paraMap);
+		
+		return n;
+		
+	} // end of public int test_insert(Map<String, String> paraMap)
+
+
+	
+	
+//////////////////////////////////////////////////////////////////////////////////////
+//게시판 시작
+	
+	
+	// === # 38. 메인페이지 요청 === //
+	// 시작페이지에서 이미지 캐러셀
+	@Override
+	public List<Map<String, String>> imgmapList() {
+		
+		List<Map<String, String>> imgmapList = sqlsession.selectList("board.imgmapList");	
+		
+		return imgmapList;
+		
+	} // end of public List<Map<String, String>> imgmapList()
+
+
+
+	// === #46. 로그인 처리하기 === //
+	@Override
+	public MemberVO getLoginMember(Map<String, String> paraMap) {
+		
+		MemberVO loginuser = sqlsession.selectOne("board.getLoginMember", paraMap);
+		
+		//aES256.decrypt(loginuser.getEmail());
+		//aES256.decrypt(loginuser.getMobile());
+		
+		return loginuser;
+		
+	} // end of public MemberVO getLoginMember(Map<String, String> paraMap)
+
+
+
+	
+	
+
+
+
+
+
+
 
 }

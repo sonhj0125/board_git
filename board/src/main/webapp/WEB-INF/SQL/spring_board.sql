@@ -54,14 +54,45 @@ commit;
 
 
 
+-----------------------------------------------------------------------------------------
+show user;
+-- USER이(가) "MYMVC_USER"입니다.
 
 
+create table tbl_main_image_product
+(imgno           number not null
+,productname     Nvarchar2(20) not null
+,imgfilename     varchar2(100) not null
+,constraint PK_tbl_main_image_product primary key(imgno)
+);
+-- Table TBL_MAIN_IMAGE_PRODUCT이(가) 생성되었습니다.
 
 
+create sequence seq_main_image_product
+start with 1
+increment by 1
+nomaxvalue
+nominvalue
+nocycle
+nocache;
+-- Sequence SEQ_MAIN_IMAGE_PRODUCT이(가) 생성되었습니다.
 
 
+insert into tbl_main_image_product(imgno, productname, imgfilename) values(seq_main_image_product.nextval, '미샤' ,'미샤.png');  
+insert into tbl_main_image_product(imgno, productname, imgfilename) values(seq_main_image_product.nextval, '원더플레이스', '원더플레이스.png'); 
+insert into tbl_main_image_product(imgno, productname, imgfilename) values(seq_main_image_product.nextval, '레노보', '레노보.png'); 
+insert into tbl_main_image_product(imgno, productname, imgfilename) values(seq_main_image_product.nextval, '동원', '동원.png'); 
+
+commit;
+
+select imgno, productname, imgfilename
+from tbl_main_image_product
+order by imgno asc;
 
 
+select *
+from tbl_member
+where userid = 'ejss0125' and pwd='9695b88a59a1610320897fa84cb7e144cc51f2984520efb77111d94b402a8382';
 
 
 

@@ -1,6 +1,9 @@
 package com.spring.app.board.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.json.JSONArray;
@@ -12,9 +15,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
 
+import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
+import com.spring.app.board.domain.TestVO2;
 import com.spring.app.board.service.BoardService;
+import com.spring.app.common.Sha256;
 
 /*
 	사용자 웹브라우저 요청(View)  ==> DispatcherServlet ==> @Controller 클래스 <==>> Service단(핵심업무로직단, business logic단) <==>> Model단[Repository](DAO, DTO) <==>> myBatis <==>> DB(오라클)           
@@ -126,6 +133,34 @@ public class BoardController {
 		
 	} // end of public String test_select(HttpServletRequest request)
 	
+	
+	
+	
+	
+	@RequestMapping(value = "/test/test_select_vo2.action")
+	public String test_select_vo2(HttpServletRequest request) {
+		
+		List<TestVO2> testvoList = service.test_select_vo2();
+		
+		request.setAttribute("testvoList", testvoList);
+		
+		return "test/test_select_vo2";
+		
+	} // end of public String test_select(HttpServletRequest request)
+	
+	
+	
+	
+	@RequestMapping(value = "/test/test_select_map.action")
+	public String test_select_map(HttpServletRequest request) {
+		
+		List<Map<String, String>> mapList = service.test_select_map();
+		
+		request.setAttribute("mapList", mapList);
+		
+		return "test/test_select_map";
+		
+	} // end of public String test_select_map(HttpServletRequest request)
 	
 	
 	
@@ -255,18 +290,94 @@ public class BoardController {
 		}
 	} // end of public String test_form4(TestVO tvo)
 	
+	
+	
+	
+	
 
-
+		@GetMapping("/test/test_form4_vo2.action")
+		public String test_form4_vo2() {
+			
+			return "test/test_form4_vo2"; 	
+			
+		} // end of public String test_form4_vo2()
+		
+		
+		
+		
+		@PostMapping("/test/test_form4_vo2.action")
+		public String test_form4_vo2(TestVO2 tvo) {
+			
+			int n = service.test_insert_vo2(tvo);
+			
+			if(n == 1) {
+				
+				return "redirect:/test/test_select_vo2.action";
+				
+			}
+			else {
+				return "redirect:/test/test_form4_vo2.action";
+				
+			}
+			
+		} // end of public String test_form4_vo2(TestVO tvo)
 	
 	
-	// ======= Ajax 연습시작 ======= //
-	
-	@GetMapping("/test/test_form5.action")	
+		
+		
+		
+		
+		
+	// method={RequestMethod.POST} 대신 @GetMapping 사용 및 (value=) 지워도 됨
+	@GetMapping("/test/test_form5.action")	// GET 방식만 허락해준다.
 	public String test_form5() {
 		
 		return "test/test_form5"; 	
 		
 	} // end of public String test_form5()
+		
+	
+	
+	
+	
+	@PostMapping("/test/test_form5.action")	// POST 방식만 허락해준다.
+	public String test_form5(HttpServletRequest request) {
+		
+		String no = request.getParameter("no");
+		String name = request.getParameter("name");
+		
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("no", no);
+		paraMap.put("name", name);
+		
+		int n = service.test_insert(paraMap);
+		
+		
+		if(n == 1) {
+			
+			return "redirect:/test/test_select_map.action";
+			
+		}
+		else {
+			return "redirect:/test/test_form5.action";
+		}
+	} // end of public String test_form5(TestVO tvo)
+	
+	
+	
+	
+	
+	
+	
+	
+	// ======= Ajax 연습시작 ======= //
+	
+	@GetMapping("/test/test_form6.action")	
+	public String test_form6() {
+		
+		return "test/test_form6"; 	
+		
+	} // end of public String test_form6()
 
 	
 	@ResponseBody // toString으로 문자열로 바뀐 것("{"n":1}") 결과물 그대로 뷰단에 보여주기 위해 해줌
@@ -326,6 +437,27 @@ public class BoardController {
 	
 	
 	
+	// === return 타입을 String 대신에 ModelAndView 를 사용  시작 === //
+	
+	@GetMapping(value = "/test/modelandview_select.action")
+	public ModelAndView modelandview_select(ModelAndView mav) {
+		
+		List<TestVO> testvoList = service.test_select();
+		
+		mav.addObject("testvoList", testvoList);
+		// 위의 것은
+		// request.setAttribute("testvoList", testvoList); 와 같은 것이다.
+		
+		mav.setViewName("test/modelandview_select");
+		// view 단 페이지의 파일명 지정하기	/WEB-INF/views/test/modelandview_select.jsp 페이지를 만들어야 한다.
+		
+		return mav;
+		
+	} // end of public String test_select(HttpServletRequest request)
+	
+	// === return 타입을 String 대신에 ModelAndView 를 사용  끝 === //
+	
+	
 	
 	// ************ tiles 연습 시작  ************ //
 	@GetMapping("test/tiles_test1.action")
@@ -358,13 +490,166 @@ public class BoardController {
 	
 	
 	
+	@GetMapping("test/tiles_test4.action")
+	public ModelAndView tiles_test4(ModelAndView mav) {
+		
+		mav.setViewName("tiles_test4.tiles2");
+		// /WEB-INF/views/tiles2/tiles_test4.jsp 파일을 만들어야 한다.
+		
+		return mav;
+
+	} // end of public String tiles_test4()
 	
 	
 	
+	@GetMapping("/test/tiles_test5.action")
+	public ModelAndView tiles_test5(ModelAndView mav) {
+		
+		mav.setViewName("test/tiles_test5.tiles2");
+		// /WEB-INF/views/tiles2/test/tiles_test5.jsp 파일을 만들어야 한다.
+		
+		return mav;
+
+	} // end of public String tiles_test5()
+	
+	
+	
+	@GetMapping("/test/tiles_test6.action")
+	public ModelAndView tiles_test6(ModelAndView mav) {
+		
+		mav.setViewName("test/sample/tiles_test6.tiles2");
+		// /WEB-INF/views/tiles2/test/tiles_test6.jsp 파일을 만들어야 한다.
+		
+		return mav;
+
+	} // end of public String tiles_test6()
+	
+	
+	
+	@GetMapping("/test/tiles_test7.action")
+	public ModelAndView tiles_test7(ModelAndView mav) {
+		
+		mav.setViewName("test7/tiles_test7.tiles3");
+		// /WEB-INF/views/tiles3/test7/side.jsp 사이드 파일을 만들어야 한다.
+		// /WEB-INF/views/tiles3/test7/content/tiles_test7.jsp 컨텐트 파일을 만들어야 한다.
+		
+		return mav;
+
+	} // end of public String tiles_test7()
+	
+	
+	
+	@GetMapping("/test/tiles_test8.action")
+	public ModelAndView tiles_test8(ModelAndView mav) {
+		
+		mav.setViewName("test8/tiles_test8.tiles3");
+		// /WEB-INF/views/tiles3/test8/side.jsp 사이드 파일을 만들어야 한다.
+		// /WEB-INF/views/tiles3/test8/content/tiles_test8.jsp 컨텐트 파일을 만들어야 한다.
+		
+		return mav;
+
+	} // end of public String tiles_test8()
+	
+	
+	
+	@GetMapping("/test/tiles_test9.action")
+	public ModelAndView tiles_test9(ModelAndView mav) {
+		
+		mav.setViewName("test9/tiles_test9.tiles4");
+		// /WEB-INF/views/tiles4/test9/content/tiles_test9.jsp 파일을 만들어야 한다.
+		
+		return mav;
+
+	} // end of public String tiles_test9()
 	
 	// ************ tiles 연습 끝  ************ //
 	
 	
 	// ==== **** spring 기초 끝  **** ==== //
+	
+	
+	
+	////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	
+	// ====== ****** 게시판시작  ****** ====== //
+	
+	// === #36. 메인 페이지 요청 === //
+	// 먼저, com.spring.app.HomeController 클래스에 가서 @Controller 를 주석 처리 한다.
+	@GetMapping("/")
+	public ModelAndView home(ModelAndView mav) {
+		
+		mav.setViewName("redirect:/index.action");
+		
+		return mav;
+		
+	} // end of public ModelAndView home(ModelAndView mav)
+	
+	
+	
+/*	
+	@GetMapping("/index.action")
+	public ModelAndView index(ModelAndView mav) {
+
+		List<Map<String, String>> imgmapList = service.getImgfilenameList();
+		
+		mav.addObject("imgmapList", imgmapList);
+		
+		mav.setViewName("main/index.tiles1");
+		// /WEB-INF/views/tiles1/main/index.jsp 페이지
+		
+		return mav;
+		
+	} // end of public ModelAndView index(ModelAndView mav)
+*/	
+	
+	// 또는
+	@GetMapping("/index.action")
+	public ModelAndView index(ModelAndView mav) {
+		
+		mav = service.index(mav);
+		
+		return mav;
+		
+	} // end of public ModelAndView index(ModelAndView mav)
+	
+	
+	
+	
+	// === #40. 로그인 폼 페이지 요청 === //
+	@GetMapping("/login.action")
+	public ModelAndView login(ModelAndView mav) {
+		
+		mav.setViewName("login/loginform.tiles1");
+		// /WEB-INF/views/tiles1/login/loginform.jsp 페이지
+		
+		return mav;
+		
+	} // end of 
+	
+	
+	// === #41. 로그인 처리하기 === //
+	@PostMapping("/loginEnd.action")
+	public ModelAndView loginEnd(ModelAndView mav, HttpServletRequest request) {
+		
+		String userid = request.getParameter("userid");
+		String pwd = request.getParameter("pwd");
+		
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("userid", userid);
+		paraMap.put("pwd", Sha256.encrypt(pwd));
+		
+		MemberVO loginuser = service.getLoginMember(paraMap);
+		
+		return mav;
+		
+	} // end of public ModelAndView loginEnd(ModelAndView mav)
+	
+	
+	
+	
+	
+	
 	
 }
