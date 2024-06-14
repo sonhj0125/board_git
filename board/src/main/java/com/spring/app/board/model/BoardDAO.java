@@ -44,6 +44,12 @@ public interface BoardDAO {
 	// 로그인 처리하기
 	MemberVO getLoginMember(Map<String, String> paraMap);
 
+	// 마지막으로 로그인 한 날짜시간이 현재시각으로 부터 1년이 지났으면 휴면으로 지정
+	void updateIdle(String userid);
+
+
+	
+
 	
 
 

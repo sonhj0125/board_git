@@ -84,10 +84,31 @@
 	</select>
 
 
+	<!-- === #47. 로그인 처리하기 === -->
+	<!-- /board/src/main/resources/mybatis/mybatis-config.xml 에서 typeAlias 설정을 해주었기 때문에
+		 resultType에 com.spring.app.board.domain.MemberVO 대신 MemberVO만 작성 가능하다.  -->
+	<select id="getLoginMember" resultType="MemberVO" parameterType="HashMap">
+		SELECT userid, name, coin, point, pwdchangegap,
+		       NVL(lastlogingap, trunc(months_between(sysdate, registerday))) AS lastlogingap, 
+			   idle, email, mobile, postcode, address, detailaddress, extraaddress 
+		FROM 
+		( select userid, name, coin, point, 
+		         trunc( months_between(sysdate, lastpwdchangedate) ) AS pwdchangegap,
+				 registerday, idle, email, mobile, postcode, address, detailaddress, extraaddress 
+		  from tbl_member 
+		  where status = 1 and userid = #{userid} and pwd = #{pwd}
+		) M 
+		CROSS JOIN 
+		( select trunc( months_between(sysdate, max(logindate)) ) as lastlogingap 
+		  from tbl_loginhistory 
+		  where fk_userid = #{userid} ) H
+	</select>
 
 
-
-
+	<update id="updateIdle" parameterType="String">
+		update tbl_member set idle = 1
+		where userid = #{userid}
+	</update>
 
 
 

@@ -197,6 +197,17 @@ public class BoardDAO_imple implements BoardDAO {
 
 
 
+
+	// 마지막으로 로그인 한 날짜시간이 현재시각으로 부터 1년이 지났으면 휴면으로 지정
+	@Override
+	public void updateIdle(String userid) {	// update도 int가 나오지만 DB에만 넣어주면 되기 때문에 void로..
+		
+		sqlsession.update("board.updateIdle", userid);
+		
+	} // end of public void updateIdle(String string)
+
+
+
 	
 	
 

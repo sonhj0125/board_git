@@ -1,5 +1,7 @@
 package com.spring.app.board.service;
 
+import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,6 +164,42 @@ private AES256 aES256;
 	public MemberVO getLoginMember(Map<String, String> paraMap) {
 		
 		MemberVO loginuser = dao.getLoginMember(paraMap);
+		
+		
+		// === #48. aes 의존객체를 사용하여 로그인 되어진 사용자(loginuser)의 이메일 값을 복호화 하도록 한다. === 
+	    //          또한 암호변경 메시지와 휴면처리 유무 메시지를 띄우도록 업무처리를 하도록 한다.
+		
+		if(loginuser != null && loginuser.getPwdchangegap() >= 3) {
+			// 마지막으로 암호를 변경한 날짜가 현재시각으로 부터 3개월이 지났으면 
+			loginuser.setRequirePwdChange(true);	// 로그인시 암호를 변경해라는 alert 를 띄우도 록 한다.
+			
+		}
+		
+		if(loginuser != null && loginuser.getLastlogingap() >= 12 && loginuser.getIdle() == 0) {
+			// 마지막으로 로그인 한 날짜시간이 현재시각으로 부터 1년이 지났으면 휴면으로 지정
+			loginuser.setIdle(1);
+			
+			// === tbl_member 테이블의 idle 컬럼의 값을 1로 변경하기 === // 
+			dao.updateIdle(paraMap.get("userid"));
+			
+		}
+		
+		
+		if(loginuser != null)	{
+			
+			try {
+				String email = aES256.decrypt(loginuser.getEmail());
+				String mobile = aES256.decrypt(loginuser.getMobile());
+				
+				loginuser.setEmail(email);
+				loginuser.setMobile(mobile);
+				
+			} catch (UnsupportedEncodingException | GeneralSecurityException e) {
+				e.printStackTrace();
+			}
+			
+			
+		}
 		
 		return loginuser;
 		

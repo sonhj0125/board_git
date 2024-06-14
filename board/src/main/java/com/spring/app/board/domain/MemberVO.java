@@ -27,15 +27,34 @@ public class MemberVO {
     private String registerday;        // 가입일자 
     private String lastpwdchangedate;  // 마지막으로 암호를 변경한 날짜  
     private int status;                // 회원탈퇴유무   1: 사용가능(가입중) / 0:사용불능(탈퇴) 
-    private int idle;                  // 휴면유무      0 : 활동중  /  1 : 휴면중
+    private int idle;                  // 휴면유무         0 : 활동중  /  1 : 휴면중  -> defalut 값이 0
                                        // 마지막으로 로그인 한 날짜시간이 현재시각으로 부터 1년이 지났으면 휴면으로 지정
 	
-	
-
+    
+    private int pwdchangegap;          // select 용. 지금으로 부터 마지막으로 암호를 변경한지가 몇개월인지 알려주는 개월수(3개월 동안 암호를 변경 안 했을시 암호를 변경하라는 메시지를 보여주기 위함)
+    private int lastlogingap;		   // select 용. 지금으로 부터 마지막으로 로그인한지가 몇개월인지 알려주는 개월수(12개월 동안 로그인을 안 했을 경우 해당 로그인 계정을 비활성화 시키려고 함)
+    
     /////////////////////////////////////////////////////////////////////////////
     // select 용
     
-    private boolean requirePwdChange = false;
+    public int getLastlogingap() {
+		return lastlogingap;
+	}
+
+	public void setLastlogingap(int lastlogingap) {
+		this.lastlogingap = lastlogingap;
+	}
+
+	
+    public int getPwdchangegap() {
+		return pwdchangegap;
+	}
+
+	public void setPwdchangegap(int pwdchangegap) {
+		this.pwdchangegap = pwdchangegap;
+	}
+
+	private boolean requirePwdChange = false;
     // 마지막으로 암호를 변경한 날짜가 현재시각으로 부터 3개월이 지났으면 true
     // 마지막으로 암호를 변경한 날짜가 현재시각으로 부터 3개월이 지나지 않았으면 false
     

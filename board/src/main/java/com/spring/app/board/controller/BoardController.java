@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -626,7 +627,7 @@ public class BoardController {
 		
 		return mav;
 		
-	} // end of 
+	} // end of public ModelAndView login(ModelAndView mav)
 	
 	
 	// === #41. 로그인 처리하기 === //
@@ -641,10 +642,129 @@ public class BoardController {
 		paraMap.put("pwd", Sha256.encrypt(pwd));
 		
 		MemberVO loginuser = service.getLoginMember(paraMap);
+	
+		if(loginuser == null) {	// 로그인 실패 시
+			
+			String message = "아이디 또는 암호가 틀립니다.";
+			String loc = "javascript:history.back()";
+			
+			mav.addObject("message", message);
+			mav.addObject("loc", loc);
+			
+			mav.setViewName("msg");
+			// 	/WEB-INF/views/msg.jsp 파일을 생성한다.
+			
+			return mav;
+			
+		}
+		else {	// 아이디와 암호가 존재하는 경우
+			
+			if(loginuser.getIdle() == 1) { // 로그인 한지 1년이 경과한 경우
+				
+				String message = "로그인을 한지 1년이 지나서 휴면상태로 되었습니다.\\n관리자에게 문의 바랍니다.";
+				String loc = request.getContextPath()+"/index.action";
+				// 원래는 위와 같이 index.action 이 아니라 휴면의 계정을 풀어주는 페이지로 잡아주어야 한다.
+				
+				mav.addObject("message", message);
+				mav.addObject("loc", loc);
+				
+				mav.setViewName("msg");
+				
+			}
+			else { // 로그인 한지 1년 이내인 경우
+			
+				HttpSession session = request.getSession();	
+				// 메모리에 생성되어져 있는 session 을 불러온다.
+				
+				session.setAttribute("loginuser", loginuser);
+				// session(세션)에 로그인 되어진 사용자 정보인 loginuser 을 키 이름을 "loginuser" 으로 저장시켜두는 것이다.
+				
+				
+				if(loginuser.isRequirePwdChange() == true)	{	// 암호를 마지막으로 변경한 것이 3개월이 경과한 경우
+					
+					String message = "비밀번호를 변경하신지 3개월이 지났습니다.\\n암호를 변경하시는 것을 추천합니다.";
+					String loc = request.getContextPath()+"/index.action";
+					// 원래는 위와 같이 index.action 이 아니라 사용자의 비밀번호를 변경해주는 페이지로 잡아주어야 한다.
+	               
+					mav.addObject("message", message);
+					mav.addObject("loc", loc);
+	               
+					mav.setViewName("msg");
+				
+				}
+				else {	// 암호를 마지막으로 변경한 것이 3개월 이내인 경우
+					
+					// 로그인을 해야만 접근할 수 있는 페이지에 로그인을 하지 않은 상태에서 접근을 시도한 경우 
+		            // "먼저 로그인을 하세요!!" 라는 메시지를 받고서 사용자가 로그인을 성공했다라면
+		            // 화면에 보여주는 페이지는 시작페이지로 가는 것이 아니라
+		            // 조금전 사용자가 시도하였던 로그인을 해야만 접근할 수 있는 페이지로 가기 위한 것이다.
+					
+					mav.setViewName("redirect:/index.action");	// 시작페이지로 이동
+					
+					
+				} // end of if(loginuser.isRequirePwdChange() == true)
+				
+			} // end of if(loginuser.getIdle() == 1)
+			
+		} // end of if(loginuser == null)
 		
 		return mav;
 		
 	} // end of public ModelAndView loginEnd(ModelAndView mav)
+	
+	
+	
+	
+	
+	// === #50. 로그아웃 처리하기 === // 
+	@GetMapping("/logout.action")
+	public ModelAndView logout(ModelAndView mav, HttpServletRequest request) {
+		
+		HttpSession session = request.getSession();
+		session.invalidate();	// 세션을 없앰
+		
+		String message = "로그아웃 되었습니다.";
+		String loc = request.getContextPath()+"/index.action";
+		
+		mav.addObject("message", message);
+		mav.addObject("loc", loc);
+		
+		mav.setViewName("msg");
+		
+		return mav;
+		
+	} // end of public ModelAndView logout(ModelAndView mav)
+	
+	
+	
+	
+	
+	// === #51. 게시판 글쓰기 홈페이지 요청 === // 
+	@GetMapping("/add.action")
+	public ModelAndView requiredLogin_add(HttpServletRequest request, ModelAndView mav) {
+		
+		// 게시판과 회원관리는 로그인 유무가 중요, 로그인을 해야 사용할 수 있는 기능이다. ==> AOP 사용(CommonAop.java)
+		
+		
+		return mav;
+		
+	} // end ofpublic ModelAndView add(ModelAndView mav)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

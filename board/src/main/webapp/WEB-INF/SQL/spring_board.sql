@@ -92,12 +92,37 @@ order by imgno asc;
 
 select *
 from tbl_member
-where userid = 'ejss0125' and pwd='9695b88a59a1610320897fa84cb7e144cc51f2984520efb77111d94b402a8382';
+where userid = 'eomjh' and pwd='9695b88a59a1610320897fa84cb7e144cc51f2984520efb77111d94b402a8382';
 
 
 
 
+--- 로그인 처리 ---
+SELECT userid, name, coin, point, pwdchangegap,
+       NVL(lastlogingap, trunc(months_between(sysdate, registerday))) AS lastlogingap, 
+	   idle, email, mobile, postcode, address, detailaddress, extraaddress 
+FROM 
+( select userid, name, coin, point, 
+         trunc( months_between(sysdate, lastpwdchangedate) ) AS pwdchangegap,
+		 registerday, idle, email, mobile, postcode, address, detailaddress, extraaddress 
+  from tbl_member 
+  where status = 1 and userid = 'eomjh' and pwd = '9695b88a59a1610320897fa84cb7e144cc51f2984520efb77111d94b402a8382'
+) M 
+CROSS JOIN 
+( select trunc( months_between(sysdate, max(logindate)) ) as lastlogingap 
+  from tbl_loginhistory 
+  where fk_userid = 'eomjh' ) H;
 
+
+
+select userid, lastpwdchangedate, idle
+from tbl_member
+where userid in ('ejss0125', 'eomjh', 'leess');
+
+
+select *
+from tbl_loginhistory
+order by historyno
 
 
 
