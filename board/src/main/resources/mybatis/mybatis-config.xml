@@ -6,6 +6,8 @@
 	<!-- domain(VO) package 선언 -->
 	<typeAliases>
 		<typeAlias type="com.spring.app.board.domain.MemberVO" alias="MemberVO"/>
+		<typeAlias type="com.spring.app.board.domain.BoardVO" alias="BoardVO"/>
 	</typeAliases>
+	
 
 </configuration>

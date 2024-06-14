@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
+import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
@@ -205,6 +206,18 @@ public class BoardDAO_imple implements BoardDAO {
 		sqlsession.update("board.updateIdle", userid);
 		
 	} // end of public void updateIdle(String string)
+
+
+
+	// === #56. 파일첨부가 없는 글쓰기 === //
+	@Override
+	public int add(BoardVO boardvo) {
+		
+		int n = sqlsession.insert("board.add", boardvo);
+		
+		return n;
+		
+	} // end of public int add(BoardVO boardvo)
 
 
 

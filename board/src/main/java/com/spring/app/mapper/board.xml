@@ -111,7 +111,10 @@
 	</update>
 
 
-
-
+	<!-- === #57. 파일첨부가 없는 글쓰기 ===  VO에서 get 다음에 뭐뭐뭐 를 ${}안에 쓰면 됨 근데 컬럼명같이랑 똑같이 해놓음-->
+   	<insert id="add" parameterType="boardVO">
+         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
+         values(boardSeq.nextval, #{fk_userid}, #{name}, #{subject}, #{content}, #{pw}, default, default, default)
+   	</insert>
 
 </mapper>

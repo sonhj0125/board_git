@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:mvc="http://www.springframework.org/schema/mvc"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:aop="http://www.springframework.org/schema/aop"
 	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
-						http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
-						http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-						http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
 	
 	<!-- Enables the Spring MVC @Controller programming model -->
@@ -83,8 +83,6 @@
 	
 	
 	
-	
-	
 	<!-- ==== #18. bean으로 등록될 @Component 클래스가 위치하는 패키지명 지정하기 ====  -->
 	<context:component-scan base-package="com.spring.app" />
 	
@@ -103,5 +101,30 @@
        	name-generator="com.spring.app.common.FullBeanNameGenerator" 은  
        	spring annotation-driven 시 bean name 중복(충돌,conflicts)을 해결하기 위해서 사용하는 커스트마이징된 BeanNameGenerator 이다. 
    	-->
+   	
+   	
+   	
+   	<!-- ===== #22. 일단 스프링에서 트랜잭션 처리를 하기 위해서는
+                    먼저 src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml 파일에 Namespaces 에 aop를 체크를 하고, 아래와 같이 트랜잭션 처리를 위한 aop 포인트컷을 등록을 해야 한다.    
+        - 아래의 <aop:aspectj-autoproxy />가 AOP 관련 어노테이션 동작이 가능하게 설정해주는 것임.
+    -->   
+   	<!--  AOP 관련 어노테이션 동작이 가능하게 설정 -->   
+   	<aop:aspectj-autoproxy /> <!-- 추가 -->        
+    
+   	<aop:config proxy-target-class="true">
+     	<aop:pointcut id="controllerOperation" expression="execution(public * com.spring.app..*Controller.*(..))" />
+    </aop:config>
+   	
+   	
+   	
+   	
+   	
+   	
+   	
+   	
+   	
+   	
+   	
+   	
 	
 </beans:beans>

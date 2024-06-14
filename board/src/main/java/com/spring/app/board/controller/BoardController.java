@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
@@ -51,8 +53,7 @@ import com.spring.app.common.Sha256;
 	여기서는 @Controller 를 사용하므로 @Component 기능이 이미 있으므로 @Component를 명기하지 않아도 BoardController 는 bean 으로 등록되어 스프링컨테이너가 자동적으로 관리해준다. 
 */
 
-
-
+// ==== #30. 컨트롤러 선언 ==== //
 //@Component 빼버릴 수 있다!
 @Controller		// @Controller 속에는 @Component 기능이 포함되어 있음
 public class BoardController {
@@ -698,9 +699,16 @@ public class BoardController {
 		            // "먼저 로그인을 하세요!!" 라는 메시지를 받고서 사용자가 로그인을 성공했다라면
 		            // 화면에 보여주는 페이지는 시작페이지로 가는 것이 아니라
 		            // 조금전 사용자가 시도하였던 로그인을 해야만 접근할 수 있는 페이지로 가기 위한 것이다.
+					String goBackURL = (String)session.getAttribute("goBackURL");
 					
-					mav.setViewName("redirect:/index.action");	// 시작페이지로 이동
-					
+					if(goBackURL != null) {
+						mav.setViewName("redirect:"+goBackURL);
+						session.removeAttribute("goBackURL");	// 세션에서 반드시 제거해주어야 한다.
+					}
+					else {
+						mav.setViewName("redirect:/index.action");	// 시작페이지로 이동
+						
+					} // end of if(goBackURL != null)
 					
 				} // end of if(loginuser.isRequirePwdChange() == true)
 				
@@ -741,10 +749,12 @@ public class BoardController {
 	
 	// === #51. 게시판 글쓰기 홈페이지 요청 === // 
 	@GetMapping("/add.action")
-	public ModelAndView requiredLogin_add(HttpServletRequest request, ModelAndView mav) {
+	public ModelAndView requiredLogin_add(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
 		
 		// 게시판과 회원관리는 로그인 유무가 중요, 로그인을 해야 사용할 수 있는 기능이다. ==> AOP 사용(CommonAop.java)
 		
+		mav.setViewName("board/add.tiles1");
+		// /WEB-INF/views/tiles1/board/add.jsp 페이지를 만들어야 한다.
 		
 		return mav;
 		
@@ -753,6 +763,30 @@ public class BoardController {
 	
 	
 	
+	// === #54. 게시판 글쓰기 완료 요청 === //
+    @PostMapping("/addEnd.action")
+    public ModelAndView addEnd(ModelAndView mav, BoardVO boardvo) {	// <== After Advice 를 사용하기 전
+    	/*
+        	form 태그의 name 명과  BoardVO 의 필드명이 같다라면 
+        	request.getParameter("form 태그의 name명"); 을 사용하지 않더라도
+                              자동적으로 BoardVO boardvo 에 set 되어진다.
+    	*/
+    	
+    	int n = service.add(boardvo);	// 파일첨부가 없는 글쓰기
+    	
+    	if(n == 1) {
+    		mav.setViewName("redirect:/list.action");	// 글목록 보기 /list.action 페이지로 redirect(페이지이동)해라는 말이다.
+    	}
+    	else {
+            mav.setViewName("board/error/add_error.tiles1");
+            //  /WEB-INF/views/tiles1/board/error/add_error.jsp 파일을 생성한다.
+        }
+    	
+    	return mav;
+    	
+    } // end of public ModelAndView addEnd(ModelAndView mav) 
+    	
+    	
 	
 	
 	

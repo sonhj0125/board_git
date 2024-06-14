@@ -3,6 +3,7 @@ package com.spring.app.board.model;
 import java.util.List;
 import java.util.Map;
 
+import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
@@ -46,6 +47,9 @@ public interface BoardDAO {
 
 	// 마지막으로 로그인 한 날짜시간이 현재시각으로 부터 1년이 지났으면 휴면으로 지정
 	void updateIdle(String userid);
+
+	// 파일첨부가 없는 글쓰기 
+	int add(BoardVO boardvo);
 
 
 	

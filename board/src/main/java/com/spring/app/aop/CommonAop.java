@@ -1,13 +1,18 @@
 package com.spring.app.aop;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import java.io.IOException;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.stereotype.Component;
+import com.spring.app.common.MyUtil;
 
 
 //=== #53. 공통관심사 클래스(Aspect 클래스) 생성하기 === //
@@ -45,8 +50,12 @@ public class CommonAop {
 		HttpServletRequest request = (HttpServletRequest) joinpoint.getArgs()[0];	// 주업무 메소드의 첫번째 파라미터를 얻어오는 것
 		// .getArgs() 주업무의 메소드에 HttpServletRequest request 파라미터를 가리킴
 		
+		HttpServletResponse response = (HttpServletResponse)joinpoint.getArgs()[1];
+		// .getArgs() 주업무의 메소드에 HttpServletResponse response 파라미터를 가리킴
+		
 		HttpSession session = request.getSession();
 		if(session.getAttribute("loginuser") == null) {
+			
 			String message = "먼저 로그인 해야 합니다.";
 	        String loc = request.getContextPath()+"/login.action";
 	          
@@ -54,10 +63,21 @@ public class CommonAop {
 	        request.setAttribute("loc", loc);
 	        
 	        // >>> 로그인 성공 후 로그인 하기 전 페이지로 돌아가는 작업 만들기 <<< //
+	        String url = MyUtil.getCurrentURL(request);
+	        session.setAttribute("goBackURL", url);		// 세션에 url 정보를 저장시켜준다.
+	        
+	        RequestDispatcher dispatcher = request.getRequestDispatcher("/WEB-INF/views/msg.jsp");
+	        
+	        try {
+				dispatcher.forward(request, response);
+			} catch (ServletException | IOException e) {
+				
+				e.printStackTrace();
+			}
 	        
 		}
 		
-	}
+	} // end of public void loginCheck(JoinPoint joinpoint)
 	
 	
 	

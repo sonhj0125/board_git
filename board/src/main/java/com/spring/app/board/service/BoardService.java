@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.web.servlet.ModelAndView;
 
+import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
@@ -38,6 +39,10 @@ public interface BoardService {
 	
 	// 로그인 처리하기
 	MemberVO getLoginMember(Map<String, String> paraMap);
+
+	
+	// 파일첨부가 없는 글쓰기
+	int add(BoardVO boardvo);
 
 	
 
