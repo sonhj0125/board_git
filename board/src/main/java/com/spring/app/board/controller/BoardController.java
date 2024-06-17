@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.support.RequestContextUtils;
 
 import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.MemberVO;
@@ -631,6 +633,9 @@ public class BoardController {
 	} // end of public ModelAndView login(ModelAndView mav)
 	
 	
+	
+/*	
+ * 컨트롤러에서 로그인 처리해주기.
 	// === #41. 로그인 처리하기 === //
 	@PostMapping("/loginEnd.action")
 	public ModelAndView loginEnd(ModelAndView mav, HttpServletRequest request) {
@@ -638,9 +643,14 @@ public class BoardController {
 		String userid = request.getParameter("userid");
 		String pwd = request.getParameter("pwd");
 		
+		// === 클라이언트의 IP 주소를 알아오는 것 === //
+		String clientip = request.getRemoteAddr();
+				
+		
 		Map<String, String> paraMap = new HashMap<>();
 		paraMap.put("userid", userid);
 		paraMap.put("pwd", Sha256.encrypt(pwd));
+		paraMap.put("clientip", clientip);
 		
 		MemberVO loginuser = service.getLoginMember(paraMap);
 	
@@ -719,11 +729,33 @@ public class BoardController {
 		return mav;
 		
 	} // end of public ModelAndView loginEnd(ModelAndView mav)
+*/	
+	// === 또는  서비스가 로그인 처리하기 === //
+	@PostMapping("/loginEnd.action")
+	public ModelAndView loginEnd(ModelAndView mav, HttpServletRequest request) {
+		
+		String userid = request.getParameter("userid");
+		String pwd = request.getParameter("pwd");
+		
+		// === 클라이언트의 IP 주소를 알아오는 것 === //
+		String clientip = request.getRemoteAddr();
+				
+		
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("userid", userid);
+		paraMap.put("pwd", Sha256.encrypt(pwd));
+		paraMap.put("clientip", clientip);
+		
+		mav = service.loginEnd(paraMap, mav, request);		// 사용자가 입력한 값들을 Map 에 담아서 서비스 객체에게 넘겨 처리하도록 한다.
+	
+		
+		return mav;
+		
+	} // end of public ModelAndView loginEnd(ModelAndView mav)
 	
 	
-	
-	
-	
+
+/*
 	// === #50. 로그아웃 처리하기 === // 
 	@GetMapping("/logout.action")
 	public ModelAndView logout(ModelAndView mav, HttpServletRequest request) {
@@ -742,9 +774,21 @@ public class BoardController {
 		return mav;
 		
 	} // end of public ModelAndView logout(ModelAndView mav)
+*/
 	
-	
-	
+	// 또는
+	// === #50. 로그아웃 처리하기 === // 
+		@GetMapping("/logout.action")
+		public ModelAndView logout(ModelAndView mav, HttpServletRequest request) {
+			
+			mav = service.logout(mav, request);
+			
+			return mav;
+			
+		} // end of public ModelAndView logout(ModelAndView mav)
+		
+		
+		
 	
 	
 	// === #51. 게시판 글쓰기 홈페이지 요청 === // 
@@ -784,20 +828,202 @@ public class BoardController {
     	
     	return mav;
     	
-    } // end of public ModelAndView addEnd(ModelAndView mav) 
+    } // end of public ModelAndView addEnd(ModelAndView mav, BoardVO boardvo)
     	
     	
 	
 	
+    // === #58. 글목록 보기 페이지 요청  === //
+	@GetMapping("/list.action")
+	public ModelAndView list(ModelAndView mav, HttpServletRequest request) {
+		
+		List<BoardVO> boardList = null;	// insert 된 것이 하나도 없을 수 있으므로 null
+		
+		//////////////////////////////////////////////////////
+		// === #69. 글조회수(readCount)증가 (DML문 update)는
+		//          반드시 목록보기에 와서 해당 글제목을 클릭했을 경우에만 증가되고,
+		//          웹브라우저에서 새로고침(F5)을 했을 경우에는 증가가 되지 않도록 해야 한다.
+		//          이것을 하기 위해서는 session 을 사용하여 처리하면 된다.
+		HttpSession session = request.getSession();
+		session.setAttribute("readCountPermission", "yes");
+		/*
+        	session 에  "readCountPermission" 키값으로 저장된 value값은 "yes" 이다.
+        	session 에  "readCountPermission" 키값에 해당하는 value값 "yes"를 얻으려면 
+        	반드시 웹브라우저에서 주소창에 "/list.action" 이라고 입력해야만 얻어올 수 있다. 
+		*/
+		
+		
+       //////////////////////////////////////////////////////
+		
+		// === 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기 === //
+		boardList = service.boardListNoSearch();
+		
+		mav.addObject("boardList", boardList);
+		
+		mav.setViewName("board/list.tiles1");
+		//  /WEB-INF/views/tiles1/board/list.jsp 파일을 생성한다.
+		
+		return mav;
+	} // end of public ModelAndView list(ModelAndView mav)
 	
 	
 	
+   
+	// === #62. 글 1개를 보여주는 페이지 요청  === //
+	@GetMapping("/view.action")
+	public ModelAndView view(ModelAndView mav, HttpServletRequest request) {
+		
+		String seq = "";
+		
+		Map<String, ?> inputFlashMap = RequestContextUtils.getInputFlashMap(request);
+		// redirect 되어서 넘어온 데이터가 있는지 꺼내어 와본다.
+		
+		if(inputFlashMap != null) {	// redirect 되어서 넘어온 데이터가 있으면
+			
+			@SuppressWarnings("unchecked")	// 경고 표시를 하지 말라는 뜻이다.
+			Map<String, String> redirect_map = (Map<String, String>) inputFlashMap.get("redirect_map");
+			// "redirect_map" 값은  /view_2.action 에서  redirectAttr.addFlashAttribute("키", 밸류값); 을 할때 준 "키" 이다. 
+	        // "키" 값을 주어서 redirect 되어서 넘어온 데이터를 꺼내어 온다. 
+	        // "키" 값을 주어서 redirect 되어서 넘어온 데이터의 값은 Map<String, String> 이므로 Map<String, String> 으로 casting 해준다.
+
+	        /*   
+	            System.out.println("~~~ 확인용 seq : " + redirect_map.get("seq"));
+			*/
+			
+			seq = redirect_map.get("seq");
+			
+		}
+		
+		/////////////////////////////////////////////////////////////////////////////////
+		
+		else {	// redirect 되어서 넘어온 데이터가 아닌 경우
+			// == 조회하고자 하는 글번호 받아오기 ==
+	        // 글목록보기인 /list.action 페이지에서 특정 글제목을 클릭하여 특정글을 조회해온 경우  
+	        // 또는 
+	        // 글목록보기인 /list.action 페이지에서 특정 글제목을 클릭하여 특정글을 조회한 후 새로고침(F5)을 한 경우는 원본이 form 을 사용해서 POST 방식으로 넘어온 경우이므로 
+			// "양식 다시 제출 확인" 이라는 대화상자가 뜨게 되며 "계속" 이라는 버튼을 클릭하면 이전에 입력했던 데이터를 자동적으로 입력해서 POST 방식으로 진행된다. 
+			// 그래서  request.getParameter("seq"); 은 null 이 아닌 번호를 입력받아온다.     
+	        // 그런데 "이전글제목" 또는 "다음글제목" 을 클릭하여 특정글을 조회한 후 새로고침(F5)을 한 경우는 원본이 /view_2.action 을 통해서 redirect 되어진 경우이므로 form 을 사용한 것이 아니라서 
+			// "양식 다시 제출 확인" 이라는 alert 대화상자가 뜨지 않는다. 
+			// 그래서  request.getParameter("seq"); 은 null 이 된다. 
+			seq = request.getParameter("seq");
+			// System.out.println("~~~~~~ 확인용 seq : " + seq);
+            // ~~~~~~ 확인용 seq : 213
+            // ~~~~~~ 확인용 seq : null
+			
+		}
+		
+		try {
+			
+			Integer.parseInt(seq);
+			/* 
+            	"이전글제목" 또는 "다음글제목" 을 클릭하여 특정글을 조회한 후 새로고침(F5)을 한 경우는   
+            	원본이 /view_2.action 을 통해서 redirect 되어진 경우이므로 form 을 사용한 것이 아니라서   
+            	"양식 다시 제출 확인" 이라는 alert 대화상자가 뜨지 않는다. 
+            	그래서  request.getParameter("seq"); 은 null 이 된다. 
+            	즉, 글번호인 seq 가 null 이 되므로 DB 에서 데이터를 조회할 수 없게 된다.     
+            	또한 seq 는 null 이므로 Integer.parseInt(seq); 을 하면  NumberFormatException 이 발생하게 된다. 
+		    */
+			HttpSession session = request.getSession();
+			MemberVO loginuser = (MemberVO) session.getAttribute("loginuser");
+			
+			String login_userid = null;
+			if(loginuser != null) {
+				login_userid = loginuser.getUserid();
+				// login_userid 는 로그인 되어진 사용자의 userid 이다.
+			}
+			
+			Map<String, String> paraMap = new HashMap<>();
+			paraMap.put("seq", seq);
+			paraMap.put("login_userid", login_userid);
+			
+			// === #68. !!! 중요 !!! 
+            //     글1개를 보여주는 페이지 요청은 select 와 함께 
+	        //     DML문(지금은 글조회수 증가인 update문)이 포함되어져 있다.
+	        //     이럴경우 웹브라우저에서 페이지 새로고침(F5)을 했을때 DML문이 실행되어
+	        //     매번 글조회수 증가가 발생한다.
+	        //     그래서 우리는 웹브라우저에서 페이지 새로고침(F5)을 했을때는
+	        //     단순히 select만 해주고 DML문(지금은 글조회수 증가인 update문)은 
+	        //     실행하지 않도록 해주어야 한다. !!! === //
+			
+			// 위의 글목록보기 #69. 에서 session.setAttribute("readCountPermission", "yes"); 해두었다.
+			BoardVO boardvo = null; 
+			
+			if("yes".equals((String)session.getAttribute("readCountPermission"))) {
+				// 글목록보기인 /list.action 페이지를 클릭한 다음에 특정글을 조회해온 경우이다.
+				
+				boardvo = service.getView(paraMap);
+				// 글 조회수 증가와 함께 글 1개를 조회해오는 것
+				// System.out.println("~~ 확인용 글내용 : " + boardvo.getContent());
+				
+				session.removeAttribute("readCountPermission");
+				// 중요함!! session 에 저장된 readCountPermission 을 삭제한다. 
+			
+			}
+			else {
+				// 글목록에서 특정 글제목을 클릭하여 본 상태에서
+                // 웹브라우저에서 새로고침(F5)을 클릭한 경우이다.
+				// System.out.println("글목록에서 특정 글제목을 클릭하여 본 상태에서 웹브라우저에서 새로고침(F5)을 클릭한 경우");
+				
+				boardvo = service.getView_no_increase_readCount(paraMap);
+				// 글 조회수 증가는 없고, 단순히 글 1개를 조회해오는 것
+				
+			/*
+				// 또는 redirect 해주기 (예 : 버거킹 www.burgerking.co.kr 메뉴소개)
+				mav.setViewName("redirect:/list.action");
+				return mav;
+			*/
+			}
+			
+			if(boardvo == null) {
+	    		mav.setViewName("redirect:/list.action");	// 글목록 보기 /list.action 페이지로 redirect(페이지이동)해라는 말이다.
+	    		return mav;
+	    	}
+	    
+			mav.addObject("boardvo", boardvo);
+			mav.setViewName("board/view.tiles1");
+			// /WEB-INF/views/tiles1/board/view.jsp 파일을 생성한다.
+			
+			
+			
+		} catch (NumberFormatException e) {
+			
+			mav.setViewName("redirect:/list.action");
+			
+		}
+		
+		return mav;
+		
+	} // end of public ModelAndView view(ModelAndView)
 	
 	
 	
-	
-	
-	
+	@GetMapping("/view_2.action")
+	public ModelAndView view_2(ModelAndView mav, HttpServletRequest request, RedirectAttributes redirectAttr) {
+		
+		// 조회하고자 하는 글번호 받아오기
+		String seq = request.getParameter("seq");
+		
+		HttpSession session = request.getSession();
+		session.setAttribute("readCountPermission", "yes");
+		
+		// ==== redirect(GET방식임)시 데이터를 넘길때 GET 방식이 아닌 POST 방식처럼 데이터를 넘기려면 RedirectAttributes 를 사용하면 된다. 시작 ==== //
+	    /////////////////////////////////////////////////////////////////////////////////
+		
+		Map<String, String> redirect_map = new HashMap<>();
+		redirect_map.put("seq", seq);
+		
+		redirectAttr.addFlashAttribute("redirect_map", redirect_map);
+		// redirectAttr.addFlashAttribute("키", 밸류값); 으로 사용하는데 오로지 1개의 데이터만 담을 수 있으므로 여러개의 데이터를 담으려면 Map 을 사용해야 한다.
+		
+		mav.setViewName("redirect:/view.action");	// 실제로 redirect:/view.action 은 POST 방식이 아닌 GET 방식이다.
+		
+		/////////////////////////////////////////////////////////////////////////////////
+		// ==== redirect(GET방식임)시 데이터를 넘길때 GET 방식이 아닌 POST 방식처럼 데이터를 넘기려면 RedirectAttributes 를 사용하면 된다. 끝 ==== //
+		
+		return mav;
+		
+	} // end of public ModelAndView view_2(ModelAndView mav, HttpServletRequest request, RedirectAttributes redirectAttr)
 	
 	
 	

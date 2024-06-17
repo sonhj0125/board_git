@@ -44,12 +44,24 @@ public interface BoardDAO {
 
 	// 로그인 처리하기
 	MemberVO getLoginMember(Map<String, String> paraMap);
+	
+	// tbl_loginhistory 테이블에 로그인 기록 입력하기
+	void insert_tbl_loginhistory(Map<String, String> paraMap);
 
 	// 마지막으로 로그인 한 날짜시간이 현재시각으로 부터 1년이 지났으면 휴면으로 지정
 	void updateIdle(String userid);
 
 	// 파일첨부가 없는 글쓰기 
 	int add(BoardVO boardvo);
+
+	// 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기
+	List<BoardVO> boardListNoSearch();
+
+	// 글 1개 조회하기 
+	BoardVO getView(Map<String, String> paraMap);
+
+	// 글조회수 1 증가시키기	
+	int increase_readCount(String seq);
 
 
 	

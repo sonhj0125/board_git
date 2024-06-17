@@ -3,10 +3,11 @@ package com.spring.app.board.service;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.app.board.domain.BoardVO;
-import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
 
@@ -26,23 +27,39 @@ public interface BoardService {
 	
 	
 //////////////////////////////////////////////////////////////////////////////////////
-//게시판 시작
+// 게시판 시작
 	
 	
 	// 시작페이지에서 이미지 캐러셀
 //	List<Map<String, String>> getImgfilenameList();
 
+	// 로그인 처리하기
+//	MemberVO getLoginMember(Map<String, String> paraMap);
 	
+///////////////////////////////////////////////////////
+	// controller 를 주석처리하고 service에서 처리해준 것들
 	// 시작페이지에서 이미지 캐러셀
 	ModelAndView index(ModelAndView mav);
-
+	ModelAndView loginEnd(Map<String, String> paraMap, ModelAndView mav, HttpServletRequest request);
+	ModelAndView logout(ModelAndView mav, HttpServletRequest request);
 	
-	// 로그인 처리하기
-	MemberVO getLoginMember(Map<String, String> paraMap);
-
+///////////////////////////////////////////////////////	
 	
 	// 파일첨부가 없는 글쓰기
 	int add(BoardVO boardvo);
+
+	// 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기
+	List<BoardVO> boardListNoSearch();
+
+	// 글 조회수 증가와 함께 글 1개를 조회해오는 것
+	BoardVO getView(Map<String, String> paraMap);
+
+	// 글 조회수 증가는 없고, 단순히 글 1개를 조회해오는 것
+	BoardVO getView_no_increase_readCount(Map<String, String> paraMap);
+
+	
+
+	
 
 	
 

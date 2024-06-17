@@ -162,6 +162,40 @@ nocache;
 
 select *
 from tbl_board
+order by seq desc;
+
+
+select historyno, fk_userid, to_char(logindate, 'yyyy-mm-dd hh24:mi:ss') as logindate, clientip
+from tbl_loginhistory
+order by historyno desc;
+
+
+
+select seq, fk_userid, name, subject
+     , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+from tbl_board
+where status = 1
+order by seq desc;
+
+
+SELECT previousseq, previoussubject, seq, fk_userid, name, subject
+     , content, readCount, nextseq, nextsubject 
+FROM
+(
+    select lag(seq, 1) over( order by seq desc ) AS previousseq         
+         , lag(subject, 1) over( order by seq desc ) AS previoussubject
+         , seq, fk_userid, name, subject, content, readCount
+         , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+         , pw
+         , lead(seq, 1) over( order by seq desc ) AS nextseq       
+         , lead(subject, 1) over( order by seq desc ) AS nextsubject
+    from tbl_board
+    where status = 1
+)V
+WHERE V.seq = 3;
+
+
+
 
 
 
