@@ -24,6 +24,14 @@
 		
 		goReadComment()		// 페이지 처리 안한 댓글 읽어오기
 		
+		$("span.move").hover(function(e){	// mouseover
+            	$(e.target).addClass("moveColor");
+          	}, 
+            function(e){	// mouseout
+            	$(e.target).removeClass("moveColor");  
+        }); // end of $("span.move").hover(function(e){})
+		
+		
 		$("input:text[name='content']").bind("keydown", function(e){
 			
 			if(e.keyCode == 13) { 	// 엔터
