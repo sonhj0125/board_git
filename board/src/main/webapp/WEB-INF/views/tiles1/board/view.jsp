@@ -11,10 +11,13 @@
 
 <style type="text/css">
    
-   span.move  {cursor: pointer; color: navy;}
-   .moveColor {color: #660029; font-weight: bold; background-color: #ffffe6;}
+   	span.move  {cursor: pointer; color: navy;}
+   	.moveColor {color: #660029; font-weight: bold; background-color: #ffffe6;}
+
+	td.comment {text-align: center;}
 
     a {text-decoration: none !important;}
+    
 </style>
 
 
@@ -147,13 +150,13 @@
 						
 						v_html += "<tr>";
 						v_html += 	"<td>"+item.content+"</td>";
-						v_html += 	"<td>"+item.name+"</td>";
-						v_html += 	"<td>"+item.regdate+"</td>";
+						v_html += 	"<td class='comment'>"+item.name+"</td>";
+						v_html += 	"<td class='comment'>"+item.regdate+"</td>";
 						
 						if( ${sessionScope.loginuser != null} && 
 						   "${sessionScope.loginuser.userid}" == item.fk_userid) {
 							
-							v_html += "<td><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button></td>";
+							v_html += "<td class='comment'><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button></td>";
 						
 						}
 						
