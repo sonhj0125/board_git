@@ -7,6 +7,7 @@
 	<typeAliases>
 		<typeAlias type="com.spring.app.board.domain.MemberVO" alias="MemberVO"/>
 		<typeAlias type="com.spring.app.board.domain.BoardVO" alias="BoardVO"/>
+		<typeAlias type="com.spring.app.board.domain.CommentVO" alias="CommentVO"/>
 	</typeAliases>
 	
 

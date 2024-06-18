@@ -15,7 +15,7 @@
 
 	$(document).ready(function(){
      
-	  	<%-- === #166. 스마트 에디터 구현 시작 === --%>
+	  	<%-- === #167. 스마트 에디터 구현 시작 === --%>
       	//전역변수
       	var obj = [];
       
@@ -35,8 +35,8 @@
       	}); // end of nhn.husky.EZCreator.createInIFrame
 		<%-- === 스마트 에디터 구현 끝 === --%>
      
-      	// 글쓰기 버튼
-      	$("button#btnWrite").click(function(){
+      	// 수정완료 버튼
+      	$("button#btnUpdate").click(function(){
       		
       		<%-- === 스마트 에디터 구현 시작 === --%>
             // id가 content인 textarea에 에디터에서 대입
@@ -88,16 +88,24 @@
              	alert("글암호를 입력하세요!");
              	return; // 종료
             }
+            else {
+            	
+            	if("${requestScope.boardvo.pw}" != pw){
+            		alert("입력하신 글암호가 올바르지 않습니다.");
+                 	return; // 종료
+            	}
+            	
+            } // end of if(pw == "")
       		
       		
       		// 폼(form)을 전송(submit)
-      		const frm = document.addFrm;
+      		const frm = document.editFrm;
       		frm.method = "post";
-      		frm.action = "<%=ctxPath%>/addEnd.action";
+      		frm.action = "<%=ctxPath%>/editEnd.action";
       		frm.submit();
       		
       		
-      	}); // end of $("button#btnWrite").click(function())
+      	}); // end of $("button#btnUpdate").click(function())
       	
       	
       
@@ -111,14 +119,14 @@
 <div style="display: flex;">
   <div style="margin: auto; padding-left: 3%;">
      
-     <h2 style="margin-bottom: 30px;">글쓰기</h2>
+     <h2 style="margin-bottom: 30px;">글수정</h2>
       
-       <form name="addFrm"> 
+       <form name="editFrm"> 
         <table style="width: 1024px" class="table table-bordered">
          <tr>
             <th style="width: 15%; background-color: #DDDDDD;">성명</th>
             <td>
-                <input type="hidden" name="fk_userid" value="${sessionScope.loginuser.userid}" readonly />
+                <input type="hidden" name="seq" value="${requestScope.boardvo.seq}" readonly />
                 <input type="text" name="name" value="${sessionScope.loginuser.name}" readonly /> 
             </td>
          </tr>
@@ -126,14 +134,14 @@
          <tr>
             <th style="width: 15%; background-color: #DDDDDD;">제목</th>
             <td>
-                <input type="text" name="subject" size="100" maxlength="200" /> 
+                <input type="text" name="subject" size="100" maxlength="200" value="${requestScope.boardvo.subject}"/> 
             </td>
          </tr>
          
          <tr>
             <th style="width: 15%; background-color: #DDDDDD;">내용</th> 
             <td>
-                <textarea style="width: 100%; height: 612px;" name="content" id="content"></textarea>
+                <textarea style="width: 100%; height: 612px;" name="content" id="content">${requestScope.boardvo.content}</textarea>
             </td>
          </tr>
          
@@ -146,7 +154,7 @@
         </table>
         
         <div style="margin: 20px;">
-            <button type="button" class="btn btn-secondary btn-sm mr-3" id="btnWrite">글쓰기</button>
+            <button type="button" class="btn btn-secondary btn-sm mr-3" id="btnUpdate">글수정</button>
             <button type="button" class="btn btn-secondary btn-sm" onclick="javascript:history.back()">취소</button>  
         </div>
         

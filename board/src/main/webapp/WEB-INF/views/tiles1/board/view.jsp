@@ -22,10 +22,162 @@
 
 	$(document).ready(function(){
 		
+		goReadComment()		// 페이지 처리 안한 댓글 읽어오기
+		
+		$("input:text[name='content']").bind("keydown", function(e){
+			
+			if(e.keyCode == 13) { 	// 엔터
+				goAddWrite();
+			}
+			
+		}); // end of $("input:text[name='content']").bind("keydown", function(e){})
 		
 		
 		
 	}); // end of $(document).ready(function())
+	
+	
+	// Function Declaraction
+	
+	// == 댓글쓰기 == //
+	function goAddWrite()	{
+		
+		const comment_content = $("input:text[name='content']").val().trim();
+		
+		if(comment_content == "") {
+			alert("댓글 내용을 입력하세요.");
+			return;		// 종료
+		}
+		
+		// 첨부파일이 없는 댓글 쓰기인 경우
+		goAddWrite_noAttach();
+		
+		
+		
+		// 첨부파일이 있는 댓글 쓰기인 경우
+		
+	} // end of function goAddWrite()
+	
+	
+	// 첨부파일이 없는 댓글 쓰기인 경우
+	function goAddWrite_noAttach() {
+		<%--
+        	// 보내야할 데이터를 선정하는 또 다른 방법
+       		// jQuery에서 사용하는 것으로써,
+       		// form태그의 선택자.serialize(); 을 해주면 form 태그내의 모든 값들을 name값을 키값으로 만들어서 보내준다. 
+       		const queryString = $("form[name='addWriteFrm']").serialize();
+    	--%>
+    	
+    	const queryString = $("form[name='addWriteFrm']").serialize();
+    	
+    	
+		$.ajax({
+			
+			url:"<%=ctxPath%>/addComment.action",
+		/*
+			data:{"fk_userid":$("input:hidden[name='fk_userid']").val() 
+	             ,"name":$("input:text[name='name']").val() 
+	             ,"content":$("input:text[name='content']").val()
+	             ,"parentSeq":$("input:hidden[name='parentSeq']").val()
+	             },
+		*/
+		// 또는
+			data:queryString,
+			
+			type:"post",
+			dataType:"json",
+			success:function(json){
+				
+			 //	console.log(JSON.stringify(json));
+			 // {"name":"손혜정","n":1}
+			 // 또는
+			 //	{"name":"손혜정","n":0}
+				
+				if(json.n == 0){
+					alert(json.name + "님의 포인트는 300점을 초과할 수 없으므로 댓글쓰기가 불가합니다.");	
+				}
+				else {
+					goReadComment();		// 페이지 처리 안한 댓글 읽어오기
+											// 페이지 처리 한 댓글 읽어오기	
+				}
+				
+				
+			 	$("input:text[name='content']").val("");
+		
+				
+				
+			},
+			error: function(request, status, error){
+		        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+		    }
+			
+		}); // end of $.ajax
+		
+	} // end of function goAddWrite_noAttach()
+	
+	
+	
+	// 페이지 처리 안한 댓글 읽어오기
+	function goReadComment() {		
+		
+		$.ajax({
+			
+			url:"<%=ctxPath%>/readComment.action",
+			data:{"parentSeq":"${requestScope.boardvo.seq}"},
+			dataType:"json",
+			success:function(json){
+				
+				// console.log(JSON.stringify(json));
+				// 댓글이 있는 경우 : [{"name":"손혜정","regdate":"2024-06-18 16:06:11","fk_userid":"ejss0125","seq":"30","content":"두번째 댓글이다"},{"name":"손혜정","regdate":"2024-06-18 16:05:51","fk_userid":"ejss0125","seq":"29","content":"두번째 댓글이다"},{"name":"손혜정","regdate":"2024-06-18 16:05:47","fk_userid":"ejss0125","seq":"28","content":"두번째 댓글이다"},{"name":"손혜정","regdate":"2024-06-18 15:38:54","fk_userid":"ejss0125","seq":"27","content":"나도갈래"}]
+				// 댓글이 없는 경우 : []
+				
+				let v_html = "";
+				
+				if(json.length > 0) {	// 댓글이 있음
+					
+					$.each(json, function(index, item){
+						
+						v_html += "<tr>";
+						v_html += 	"<td>"+item.content+"</td>";
+						v_html += 	"<td>"+item.name+"</td>";
+						v_html += 	"<td>"+item.regdate+"</td>";
+						
+						if( ${sessionScope.loginuser != null} && 
+						   "${sessionScope.loginuser.userid}" == item.fk_userid){
+							
+							v_html += "<td><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button></td>";
+						
+						}
+						
+						v_html += "</tr>";
+						
+					}); // end of $.each
+					
+				} 
+				else {	// 댓글이 없음
+					
+					v_html += "<tr>";
+					v_html += 	"<td colspan='4'>댓글이 없습니다.</td>";
+					v_html += "</tr>";
+					
+				} // end of if(json.length > 0)
+				
+					
+				$("tbody#commentDisplay").html(v_html);
+				
+				
+			},
+			error: function(request, status, error){
+		        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+		    }
+			
+		}); // end of $.ajax
+		
+		
+		
+		
+	
+	} // end of function goReadComment()
 	
 </script>
 
@@ -91,9 +243,65 @@
 	   			<button type="button" class="btn btn-secondary btn-sm mr-3" onclick="javascript:location.href='<%= ctxPath%>/del.action?seq=${requestScope.boardvo.seq}'">글삭제하기</button>
 	   		</c:if>
 	   		
+	   		
+	   		<%-- === #83. 댓글쓰기 폼 추가 === --%>
+	   		<c:if test="${not empty sessionScope.loginuser}">
+	   			<h3 style="margin-top: 50px;">댓글쓰기</h3>
+	   			<form name="addWriteFrm" id="addWriteFrm" style="margin-top: 20px;">
+	   			
+	             	<table class="table" style="width: 1024px">
+	             	
+	               		<tr style="height: 30px;">
+	                  		<th width="10%">성명</th>
+	                  		<td>
+	                  			<input type="hidden" name="fk_userid" value="${sessionScope.loginuser.userid}" readonly />
+	                  			<input type="text" name="name" value="${sessionScope.loginuser.name}" readonly />
+	                  		</td>
+	                  	</tr>
+	                  	
+	                  	<tr style="height: 30px;">
+                  			<th>댓글내용</th>
+                  			<td>
+                  				<input type="text" name="content" size="100" maxlength="1000" />
+                  				
+                  				<%-- 댓글에 달리는 원게시물 글번호(즉, 댓글의 부모글 글번호) --%>
+                  				<input type="hidden" name="parentSeq" value="${requestScope.boardvo.seq}" readonly />
+                  			</td>
+                  		</tr>
+                  		
+                  		<tr>
+			                <th colspan="2">
+	                        	<button type="button" class="btn btn-success btn-sm mr-3" onclick="goAddWrite()">댓글쓰기 확인</button>
+			                    <button type="reset" class="btn btn-success btn-sm">댓글쓰기 취소</button>
+			                </th>
+		               	</tr>
+		               	
+		           	</table>         
+		           	
+		         </form>
+	   		</c:if>
+	   		
+	   		<%-- === #94. 댓글 내용 보여주기 === --%>
+       		<h3 style="margin-top: 50px;">댓글내용</h3>
+	      	<table class="table" style="width: 1024px; margin-top: 2%; margin-bottom: 3%;">
+	         	<thead>
+	         		<tr>
+	            		<th style="text-align: center;">내용</th>
+	            		<th style="width: 8%; text-align: center;">작성자</th>
+	            		<th style="width: 12%; text-align: center;">작성일자</th>
+	            		<th style="width: 12%; text-align: center;">수정/삭제</th>
+	         		</tr>
+	         	</thead>
+         		<tbody id="commentDisplay">
+         		
+         		
+         		
+         		</tbody>
+	      	</table>
+	   		
+	   		
+	   		
 	   	</div>
-	   	
-	   	
 	   	
    	</div>
 </div>

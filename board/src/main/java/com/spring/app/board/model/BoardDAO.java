@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.spring.app.board.domain.BoardVO;
+import com.spring.app.board.domain.CommentVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
@@ -63,6 +64,20 @@ public interface BoardDAO {
 	// 글조회수 1 증가시키기	
 	int increase_readCount(String seq);
 
+	// 1개 글 수정하기
+	int edit(BoardVO boardvo);
+
+	// 1개 글 삭제하기
+	int del(String seq);
+
+	/////////////////////////////////////////////////////
+	int addComment(CommentVO commentvo);										// 댓글쓰기(tbl_comment 테이블에 insert)
+	int updateCommentCount(String parentSeq);			// tbl_board 테이블에 commentCount 컬럼이 1증가(update)
+	int updateMemberPoint(Map<String, String> paraMap);		// tbl_member 테이블의 point 컬럼의 값을 50점을 증가(update)
+	/////////////////////////////////////////////////////
+
+	// 원 게시물에 딸린 댓글들을 조회해오기
+	List<CommentVO> getCommentList(String parentSeq);
 
 	
 

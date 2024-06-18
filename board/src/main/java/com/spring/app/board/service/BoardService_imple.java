@@ -1,5 +1,6 @@
 package com.spring.app.board.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -8,9 +9,13 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.app.board.domain.BoardVO;
+import com.spring.app.board.domain.CommentVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
@@ -398,6 +403,84 @@ private AES256 aES256;
 		return boardvo;
 		
 	} // end of public BoardVO getView_no_increase_readCount(Map<String, String> paraMap)
+
+
+	
+
+	// === #73. 1개 글 수정하기 === //
+	@Override
+	public int edit(BoardVO boardvo) {
+		
+		int n = dao.edit(boardvo);
+		
+		return n;
+		
+	} // end of public int edit(BoardVO boardvo)s
+
+	
+
+
+	// === #78. 1개 글 삭제하기  === //
+	@Override
+	public int del(String seq) {
+		
+		int n = dao.del(seq);
+		
+		return n;
+		
+	} // end of public int del(String seq)
+
+
+	
+
+	// === #85. 댓글쓰기(Transaction) === //
+	// tbl_comment 테이블에 insert 된 다음에 
+	// tbl_board 테이블에 commentCount 컬럼이 1증가(update) 하도록 요청한다.
+    // 이어서 회원의 포인트를 50점을 증가하도록 한다.
+    // 즉, 2개이상의 DML 처리를 해야하므로 Transaction 처리를 해야 한다. (여기서는 3개의 DML 처리가 일어남)
+    // >>>>> 트랜잭션처리를 해야할 메소드에 @Transactional 어노테이션을 설정하면 된다. 
+    // rollbackFor={Throwable.class} 은 롤백을 해야할 범위를 말하는데 Throwable.class 은 error 및 exception 을 포함한 최상위 루트이다. 즉, 해당 메소드 실행시 발생하는 모든 error 및 exception 에 대해서 롤백을 하겠다는 말이다.
+	@Override
+	@Transactional(propagation=Propagation.REQUIRED, isolation=Isolation.READ_COMMITTED, rollbackFor= {Throwable.class})
+	public int addComment(CommentVO commentvo) throws Throwable {
+		
+		int n1 = 0, n2 = 0, result = 0;
+				
+		n1 = dao.addComment(commentvo);		// 댓글쓰기(tbl_comment 테이블에 insert)
+		
+	 // System.out.println("~~~ 확인용 n1 : " + n1);
+		
+		
+		if(n1 == 1) {
+			n2 = dao.updateCommentCount(commentvo.getParentSeq());	// tbl_board 테이블에 commentCount 컬럼이 1증가(update)
+		 // System.out.println("~~~ 확인용 n2 : " + n2);
+		}
+		
+		if(n2 == 1) {
+			
+			Map<String, String> paraMap = new HashMap<>();
+			paraMap.put("userid", commentvo.getFk_userid());
+			paraMap.put("point", "50");
+			
+			result = dao.updateMemberPoint(paraMap);	// tbl_member 테이블의 point 컬럼의 값을 50점을 증가(update)
+		 // System.out.println("~~~ 확인용 result : " + result);
+		}	
+		
+		return result;
+		
+	} // end of public int addComment(CommentVO commentvo) throws Throwable
+
+
+
+	// === #91. 원 게시물에 딸린 댓글들을 조회해오기  === //
+	@Override
+	public List<CommentVO> getCommentList(String parentSeq) {
+		
+		List<CommentVO> commentList = dao.getCommentList(parentSeq);
+		
+		return commentList;
+		
+	} // end of public List<CommentVO> getCommentList(String parentSeq)
 
 
 

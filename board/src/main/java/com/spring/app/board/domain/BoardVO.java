@@ -15,14 +15,20 @@ public class BoardVO {
     private String readCount;    // 글조회수
     private String regDate;      // 글쓴시간
     private String status;       // 글삭제여부   1:사용가능한 글,  0:삭제된글 
-   
+    
+	// === #81. 댓글형 게시판을 위한 commentCount 필드 추가하기 
+    //          먼저 tbl_board 테이블에 commentCount 라는 컬럼이 존재해야 한다.
+    private String commentCount;     // 댓글수 
+    
+    
     // select 용
     private String previousseq;      // 이전글번호
     private String previoussubject;  // 이전글제목
     private String nextseq;          // 다음글번호
     private String nextsubject;      // 다음글제목
-    
-    
+
+
+    // method
     public BoardVO() {}		// 기본생성자
     
     public BoardVO(String seq, String fk_userid, String name, String subject, String content, String pw,
@@ -119,5 +125,13 @@ public class BoardVO {
 	}
 	public void setNextsubject(String nextsubject) {
 		this.nextsubject = nextsubject;
+	}
+
+    public String getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(String commentCount) {
+		this.commentCount = commentCount;
 	}
 }

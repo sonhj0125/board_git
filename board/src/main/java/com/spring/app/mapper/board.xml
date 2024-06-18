@@ -166,12 +166,64 @@
    	
    	
    	
+   	<!-- === #75. 1개 글 수정하기 === -->
+   	<update id="edit" parameterType="BoardVO">
+   		update tbl_board set subject = #{subject}
+   							,content = #{content}
+		where seq = #{seq}
+   	</update>
+   	
+   	
+   	<!-- === #80. 1개 글 삭제하기  === -->
+   	<delete id="del" parameterType="String">
+   		delete from tbl_board
+   		where seq = #{seq}
+   	</delete>
    	
    	
    	
+   	<!-- === #88. 댓글쓰기(tbl_comment 테이블에 insert)  === -->
+  	<insert id="addComment" parameterType="CommentVO">
+  		<!-- 첨부파일이 없는 경우 -->
+  		insert into tbl_comment(seq, fk_userid, name, content, regDate, parentSeq, status)
+  		values(commentSeq.nextval, #{fk_userid}, #{name}, #{content}, default, #{parentSeq}, default)
+  		
+  		
+  		<!-- 첨부파일이 있는 경우 -->
+  	</insert>
+  
+  
+  
+  
+   	<!-- === #89.-1 tbl_board 테이블에 commentCount 컬럼이 1증가(update)  === -->
+   	<update id="updateCommentCount" parameterType="String">
+   		update tbl_board set commentCount = commentCount + 1
+   		where seq = #{parentSeq}
+   	</update>
    	
    	
    	
-   	
+   	<!-- === #89. -2 tbl_member 테이블의 point 컬럼의 값을 50점을 증가(update)  === -->
+   	<update id="updateMemberPoint" parameterType="HashMap">
+      	update tbl_member set point = point + to_number(#{point})
+      	where userid = #{userid}
+   	</update>
+
+
+
+	<!-- === #93. 원 게시물에 딸린 댓글들을 조회해오기  === -->
+	<!-- 첨부파일이 없는 경우 -->
+	<select id="getCommentList" parameterType="String" resultType="CommentVO">
+		select seq, fk_userid, name, content
+     		 , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+		from tbl_comment
+		where status = 1 and parentSeq = #{parentSeq}
+		order by seq desc
+	</select>
+
+
+
+
+
 
 </mapper>

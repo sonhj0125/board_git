@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 import com.spring.app.board.domain.BoardVO;
+import com.spring.app.board.domain.CommentVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
@@ -1024,6 +1025,243 @@ public class BoardController {
 		return mav;
 		
 	} // end of public ModelAndView view_2(ModelAndView mav, HttpServletRequest request, RedirectAttributes redirectAttr)
+	
+	
+	
+	// === #71. 글을 수정하는 페이지 요청 === // 
+	@GetMapping("/edit.action")
+	public ModelAndView requiredLogin_edit(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
+		
+		// 글 수정해야 할 글번호 가져오기
+		String seq = request.getParameter("seq");
+		String message = "";
+		
+		try {
+			
+			Integer.parseInt(seq);
+			
+			// 글 수정해야 할 글 1개 내용 가져오기
+			Map<String, String> paraMap = new HashMap<>();
+			paraMap.put("seq", seq);
+			
+			BoardVO boardvo = service.getView_no_increase_readCount(paraMap);
+			// 글 조회수 증가는 없고, 단순히 글 1개를 조회해오는 것
+			
+			if(boardvo == null) {
+				
+				message = "글 수정이 불가합니다.";
+				
+			}
+			else {
+				
+				HttpSession session = request.getSession();
+				MemberVO loginuser = (MemberVO) session.getAttribute("loginuser");
+				
+				if(!loginuser.getUserid().equals(boardvo.getFk_userid())) {	// 로그인한 아이디와 글쓴이 아이디가 일치하지 않는다면
+					
+					message = "다른 사용자의 글은 수정이 불가합니다.";
+					
+				}
+				else {	// 내가 쓴 글이라면, 가져온 1개 글을 글 수정할 폼이 있는 view 단으로 보내준다.
+					
+					mav.addObject("boardvo", boardvo);
+					mav.setViewName("board/edit.tiles1");
+					
+					return mav;
+					
+				} // end of (!loginuser.getUserid().equals(boardvo.getFk_userid()))
+				
+			} // end of if(boardvo == null)
+			
+			
+		} catch (NumberFormatException e) {
+			
+			message = "글 수정이 불가합니다.";
+			
+		}
+		
+		String loc = "javascript:history.back()";
+		mav.addObject("message", message);
+		mav.addObject("loc", loc);
+		
+		mav.setViewName("msg");
+		
+		return mav;
+		
+	} // end of public ModelAndView requiredLogin_edit(HttpServletRequest request, HttpServletResponse response, ModelAndView mav)
+	
+	
+	
+	
+	// === #72. 글을 수정하는 페이지 완료하기 === //
+	@PostMapping("/editEnd.action")
+	public ModelAndView editEnd(ModelAndView mav, BoardVO boardvo, HttpServletRequest request) {
+		
+		int n = service.edit(boardvo);
+		
+		if(n == 1) {
+			mav.addObject("message", "글 수정 성공!!");
+			mav.addObject("loc", request.getContextPath()+"/view.action?seq="+boardvo.getSeq());
+			mav.setViewName("msg");
+		}
+		
+		return mav;
+		
+	} // end of public ModelAndView editEnd(ModelAndView mav)
+	
+	
+	
+	
+	
+	// === #76. 글 삭제하기 페이지 요청 ===
+	@GetMapping("/del.action")
+	public ModelAndView requiredLogin_del(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
+
+		// 삭제할 글번호 가져오기
+		String seq = request.getParameter("seq");
+      
+		String message = "";
+      
+		try {
+			Integer.parseInt(seq);
+         
+			// 삭제할 글 1개의 내용 가져오기
+			Map<String, String> paraMap = new HashMap<>();
+			paraMap.put("seq", seq);
+         
+			BoardVO boardvo = service.getView_no_increase_readCount(paraMap);
+			// 조회수 증가 없이 단순히 글 1개만 조회해오는 것
+         
+			if(boardvo == null) {
+				message = "글 삭제가 불가합니다.";
+            
+			} else {
+            
+				HttpSession session = request.getSession();
+				MemberVO loginuser = (MemberVO)session.getAttribute("loginuser");
+            
+			if(!loginuser.getUserid().equals(boardvo.getFk_userid())) { // 현재 로그인한 사용자가 글을 작성한 사용자와 같지 않다면
+				message = "다른 사용자의 글은 삭제가 불가합니다.";
+               
+            } else {
+            	// 자신의 글을 삭제할 경우
+            	// 가져온 1개의 글을 '글 삭제하기' 폼이 있는 view단으로 보내준다.
+            	mav.addObject("boardvo", boardvo);
+            	mav.setViewName("board/del.tiles1");
+            	// /WEB-INF/views/tiles1/board/del.jsp 파일을 생성한다.
+               
+               	return mav;
+               	
+            	}
+			}
+         
+		} catch (NumberFormatException e) {
+			message = "글 삭제가 불가합니다.";
+		}
+      
+		String loc = "javascript:history.back()";
+	  
+		mav.addObject("message", message);
+		mav.addObject("loc", loc);
+	  
+		mav.setViewName("msg"); // /WEB-INF/views/msg.jsp
+	  
+		return mav;
+      
+	} // end of public ModelAndView requiredLogin_del
+
+	
+	
+	
+	
+	
+	
+	// === #72. 글을 삭제하는 페이지 완료하기 === //
+	@PostMapping("/delEnd.action")
+	public ModelAndView delEnd(ModelAndView mav, HttpServletRequest request) {
+		
+		String seq = request.getParameter("seq");
+		
+		int n = service.del(seq);
+		
+		if(n == 1) {
+			mav.addObject("message", "글 삭제가 완료되었습니다.");
+			mav.addObject("loc", request.getContextPath()+"/list.action");
+			mav.setViewName("msg");
+		}
+		
+		return mav;
+		
+	} // end of public ModelAndView editEnd(ModelAndView mav)
+
+	
+	
+	
+	
+	// === #84. 댓글 쓰기(Ajax로 처리) === //
+	@ResponseBody	// 결과물 그대로 웹에 보여주기 위함 ==> String
+	@PostMapping(value="/addComment.action", produces="text/plain;charset=UTF-8")
+	public String addComment(CommentVO commentvo) {
+		
+		int n = 0;
+		
+		// 댓글쓰기에 첨부파일이 없는 경우
+		try {
+			
+			n = service.addComment(commentvo);
+			// 댓글쓰기(insert) 및 원게시물(tbl_board 테이블)에 댓글의 개수 증가(update 1씩 증가)하기 
+	        // 이어서 회원의 포인트를 50점을 증가하도록 한다. (tbl_member 테이블에 point 컬럼의 값을 50 증가하도록 update 한다.)
+			
+		} catch (Throwable e) {
+		
+			e.printStackTrace();
+		}
+		
+		JSONObject jsonObj = new JSONObject();		// {}
+		jsonObj.put("n", n);						// {"n":1} 또는 {"n":0}
+		jsonObj.put("name", commentvo.getName());	// {"n":1, "name":"엄정화"}또는 {"n":0, "name":"손혜정"}
+		
+		
+		return jsonObj.toString();	// "{"n":1, "name":"엄정화"}"또는 "{"n":0, "name":"손혜정"}"
+		
+	} // end of public String addComment(CommentVO commentvo)
+	
+	
+	
+	
+	
+	// === #90. 원 게시물에 딸린 댓글들을 조회해오기(Ajax로 처리) === //
+	@ResponseBody
+	@GetMapping(value="/readComment.action", produces="text/plain;charset=UTF-8")
+	public String readComment(HttpServletRequest request) {
+		
+		String parentSeq = request.getParameter("parentSeq");
+		
+		List<CommentVO> commentList = service.getCommentList(parentSeq);
+		
+		JSONArray jsonArr = new JSONArray();	// []
+		
+		if(commentList != null) {	// 댓글이 있는 경우
+			
+			for(CommentVO cmtvo : commentList) {
+				
+				JSONObject jsonObj = new JSONObject();			// {}
+				jsonObj.put("seq", cmtvo.getSeq());				// {"seq":4}
+				jsonObj.put("fk_userid", cmtvo.getFk_userid());	// {"seq":4, "userid":"ejss0125"}
+				jsonObj.put("name", cmtvo.getName());			// {"seq":4, "userid":"ejss0125", "name":"손혜정"}	
+				jsonObj.put("content", cmtvo.getContent());		// {"seq":4, "userid":"ejss0125","name":"손혜정", "content":"나도갈래"}
+				jsonObj.put("regdate", cmtvo.getRegDate() );	// {"seq":4, "userid":"ejss0125","name":"손혜정", "content":"나도갈래", "regdate":"2024-06-18 15:36:41"}
+				
+				jsonArr.put(jsonObj);
+				
+			} // end of for(CommentVO cmtvo : commentList)
+		}
+		
+		return jsonArr.toString();	// "[{"seq":4, "userid":"ejss0125","name":"손혜정", "content":"나도갈래", "regdate":"2024-06-18 15:36:41"}]"
+									// 또는
+									// "[]"
+		
+	} // end of public String readComment
 	
 	
 	

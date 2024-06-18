@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.app.board.domain.BoardVO;
+import com.spring.app.board.domain.CommentVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
 
@@ -56,6 +57,18 @@ public interface BoardService {
 
 	// 글 조회수 증가는 없고, 단순히 글 1개를 조회해오는 것
 	BoardVO getView_no_increase_readCount(Map<String, String> paraMap);
+
+	// 1개 글 수정하기
+	int edit(BoardVO boardvo);
+
+	// 1개 글 삭제하기
+	int del(String seq);
+
+	// 댓글쓰기(Transaction)
+	int addComment(CommentVO commentvo) throws Throwable;
+
+	// 원 게시물에 딸린 댓글들을 조회해오기
+	List<CommentVO> getCommentList(String parentSeq);
 
 	
 

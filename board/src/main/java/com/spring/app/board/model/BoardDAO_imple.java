@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import com.spring.app.board.domain.BoardVO;
+import com.spring.app.board.domain.CommentVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
@@ -273,6 +274,79 @@ public class BoardDAO_imple implements BoardDAO {
 
 
 	
+	// === #74. 1개 글 수정하기 === //
+	@Override
+	public int edit(BoardVO boardvo) {
+		
+		int n = sqlsession.update("board.edit", boardvo);
+		
+		return n;
+		
+	} // end of public int edit(BoardVO boardvo)
+
+
+
+	
+	// === #79. 1개 글 삭제하기  === //
+	@Override
+	public int del(String seq) {
+		
+		int n = sqlsession.delete("board.del", seq);
+		
+		return n;
+		
+	} // end of public int del(String seq)
+
+
+	//////////////////////////////////////////////////////////////////////////////////
+	
+	// === #86. 댓글쓰기  === //
+	// 댓글쓰기(tbl_comment 테이블에 insert)
+	@Override
+	public int addComment(CommentVO commentvo) {
+		
+		int n = sqlsession.insert("board.addComment", commentvo);
+		
+		return n;
+		
+	} // end of public int addComment
+
+
+
+	// === #87.-1 tbl_board 테이블에 commentCount 컬럼이 1증가(update) === //
+	@Override
+	public int updateCommentCount(String parentSeq) {
+		
+		int n = sqlsession.update("board.updateCommentCount", parentSeq);
+		
+		return n;
+		
+	} // end of public int updateCommentCount
+
+
+
+	// === #87.-2 tbl_member 테이블의 point 컬럼의 값을 50점을 증가(update) === //
+	@Override
+	public int updateMemberPoint(Map<String, String> paraMap) {
+		
+		int n = sqlsession.update("board.updateMemberPoint", paraMap);
+		
+		return n;
+		
+	} // end of public int updateMemberPoint
+	//////////////////////////////////////////////////////////////////////////////////
+
+
+
+	// === #92. 원 게시물에 딸린 댓글들을 조회해오기  === //
+	@Override
+	public List<CommentVO> getCommentList(String parentSeq) {
+		
+		List<CommentVO> commentList = sqlsession.selectList("board.getCommentList", parentSeq);
+		
+		return commentList;
+		
+	} // end of public List<CommentVO> getCommentList(String parentSeq)
 	
 
 
