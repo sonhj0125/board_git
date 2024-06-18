@@ -143,7 +143,7 @@
 						v_html += 	"<td>"+item.regdate+"</td>";
 						
 						if( ${sessionScope.loginuser != null} && 
-						   "${sessionScope.loginuser.userid}" == item.fk_userid){
+						   "${sessionScope.loginuser.userid}" == item.fk_userid) {
 							
 							v_html += "<td><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button></td>";
 						
