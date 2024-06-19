@@ -1,6 +1,7 @@
 package com.spring.app.aop;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -8,10 +9,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.spring.app.board.service.BoardService;
 import com.spring.app.common.MyUtil;
 
 
@@ -83,20 +88,48 @@ public class CommonAop {
 	
 	
 	
-	
-	
-	
-	
-	
-	
-	
-	// ===== #97. After Advice(보조업무) 만들기 ====== // 
+	// ===== #105. After Advice(보조업무) 만들기 ====== // 
 	/*
 	       주업무(<예: 글쓰기, 제품구매 등등>)를 실행한 다음에  
 	       회원의 포인트를 특정점수(예: 100점, 200점, 300점) 증가해 주는 것이 공통의 관심사(보조업무)라고 보자.
 	       관심 클래스(Aspect 클래스)를 생성하여 포인트컷(주업무)과 어드바이스(보조업무)를 생성하여
 	       동작하도록 만들겠다.
 	*/
+	// === Pointcut(주업무)을 설정해야 한다. === //
+	//     Pointcut 이란 공통관심사를 필요로 하는 메소드를 말한다.  
+	@Pointcut("execution(public * com.spring.app..*Controller.pointPlus_*(..) )")
+	// .. 는 .board.controller 와 .employees.controller 를 생략한 것
+	// (..)는 파라미터 유무와 상관없이 아무거나 가능하다는 의미
+	// com.spring.app.board.controller.BoardController.requiredLogin_add
+	// com.spring.app.employees.controller.EmpController.requiredLogin_empList()
+	public void pointPlus() {} 
+	
+	@Autowired		// Type에 따라 알아서 Bean 을 주입해준다.
+	private BoardService service;
+	
+	
+	// === After Advice(공통관심사, 보조업무)를 구현한다. === //
+	// 회원의 포인트를 특정점수(예: 100점, 200점, 300점) 만큼 증가시키는 메소드 생성하기 
+	@After("pointPlus()")	// 글 쓴 다음..
+	public void pointPlus(JoinPoint joinpoint) {	// joinpoint 는 실제 주업무의 메소드라는 의미
+		
+		@SuppressWarnings("unchecked")	// 앞으로는 노란줄 경고 표시를 하지 말라는 뜻이다.
+		Map<String, String> paraMap = (Map<String, String>) joinpoint.getArgs()[0];
+		// 주업무 메소드의 첫번째 파라미터를 얻어오는 것이다.
+		
+		service.pointPlus(paraMap);
+		
+	} // end of public void pointPlus(JoinPoint joinpoint)
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

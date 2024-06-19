@@ -39,13 +39,140 @@
 			
 			if(e.keyCode == 13) { 	// 엔터
 				goAddWrite();
+				
 			}
 			
 		}); // end of $("input:text[name='content']").bind("keydown", function(e){})
 		
 		
 		
+		
+		// ===== 댓글 수정 ===== // 
+		let origin_comment_content = "";
+		
+		$(document).on("click", "button.btnUpdateComment", function(e){
+		
+			const $btn = $(e.target);
+			
+			if($(e.target).text() == "수정") {
+		
+				// alert("댓글수정");
+				// alert($(e.target).parent().parent().children("td:nth-child(1)").text()); // 수정 전 댓글내용
+				
+				const $content = $(e.target).parent().parent().children("td:nth-child(1)");	// $content => 선택자를 의미
+				origin_comment_content = $(e.target).parent().parent().children("td:nth-child(1)").text();
+				
+				$content.html(`<input id='comment_update' type='text' value='\${origin_comment_content}' size='40'	/>`);	// 댓글 내용을 수정할 수 있도록 input 태그를 만들어준다.
+				
+				
+				$(e.target).text("완료").removeClass("btn-secondary").addClass("btn-info");
+				$(e.target).next().next().text("취소").removeClass("btn-secondary").addClass("btn-danger");
+				
+				$(document).on("keydown", "input#comment_update", function(e){
+					
+					if(e.keyCode == 13) {
+						// alert("엔터!");
+						// alert($btn.text());	// 완료
+						$btn.click();
+						
+					} // end of if(e.keyCode == 13)
+					
+				}); // end of $(document).on("keydown", "input#comment_update", function(e){})
+				
+			}
+			else if($(e.target).text() == "완료") {
+				
+				// alert("댓글수정완료");
+				// alert($(e.target).next().val()); // 수정해야 할 댓글 시퀀스 번호
+				// alert($(e.target).parent().parent().children("td:nth-child(1)").children("input").val()); // 수정 후 댓글 내용
+				
+				const content = $(e.target).parent().parent().children("td:nth-child(1)").children("input").val();
+				
+				$.ajax({
+					
+					url:"${pageContext.request.contextPath}/updateComment.action",
+					type:"post",
+					data:{"seq":$(e.target).next().val()
+						, "content":content},
+					dataType:"json",
+					success:function(json){
+						
+						// $(e.target).parent().parent().children("td:nth-child(1)").html(content);
+						
+						$(e.target).text("수정").removeClass("btn-info").addClass("btn-secondary");
+						$(e.target).next().next().text("삭제").removeClass("btn-danger").addClass("btn-secondary");
+						
+						goReadComment();	// 페이징 처리 안한 댓글 읽어오기
+						
+						
+					},
+					error: function(request, status, error){
+				        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+				    }
+					
+				}); // end of $.ajax
+				
+			} // end of ($(e.target).text() == "수정")
+			
+		}); // end of $(document).on("click", "button.btnUpdateComment", function(e){})
+
+		
+		
+		
+		
+	    // ===== 댓글 수정취소 / 댓글삭제  ===== //
+	    $(document).on('click', "button.btnDeleteComment", function(e){
+	    	
+	         if($(e.target).text() == "취소") {
+	            //  alert("댓글 수정 취소 누름!");
+	            //  alert($(e.target).parent().parent().children("td:nth-child(1)").html());
+	            
+	            const $content = $(e.target).parent().parent().children("td:nth-child(1)");
+	            $content.html(`\${origin_comment_content}`);
+	            
+	            $(e.target).text("삭제").removeClass("btn-danger").addClass("btn-secondary");
+	               $(e.target).prev().prev().text("수정").removeClass("btn-info").addClass("btn-secondary");
+	            
+	            
+	            
+	         }
+	         else if($(e.target).text() == "삭제") { // 댓글을 삭제하면 comment
+	            //   alert("댓글삭제");
+	            //   alert($(e.target).prev().val()); // 삭제해야할 시퀀스 번호
+	            
+	            if(confirm("정말로 삭제하시겠습니까?")) {
+	               
+	               $.ajax({
+	                  url:"${pageContext.request.contextPath}/deleteComment.action",
+	                  type:"post",
+	                  data:{"seq":$(e.target).prev().val()
+	                      ,"parentSeq":"${requestScope.boardvo.seq}"},
+	                  dataType:"json",
+	                  success:function(json){
+	                     goReadComment();// 페이징 처리 안 한 댓글 읽어오기(delete 하면 select 해와야함 그래서 이 함수 호출)
+	                  },
+	                  error: function(request, status, error){
+	                        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+	                  }
+	                  
+	               }); // end of $.ajax
+	               
+	            } // end of if(confirm)
+	            	
+	         } // end of if($(e.target).text() == "취소")
+	         
+	      }); // end of $(document).on('click', "button.btnDeleteComment", function(e){})
+		
+		
+		
+		
+		
+		
 	}); // end of $(document).ready(function())
+	
+	
+	
+	
 	
 	
 	// Function Declaraction
@@ -153,10 +280,9 @@
 						v_html += 	"<td class='comment'>"+item.name+"</td>";
 						v_html += 	"<td class='comment'>"+item.regdate+"</td>";
 						
-						if( ${sessionScope.loginuser != null} && 
-						   "${sessionScope.loginuser.userid}" == item.fk_userid) {
+						if( ${sessionScope.loginuser != null} && "${sessionScope.loginuser.userid}" == item.fk_userid ) {
 							
-							v_html += "<td class='comment'><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button></td>";
+							v_html += "<td class='comment'><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button><input type='hidden' value='"+item.seq+"'/>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button></td>";
 						
 						}
 						
@@ -184,10 +310,6 @@
 			
 		}); // end of $.ajax
 		
-		
-		
-		
-	
 	} // end of function goReadComment()
 	
 </script>

@@ -810,7 +810,8 @@ public class BoardController {
 	
 	// === #54. 게시판 글쓰기 완료 요청 === //
     @PostMapping("/addEnd.action")
-    public ModelAndView addEnd(ModelAndView mav, BoardVO boardvo) {	// <== After Advice 를 사용하기 전
+//  public ModelAndView addEnd(ModelAndView mav, BoardVO boardvo) {	// <== After Advice 를 사용하기 전
+    public ModelAndView pointPlus_addEnd(Map<String, String> paraMap, ModelAndView mav, BoardVO boardvo) {	// <== After Advice 를 사용하기
     	/*
         	form 태그의 name 명과  BoardVO 의 필드명이 같다라면 
         	request.getParameter("form 태그의 name명"); 을 사용하지 않더라도
@@ -826,6 +827,13 @@ public class BoardController {
             mav.setViewName("board/error/add_error.tiles1");
             //  /WEB-INF/views/tiles1/board/error/add_error.jsp 파일을 생성한다.
         }
+    	
+    	// ===== #104. After Advice를 사용하기 ====== // 
+    	//			       글쓰기를 한 이후에는 회원의 포인트를 100점 올린다.
+    	paraMap.put("userid", boardvo.getFk_userid());
+    	paraMap.put("point", "100");
+    	
+    	
     	
     	return mav;
     	
@@ -854,17 +862,66 @@ public class BoardController {
 		*/
 		
 		
-       //////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////
 		
 		// === 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기 === //
-		boardList = service.boardListNoSearch();
+		// boardList = service.boardListNoSearch();
+
+		// === #110. 페이징 처리를 안한, 검색어가 있는 전체 글목록 보여주기  === //
+		String searchType = request.getParameter("searchType");
+		String searchWord = request.getParameter("searchWord");
+		
+		// System.out.println("~~~ 확인용 searchType : " + searchType);
+		// System.out.println("~~~ 확인용 searchWord : " + searchWord);
+		/*
+		  	~~~ 확인용 searchType : null
+		  	~~~ 확인용 searchType : subject
+			~~~ 확인용 searchType : name
+		*/
+		/*
+			~~~ 확인용 searchWord : null
+			~~~ 확인용 searchWord : 연습
+			~~~ 확인용 searchWord : 
+ 		*/
+		
+		if(searchType == null) {
+			searchType = "";
+		}
+		
+		if(searchWord == null) {
+			searchWord = "";
+		}
+		
+		if(searchWord != null) {
+			searchWord = searchWord.trim();
+			// "      연습              " ==> "연습"
+			// "              " ==> ""
+		}
+		
+		
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("searchType", searchType);
+		paraMap.put("searchWord", searchWord);
+		
+		boardList = service.boardListSearch(paraMap);
 		
 		mav.addObject("boardList", boardList);
+		
+		// 검색 시 검색조건 및 검색어 값 유지시키기
+		if("subject".equals(searchType) ||
+		   "content".equals(searchType) ||
+		   "subject_content".equals(searchType) ||
+		   "name".equals(searchType)) {
+			
+				mav.addObject("paraMap", paraMap);	
+				
+		}
 		
 		mav.setViewName("board/list.tiles1");
 		//  /WEB-INF/views/tiles1/board/list.jsp 파일을 생성한다.
 		
 		return mav;
+		
 	} // end of public ModelAndView list(ModelAndView mav)
 	
 	
@@ -1266,6 +1323,60 @@ public class BoardController {
 	
 	
 	
+	
+	// === #95. 댓글 수정(Ajax 로 처리) === //
+	@ResponseBody
+	@PostMapping(value="/updateComment.action", produces="text/plain;charset=UTF-8")
+	public String updateComment(HttpServletRequest request) {
+		
+		String seq = request.getParameter("seq");
+		String content = request.getParameter("content");
+
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("seq", seq);
+		paraMap.put("content", content);
+		
+		int n = service.updateComment(paraMap);
+		
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("n", n);
+		
+		
+		return jsonObj.toString();
+		
+	} // end of public String updateComment
+	
+	
+	
+	
+	
+	// === #100. 댓글 삭제(Ajax 로 처리) === //
+	@ResponseBody
+	@PostMapping(value="/deleteComment.action", produces="text/plain;charset=UTF-8")
+	public String deleteComment(HttpServletRequest request) {
+		
+		String seq = request.getParameter("seq");
+		String parentSeq = request.getParameter("parentSeq");
+		
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("seq", seq);
+		paraMap.put("parentSeq", parentSeq);
+		
+		int n = 0;
+		
+		try {
+			n = service.deleteComment(paraMap);
+		} catch (Throwable e) {
+			
+			e.printStackTrace();
+		}
+		
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("n", n);
+		
+		return jsonObj.toString();
+		
+	} // end of public String deleteComment
 	
 	
 	

@@ -70,6 +70,18 @@ public interface BoardService {
 	// 원 게시물에 딸린 댓글들을 조회해오기
 	List<CommentVO> getCommentList(String parentSeq);
 
+	// 댓글 수정(Ajax 로 처리)
+	int updateComment(Map<String, String> paraMap);
+
+	// 댓글 삭제(Ajax 로 처리) Transaction 처리(delete, update 같이 진행)
+	int deleteComment(Map<String, String> paraMap) throws Throwable;
+
+	// CommonAop 클래스에서 사용하는 것으로 특정 회원에게 특정 점수만큼 포인트를 증가하기 위한 것   
+	void pointPlus(Map<String, String> paraMap);
+
+	// 페이징 처리를 안한, 검색어가 있는 전체 글목록 보여주기
+	List<BoardVO> boardListSearch(Map<String, String> paraMap);
+
 	
 
 	

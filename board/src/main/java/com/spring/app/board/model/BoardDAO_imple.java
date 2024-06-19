@@ -347,6 +347,64 @@ public class BoardDAO_imple implements BoardDAO {
 		return commentList;
 		
 	} // end of public List<CommentVO> getCommentList(String parentSeq)
+
+
+
+	// === #97.댓글 수정(Ajax 로 처리) === //
+	@Override
+	public int updateComment(Map<String, String> paraMap) {
+		
+		int n = sqlsession.update("board.updateComment", paraMap);
+		
+		return n;
+		
+	} // end of public int updateComment
+
+
+
+	// === #102.-1 댓글 수정(Ajax 로 처리) === //
+	@Override
+	public int deleteComment(String seq) {
+		
+		int n =  sqlsession.delete("board.deleteComment", seq);
+		
+		return n;
+		
+	} // end of public int deleteComment
+
+
+
+	// === #102.-2 댓글삭제시 tbl_board 테이블에 commentCount 컬럼이 1감소(update) === //
+	@Override
+	public int updateCommentCount_decrease(String string) {
+	
+		int n =  sqlsession.update("board.updateCommentCount_decrease", string);
+		
+		return n;
+		
+	} // end of public int updateCommentCount_decrease
+
+
+
+	// === #107. CommonAop 클래스에서 사용하는 것으로 특정 회원에게 특정 점수만큼 포인트를 증가하기 위한 것    === //
+	@Override
+	public void pointPlus(Map<String, String> paraMap) {
+	
+		sqlsession.update("board.pointPlus", paraMap);
+		
+	} // end of public void pointPlus(Map<String, String> paraMap)
+
+
+
+	// === #112. 페이징 처리를 안한, 검색어가 있는 전체 글목록 보여주기    === //
+	@Override
+	public List<BoardVO> boardListSearch(Map<String, String> paraMap) {
+		
+		List<BoardVO> boardList = sqlsession.selectList("board.boardListSearch", paraMap);
+		
+		return boardList;
+		
+	} // end of 
 	
 
 

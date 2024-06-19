@@ -79,6 +79,21 @@ public interface BoardDAO {
 	// 원 게시물에 딸린 댓글들을 조회해오기
 	List<CommentVO> getCommentList(String parentSeq);
 
+	// 댓글 수정(Ajax 로 처리)
+	int updateComment(Map<String, String> paraMap);
+
+	// 댓글 삭제(Ajax 로 처리)
+	int deleteComment(String string);
+	
+	// 댓글삭제시 tbl_board 테이블에 commentCount 컬럼이 1감소(update)
+	int updateCommentCount_decrease(String string);
+
+	// CommonAop 클래스에서 사용하는 것으로 특정 회원에게 특정 점수만큼 포인트를 증가하기 위한 것   
+	void pointPlus(Map<String, String> paraMap);
+	
+	// 페이징 처리를 안한, 검색어가 있는 전체 글목록 보여주기
+	List<BoardVO> boardListSearch(Map<String, String> paraMap);
+
 	
 
 	

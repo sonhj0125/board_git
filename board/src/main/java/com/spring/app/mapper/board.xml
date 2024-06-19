@@ -126,10 +126,24 @@
    	
    	
    	
-   	<!-- #61. 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기 ===  -->
+   	<!-- #61. 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기 ===  
    	<select id="boardListNoSearch" resultType="BoardVO">
 	   	select seq, fk_userid, name, subject
 	     	 , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+		from tbl_board
+		where status = 1
+		order by seq desc
+   	</select>
+   	-->
+   	
+   	
+   	<!-- 먼저 #61.을 주석처리 하고서 아래의 작업을 한다. -->
+   	<!-- #99. 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기 === 
+   			     전체 글 목록을 보여줄때 딸린 댓글의 개수도 보여준다. -->
+   	<select id="boardListNoSearch" resultType="BoardVO">
+	   	select seq, fk_userid, name, subject
+	     	 , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+	     	 , commentCount
 		from tbl_board
 		where status = 1
 		order by seq desc
@@ -220,6 +234,71 @@
 		where status = 1 and parentSeq = #{parentSeq}
 		order by seq desc
 	</select>
+
+
+	<!-- === #98. 댓글 수정(Ajax 로 처리)  === -->
+	<update id="updateComment" parameterType="HashMap">
+      	update tbl_comment set content = #{content}, regdate = sysdate
+      	where seq = #{seq}
+   	</update>
+
+
+   <!-- === #103. -1  댓글 삭제하기(Ajax로 처리)=== -->
+   <delete id="deleteComment" parameterType="String">
+      	delete from tbl_comment
+      	where seq = #{seq}
+   </delete>
+   
+   
+   
+   <!-- === #102. -2 댓글삭제시 tbl_board 테이블에 commentCount 컬럼이 1감소(update) === -->
+   <update id="updateCommentCount_decrease" parameterType="String">
+      	update tbl_board set commentCount = commentCount - 1
+       	where seq = #{parentSeq}
+   </update>
+
+
+
+
+   <!-- === #108. CommonAop 클래스에서 사용하는 것으로 특정 회원에게 특정 점수만큼 포인트를 증가하기 위한 것  === -->
+   <update id="pointPlus" parameterType="HashMap">
+   		update tbl_member set point = point + to_number(#{point})
+       	where userid = #{userid}
+   </update>
+
+
+
+	<!-- #### 중요 #### 
+       HashMap 타입으로 매개변수를 받아온 것을 꺼내서 사용할때 
+       1. 데이터로 사용할때는 #{key명} 이고,
+       2. 식별자(테이블명, 컬럼명)로 사용할때는 ${key명} 이고,
+       3. myBatis 에서 제공하는 if 엘리먼트나 choose 엘리먼트 안에서 사용할때는  그냥 <if test="key명"> <when test="key명"> 으로 사용한다. 
+   	-->
+	<!-- === #108. 페이징 처리를 안한, 검색어가 있는 전체 글목록 보여주기  === -->
+	<select id="boardListSearch" parameterType="HashMap" resultType="BoardVO">
+		select seq, fk_userid, name, subject
+	     	 , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+	     	 , commentCount
+		from tbl_board
+		where status = 1
+		<choose>
+			<when test='searchType == "subject" and searchWord != ""'>
+				and lower(subject) like '%'||lower(#{searchWord})||'%'
+			</when>
+			<when test='searchType == "content" and searchWord != ""'>
+				and lower(content) like '%'||lower(#{searchWord})||'%'
+			</when>
+			<when test='searchType == "subject_content" and searchWord != ""'>
+				and (lower(subject) like '%'||lower(#{searchWord})||'%' or lower(content) like '%'||lower(#{searchWord})||'%')
+			</when>
+			<when test='searchType == "name" and searchWord != ""'>
+				and lower(name) like '%'||lower(#{searchWord})||'%'
+			</when>
+			<otherwise></otherwise>
+		</choose>
+		order by seq desc
+	</select>
+
 
 
 

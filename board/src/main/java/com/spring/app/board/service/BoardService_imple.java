@@ -484,6 +484,64 @@ private AES256 aES256;
 
 
 
+	// === #96. 댓글 수정(Ajax 로 처리) === //
+	@Override
+	public int updateComment(Map<String, String> paraMap) {
+		
+		int n = dao.updateComment(paraMap);
+		
+		return n;
+		
+	} // end of public int updateComment(Map<String, String> paraMap)
+
+
+
+	// === #101. 댓글 삭제하기(Ajax로 처리)=== //   
+	@Override
+	@Transactional(propagation=Propagation.REQUIRED, isolation=Isolation.READ_COMMITTED, rollbackFor= {Throwable.class})
+	public int deleteComment(Map<String, String> paraMap) {
+	   
+		int n = dao.deleteComment(paraMap.get("seq"));
+      
+		int m = 0;
+		
+		if(n == 1) { 
+    	  
+			// 댓글삭제시 tbl_board 테이블에 commentCount 컬럼이 1감소(update)
+			m = dao.updateCommentCount_decrease(paraMap.get("parentSeq"));
+			// System.out.println("~~~ 확인용  m : " + m);
+			// ~~~ 확인용  m : 1
+			
+		}
+      
+		return n*m;
+      
+	} // end of  public int deleteComment
+
+
+
+	// === #106. CommonAop 클래스에서 사용하는 것으로 특정 회원에게 특정 점수만큼 포인트를 증가하기 위한 것   === //   
+	@Override
+	public void pointPlus(Map<String, String> paraMap) {
+		
+		dao.pointPlus(paraMap);
+		
+	} // end of public void pointPlus(Map<String, String> paraMap)
+
+
+
+	// === #111. 페이징 처리를 안한, 검색어가 있는 전체 글목록 보여주기    === //
+	@Override
+	public List<BoardVO> boardListSearch(Map<String, String> paraMap) {
+		
+		List<BoardVO> boardList = dao.boardListSearch(paraMap);
+		
+		return boardList;
+		
+	} // end of public List<BoardVO> boardListNoSearch
+
+
+
 	
 
 }

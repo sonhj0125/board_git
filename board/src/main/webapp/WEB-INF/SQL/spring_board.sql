@@ -325,8 +325,10 @@ order by seq desc;
 
 
 
-
-
+-- ==== Transaction 처리를 위한 시나리오 때문에 만들었던 포인트 체크제약을 없앤다. ==== --
+alter table tbl_member
+drop constraint CK_tbl_member_point;
+-- Table TBL_MEMBER이(가) 변경되었습니다.
 
 
 
