@@ -541,6 +541,56 @@ private AES256 aES256;
 	} // end of public List<BoardVO> boardListNoSearch
 
 
+	
+	
+
+	// === #117. 검색어 입력시 자동글 완성하기 4  === //
+	@Override
+	public List<String> wordSearchShow(Map<String, String> paraMap) {
+		
+		List<String> wordList = dao.wordSearchShow(paraMap);
+		
+		return wordList;
+		
+	} // end of public List<String> wordSearchShow
+
+
+
+	
+	
+	// === #123. 총 게시물 건수 (totalCount) 구하기 - 검색이 있을 때와 검색이 없을때로 나뉜다. === //
+	@Override
+	public int getTotalCount(Map<String, String> paraMap) {
+		
+		int totalCount = dao.getTotalCount(paraMap);
+		
+		return totalCount;
+		
+	} // end of public int getTotalCount
+
+
+	
+
+	// === #126. 글목록 가져오기 (페이징 처리 했으며, 검색어가 있는 것 또는 검색어 없는 것 모두 포함한 것이다.) === //
+	@Override
+	public List<BoardVO> boardListSearch_withPaging(Map<String, String> paraMap) {
+		
+		List<BoardVO> boardList = dao.boardListSearch_withPaging(paraMap);
+		
+		return boardList;
+		
+	} // end of public List<BoardVO> boardListSearch_withPaging
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	
 

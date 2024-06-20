@@ -94,6 +94,15 @@ public interface BoardDAO {
 	// 페이징 처리를 안한, 검색어가 있는 전체 글목록 보여주기
 	List<BoardVO> boardListSearch(Map<String, String> paraMap);
 
+	// 검색어 입력시 자동글 완성하기 5
+	List<String> wordSearchShow(Map<String, String> paraMap);
+
+	// 총 게시물 건수 (totalCount) 구하기 - 검색이 있을 때와 검색이 없을때로 나뉜다.
+	int getTotalCount(Map<String, String> paraMap);
+
+	// 글목록 가져오기 (페이징 처리 했으며, 검색어가 있는 것 또는 검색어 없는 것 모두 포함한 것이다.)
+	List<BoardVO> boardListSearch_withPaging(Map<String, String> paraMap);
+
 	
 
 	

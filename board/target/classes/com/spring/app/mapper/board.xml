@@ -302,6 +302,117 @@
 
 
 
+	<!-- === #119. 검색어 입력시 자동글 완성하기  7  === -->
+	<select id="wordSearchShow" parameterType="HashMap" resultType="String">
+		<choose>
+			<when test='searchType == "subject"'>
+				select subject
+			</when>
+			<otherwise>
+				select distinct name
+			</otherwise>
+		</choose>
+		from tbl_board
+		where status = 1
+		<choose>
+			<when test='searchType == "subject" and searchWord != ""'>
+				and lower(subject) like '%'||lower(#{searchWord})||'%'
+			</when>
+			<otherwise>
+				and lower(name) like '%'||lower(#{searchWord})||'%'
+			</otherwise>
+		</choose>
+		
+		
+		<!-- 
+	  		select 문에서 distinct 와 order by 절을 함께 사용할때는 조심해야 한다.
+	        order by 절에는 select 문에서 사용된 컬럼만 들어올 수가 있다.
+	                    또는 order by 절을 사용하지 않아야 한다.
+	    -->
+		<choose>
+			<when test='searchType == "subject"'>
+				order by regdate desc
+			</when>
+			<otherwise>
+				order by name asc
+			</otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	
+	
+	<!-- === #125. 총 게시물 건수 (totalCount) 구하기 - 검색이 있을 때와 검색이 없을때로 나뉜다.  === -->
+	<select id="getTotalCount" parameterType="HashMap" resultType="int">
+		select count(*)
+		from tbl_board
+		where status = 1
+		<choose>
+			<when test='searchType == "subject" and searchWord != ""'>
+				and lower(subject) like '%'||lower(#{searchWord})||'%'
+			</when>
+			<when test='searchType == "content" and searchWord != ""'>
+				and lower(content) like '%'||lower(#{searchWord})||'%'
+			</when>
+			<when test='searchType == "subject_content" and searchWord != ""'>
+				and (lower(subject) like '%'||lower(#{searchWord})||'%' or lower(content) like '%'||lower(#{searchWord})||'%')
+			</when>
+			<when test='searchType == "name" and searchWord != ""'>
+				and lower(name) like '%'||lower(#{searchWord})||'%'
+			</when>
+			<otherwise></otherwise>
+		</choose>
+	</select>
+	
+	
+	
+	
+   <!-- === #127. 글목록 가져오기 (페이징 처리 했으며, 검색어가 있는 것 또는 검색어 없는 것 모두 포함한 것이다.) === -->
+   <select id="boardListSearch_withPaging" parameterType="HashMap" resultType="BoardVO">
+      	SELECT seq, fk_userid, name, subject, readCount, regDate, commentCount
+      	FROM
+      	(
+	      	select row_number() over(order by seq desc) AS rno
+	      		 , seq, fk_userid, name, subject
+		     	 , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+		     	 , commentCount
+			from tbl_board
+			where status = 1
+			<choose>
+				<when test='searchType == "subject" and searchWord != ""'>
+					and lower(subject) like '%'||lower(#{searchWord})||'%'
+				</when>
+				<when test='searchType == "content" and searchWord != ""'>
+					and lower(content) like '%'||lower(#{searchWord})||'%'
+				</when>
+				<when test='searchType == "subject_content" and searchWord != ""'>
+					and (lower(subject) like '%'||lower(#{searchWord})||'%' or lower(content) like '%'||lower(#{searchWord})||'%')
+				</when>
+				<when test='searchType == "name" and searchWord != ""'>
+					and lower(name) like '%'||lower(#{searchWord})||'%'
+				</when>
+				<otherwise></otherwise>
+			</choose>
+		)V
+		WHERE V.rno between #{startRno} and #{endRno}
+   </select>
+	
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

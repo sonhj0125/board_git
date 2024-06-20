@@ -330,6 +330,44 @@ alter table tbl_member
 drop constraint CK_tbl_member_point;
 -- Table TBL_MEMBER이(가) 변경되었습니다.
 
+update tbl_board set status = 1
+where seq between 1 and 5;
+-- 5개 행 이(가) 업데이트되었습니다.
+
+commit;
+-- 커밋 완료.
+
+
+
+
+-------------------------------------------------------------------------------
+begin
+    for i in 1..100 loop
+        insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
+        values(boardSeq.nextval, 'ejss0125', '손혜정', '손혜정 입니다'||i, '안녕하세요? 손혜정'|| i ||' 입니다.', '1234', default, default, default);
+    end loop;
+end;
+
+begin
+    for i in 101..200 loop
+        insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
+        values(boardSeq.nextval, 'eomjh', '엄정화', '엄정화 입니다'||i, '안녕하세요? 엄정화'|| i ||' 입니다.', '1234', default, default, default);
+    end loop;
+end;
+
+commit;
+-- 커밋 완료.
+
+
+
+
+
+
+
+
+
+
+
 
 
 

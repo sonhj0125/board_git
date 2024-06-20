@@ -27,7 +27,9 @@ import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
 import com.spring.app.board.service.BoardService;
+import com.spring.app.common.MyUtil;
 import com.spring.app.common.Sha256;
+
 
 /*
 	사용자 웹브라우저 요청(View)  ==> DispatcherServlet ==> @Controller 클래스 <==>> Service단(핵심업무로직단, business logic단) <==>> Model단[Repository](DAO, DTO) <==>> myBatis <==>> DB(오라클)           
@@ -868,6 +870,7 @@ public class BoardController {
 		// boardList = service.boardListNoSearch();
 
 		// === #110. 페이징 처리를 안한, 검색어가 있는 전체 글목록 보여주기  === //
+		/*
 		String searchType = request.getParameter("searchType");
 		String searchWord = request.getParameter("searchWord");
 		
@@ -883,6 +886,60 @@ public class BoardController {
 			~~~ 확인용 searchWord : 연습
 			~~~ 확인용 searchWord : 
  		*/
+		/*
+		if(searchType == null) {
+			searchType = "";
+		}
+		
+		if(searchWord == null) {
+			searchWord = "";
+		}
+		
+		if(searchWord != null) {
+			searchWord = searchWord.trim();
+			// "      연습              " ==> "연습"
+			// "              " ==> ""
+		}
+		*/
+		/*
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("searchType", searchType);
+		paraMap.put("searchWord", searchWord);
+		
+		boardList = service.boardListSearch(paraMap);
+		*/
+		
+		
+		
+		// === #122. 페이징 처리를 한, 검색어가 있는 전체 글목록 보여주기   === //
+		
+		
+		/*  페이징 처리를 통한 글목록 보여주기는 
+        
+    		예를 들어 3페이지의 내용을 보고자 한다라면 
+        	검색을 할 경우는 아래와 같이
+ 			list.action?searchType=subject&searchWord=안녕&currentShowPageNo=3 와 같이 해주어야 한다.
+ 
+    		또는
+ 
+        	검색이 없는 전체를 볼때는 아래와 같이 
+			list.action 또는 
+			list.action?searchType=&searchWord=&currentShowPageNo=3 또는 
+			list.action?searchType=subject&searchWord=&currentShowPageNo=3 또는
+			list.action?searchType=name&searchWord=&currentShowPageNo=3 와 같이 해주어야 한다.
+		*/
+		
+		String searchType = request.getParameter("searchType");
+		String searchWord = request.getParameter("searchWord");
+		String str_currentShowPageNo = request.getParameter("currentShowPageNo");
+		// System.out.println("~~ 확인용 str_currentShowPageNo : " + str_currentShowPageNo);
+        // ~~ 확인용 str_currentShowPageNo : null 
+        // ~~ 확인용 str_currentShowPageNo : 3
+        // ~~ 확인용 str_currentShowPageNo : dsfsdfdsfdsfㄴㄹㄴㅇㄹㄴ
+        // ~~ 확인용 str_currentShowPageNo : -3412
+        // ~~ 확인용 str_currentShowPageNo : 0
+        // ~~ 확인용 str_currentShowPageNo : 32546
+        // ~~ 확인용 str_currentShowPageNo : 35325234534623463454354534
 		
 		if(searchType == null) {
 			searchType = "";
@@ -898,12 +955,79 @@ public class BoardController {
 			// "              " ==> ""
 		}
 		
-		
 		Map<String, String> paraMap = new HashMap<>();
 		paraMap.put("searchType", searchType);
 		paraMap.put("searchWord", searchWord);
 		
-		boardList = service.boardListSearch(paraMap);
+		// 먼저, 총 게시물 건수 (totalCount)를 구해와야 한다.
+		// 총 게시물 건수는 검색조건이 있을 때와 없을 때로 나뉘어진다.
+		int totalCount = 0;				// 총 게시물 건수
+		int sizePerPage = 10;			// 한 페이지당 보여줄 게시물 건수
+		int currentShowPageNo = 0;		// 현재 보여주는 페이지 번호로서, 초기치로는 1페이지로 설정함. 
+		int totalPage = 0;				// 총 페이지수(웹브라우저상에서 보여줄 총 페이지 개수, 페이지바)
+		
+		// 총 게시물 건수 (totalCount)
+		totalCount = service.getTotalCount(paraMap);
+		// System.out.println("~~~ 확인용  totalCount : " + totalCount);
+		// ~~~ 확인용  totalCount : 11
+		// java 검색시 ~~~ 확인용  totalCount : 3
+		// 글쓴이 검색시 ~~~ 확인용  totalCount : 8
+		
+		// 만약에 총 게시물 건수(totalCount)가 124 개 이라면 총 페이지수(totalPage)는 13 페이지가 되어야 한다.
+        // 만약에 총 게시물 건수(totalCount)가 120 개 이라면 총 페이지수(totalPage)는 12 페이지가 되어야 한다.
+		totalPage = (int)Math.ceil((double)totalCount/sizePerPage); 
+		// (double)124/10 ==> 12.4	==> Math.ceil(12.4) ==> 13.0	==> 13
+		// (double)120/10 ==> 12.0	==> Math.ceil(12.0) ==> 12.0	==> 12
+		
+		if(str_currentShowPageNo == null) {
+			// 게시판에 보여지는 첫 화면
+			
+			currentShowPageNo = 1;	// 1페이지
+			
+		}
+		else {
+			
+			try {
+				
+				currentShowPageNo = Integer.parseInt(str_currentShowPageNo);
+				
+				if(currentShowPageNo < 1 || currentShowPageNo > totalPage) {
+				// get 방식이므로 사용자가 str_currentShowPageNo 에 입력한 값이 0 또는 음수를 입력하여 장난친 경우 
+	            // get 방식이므로 사용자가 str_currentShowPageNo 에 입력한 값이 실제 데이터베이스에 존재하는 페이지수 보다 더 큰값을 입력하여 장난친 경우
+					
+					currentShowPageNo = 1;
+					
+				}
+				
+			} catch (NumberFormatException e) {
+			// get 방식이므로 사용자가 str_currentShowPageNo 에 입력한 값이 숫자가 아닌 문자를 입력하여 장난친 경우
+				
+				currentShowPageNo = 1;
+				
+			} // end of try_catch
+			
+		} // end of if(str_currentShowPageNo == null)
+		
+		
+		// **** 가져올 게시글의 범위를 구한다.(공식임!!!) **** 
+        /*
+             currentShowPageNo      startRno     endRno
+            --------------------------------------------
+                 1 page        ===>    1           10
+                 2 page        ===>    11          20
+                 3 page        ===>    21          30
+                 4 page        ===>    31          40
+                 ......                ...         ...
+        */
+		
+		int startRno = ((currentShowPageNo - 1) * sizePerPage) + 1; // 시작 행번호 
+        int endRno = startRno + sizePerPage - 1; // 끝 행번호
+        
+        paraMap.put("startRno", String.valueOf(startRno));
+        paraMap.put("endRno", String.valueOf(endRno));
+		
+		boardList = service.boardListSearch_withPaging(paraMap);
+		// 글목록 가져오기 (페이징 처리 했으며, 검색어가 있는 것 또는 검색어 없는 것 모두 포함한 것이다.)
 		
 		mav.addObject("boardList", boardList);
 		
@@ -917,6 +1041,124 @@ public class BoardController {
 				
 		}
 		
+		
+		
+		// === #129. 페이지바 만들기 === //
+		
+		int blockSize = 10;
+		
+		// blockSize 는 1개 블럭(토막)당 보여지는 페이지번호의 개수이다.
+		/*
+                       	1  2  3  4  5  6  7  8  9 10 [다음][마지막]  -- 1개블럭
+         	[맨처음][이전]  11 12 13 14 15 16 17 18 19 20 [다음][마지막]  -- 1개블럭
+         	[맨처음][이전]  21 22 23
+		*/
+		
+		int loop = 1;
+		
+		/*
+        	loop는 1부터 증가하여 1개 블럭을 이루는 페이지번호의 개수[ 지금은 10개(== blockSize) ] 까지만 증가하는 용도이다.
+		*/
+		
+		int pageNo = ((currentShowPageNo - 1)/blockSize) * blockSize + 1;
+	    
+		// *** !! 공식이다. !! *** //
+	      
+	    /*
+	       1  2  3  4  5  6  7  8  9  10  -- 첫번째 블럭의 페이지번호 시작값(pageNo)은 1 이다.
+	       11 12 13 14 15 16 17 18 19 20  -- 두번째 블럭의 페이지번호 시작값(pageNo)은 11 이다.
+	       21 22 23 24 25 26 27 28 29 30  -- 세번째 블럭의 페이지번호 시작값(pageNo)은 21 이다.
+	       
+	       currentShowPageNo         pageNo
+	      ----------------------------------
+	            1                      1 = ((1 - 1)/10) * 10 + 1
+	            2                      1 = ((2 - 1)/10) * 10 + 1
+	            3                      1 = ((3 - 1)/10) * 10 + 1
+	            4                      1
+	            5                      1
+	            6                      1
+	            7                      1 
+	            8                      1
+	            9                      1
+	            10                     1 = ((10 - 1)/10) * 10 + 1
+	           
+	            11                    11 = ((11 - 1)/10) * 10 + 1
+	            12                    11 = ((12 - 1)/10) * 10 + 1
+	            13                    11 = ((13 - 1)/10) * 10 + 1
+	            14                    11
+	            15                    11
+	            16                    11
+	            17                    11
+	            18                    11 
+	            19                    11 
+	            20                    11 = ((20 - 1)/10) * 10 + 1
+	            
+	            21                    21 = ((21 - 1)/10) * 10 + 1
+	            22                    21 = ((22 - 1)/10) * 10 + 1
+	            23                    21 = ((23 - 1)/10) * 10 + 1
+	            ..                    ..
+	            29                    21
+	            30                    21 = ((30 - 1)/10) * 10 + 1
+	   */
+		
+		String pageBar = "<ul style='list-style:none;'>";
+		String url = "list.action";
+		
+		// === [맨처음] [이전] 만들기  === //
+		if(pageNo != 1) {
+			
+			pageBar += "<li style='display:inline-block; width:70px; font-size:12pt;'><a href='"+url+"?searchType="+searchType+"&searchWord="+searchWord+"&currentShowPageNo=1'>[맨처음]</a></li>";
+			pageBar += "<li style='display:inline-block; width:50px; font-size:12pt;'><a href='"+url+"?searchType="+searchType+"&searchWord="+searchWord+"&currentShowPageNo="+(pageNo-1)+"'>[이전]</a></li>";
+			
+		}
+
+		
+		while( !(loop > blockSize || pageNo > totalPage) ) {
+			
+			if(pageNo == currentShowPageNo) {
+				
+				pageBar += "<li style='display:inline-block; width:30px; font-size:12pt; border:solid 1px gray; padding:2px 4px;'>"+pageNo+"</li>";
+				
+			}
+			else {
+				
+				pageBar += "<li style='display:inline-block; width:30px; font-size:12pt;'><a href='"+url+"?searchType="+searchType+"&searchWord="+searchWord+"&currentShowPageNo="+pageNo+"'>"+pageNo+"</a></li>";
+				
+			}
+			
+			loop++;
+			pageNo++;
+			
+		} // end of	while( !(loop > blockSize || pageNo > totalPage) )
+		
+		
+		// === [다음] [마지막] 만들기  === //
+		if(pageNo <= totalPage) {
+			
+			pageBar += "<li style='display:inline-block; width:50px; font-size:12pt;'><a href='"+url+"?searchType="+searchType+"&searchWord="+searchWord+"&currentShowPageNo="+pageNo+"'>[다음]</a></li>";
+			pageBar += "<li style='display:inline-block; width:70px; font-size:12pt;'><a href='"+url+"?searchType="+searchType+"&searchWord="+searchWord+"&currentShowPageNo="+totalPage+"'>[마지막]</a></li>";
+			
+		}
+		
+		pageBar += "</ul>";
+		
+		mav.addObject("pageBar", pageBar);
+		
+		
+		// === #131.페이징 처리되어진 후 특정 글제목을 클릭하여 상세내용을 본 이후
+	    //          사용자가 "검색된결과목록보기" 버튼을 클릭했을때 돌아갈 페이지를 알려주기 위해
+	    //          현재 페이지 주소를 뷰단으로 넘겨준다.
+		String goBackURL = MyUtil.getCurrentURL(request);
+		// System.out.println("~~~ 확인용(list.action) goBackURL : " + goBackURL);
+		/* 
+		   ~~~ 확인용(list.action) goBackURL : /list.action
+		   ~~~ 확인용(list.action) goBackURL : /list.action?searchType=&searchWord=&currentShowPageNo=5
+		   ~~~ 확인용(list.action) goBackURL : /list.action?searchType=subject&searchWord=java
+		   ~~~ 확인용(list.action) goBackURL : /list.action?searchType=subject&searchWord=정화&currentShowPageNo=3
+		   ~~~ 확인용(list.action) goBackURL : /list.action?searchType=name&searchWord=정화
+		*/
+		mav.addObject("goBackURL", goBackURL);
+		
 		mav.setViewName("board/list.tiles1");
 		//  /WEB-INF/views/tiles1/board/list.jsp 파일을 생성한다.
 		
@@ -928,10 +1170,12 @@ public class BoardController {
 	
    
 	// === #62. 글 1개를 보여주는 페이지 요청  === //
-	@GetMapping("/view.action")
+	//@GetMapping("/view.action")
+	@RequestMapping("/view.action")	// === #133. 특정글을 조회한 후 "검색된결과목록보기" 버튼을 클릭했을 때 돌아갈 페이지를 만들기 위함. === //
 	public ModelAndView view(ModelAndView mav, HttpServletRequest request) {
 		
 		String seq = "";
+		String goBackURL = "";
 		
 		Map<String, ?> inputFlashMap = RequestContextUtils.getInputFlashMap(request);
 		// redirect 되어서 넘어온 데이터가 있는지 꺼내어 와본다.
@@ -944,12 +1188,11 @@ public class BoardController {
 	        // "키" 값을 주어서 redirect 되어서 넘어온 데이터를 꺼내어 온다. 
 	        // "키" 값을 주어서 redirect 되어서 넘어온 데이터의 값은 Map<String, String> 이므로 Map<String, String> 으로 casting 해준다.
 
+			
+			seq = redirect_map.get("seq");
 	        /*   
 	            System.out.println("~~~ 확인용 seq : " + redirect_map.get("seq"));
 			*/
-			
-			seq = redirect_map.get("seq");
-			
 		}
 		
 		/////////////////////////////////////////////////////////////////////////////////
@@ -969,7 +1212,22 @@ public class BoardController {
             // ~~~~~~ 확인용 seq : 213
             // ~~~~~~ 확인용 seq : null
 			
-		}
+			
+	        // === #134. 5특정글을 조회한 후 "검색된결과목록보기" 버튼을 클릭했을 때 돌아갈 페이지를 만들기 위함. === //
+	        goBackURL = request.getParameter("goBackURL");
+	        // System.out.println("~~~ 확인용(view.action) goBackURL :" + goBackURL);
+			/*
+			 * 잘못된것(get 방식일 경우)
+			   ~~~ 확인용(view.action) goBackURL :/list.action?searchType=subject
+			   
+			 * 올바른것(post 방식일 경우)
+			   ~~~ 확인용(view.action) goBackURL :/list.action?searchType=subject&searchWord=%EC%A0%95%ED%99%94&currentShowPageNo=3
+			*/
+			
+			
+		} // end of if(inputFlashMap != null)
+		
+		mav.addObject("goBackURL", goBackURL);
 		
 		try {
 			
@@ -1377,6 +1635,64 @@ public class BoardController {
 		return jsonObj.toString();
 		
 	} // end of public String deleteComment
+	
+	
+	
+	
+	// === #116. 검색어 입력시 자동글 완성하기 2  === //
+	@ResponseBody
+	@GetMapping(value="/wordSearchShow.action", produces="text/plain;charset=UTF-8")
+	public String wordSearchShow(HttpServletRequest request) {
+		
+		String searchType = request.getParameter("searchType");
+		String searchWord = request.getParameter("searchWord");
+		
+		Map<String, String> paraMap = new HashMap<>();
+		paraMap.put("searchType", searchType);
+		paraMap.put("searchWord", searchWord);
+		
+		List<String> wordList = service.wordSearchShow(paraMap);
+		
+		JSONArray jsonArr = new JSONArray();	// []
+		
+		if(wordList != null) {
+			
+			for(String word : wordList) {
+				
+				JSONObject jsonObj = new JSONObject();	// {}
+				jsonObj.put("word", word);
+				
+				jsonArr.put(jsonObj);	// [{}, {}, {}]
+				
+			} // end of for
+			
+		} // end of if(wordList != null)
+		
+		return jsonArr.toString();
+		
+	} // end of public String wordSearchShow
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

@@ -404,7 +404,47 @@ public class BoardDAO_imple implements BoardDAO {
 		
 		return boardList;
 		
-	} // end of 
+	} // end of public List<BoardVO> boardListSearch
+
+
+
+	
+	// === #118. 검색어 입력시 자동글 완성하기 6  === //
+	@Override
+	public List<String> wordSearchShow(Map<String, String> paraMap) {
+		
+		List<String> wordList = sqlsession.selectList("board.wordSearchShow", paraMap);
+		
+		return wordList;
+		
+	} // end of public List<String> wordSearchShow
+
+	
+
+
+	// === #124. 총 게시물 건수 (totalCount) 구하기 - 검색이 있을 때와 검색이 없을때로 나뉜다. === //
+	@Override
+	public int getTotalCount(Map<String, String> paraMap) {
+		
+		int totalCount = sqlsession.selectOne("board.getTotalCount", paraMap);
+		
+		return totalCount;
+		
+	} // end of public int getTotalCount
+
+
+	
+	
+
+	// === #127. 글목록 가져오기 (페이징 처리 했으며, 검색어가 있는 것 또는 검색어 없는 것 모두 포함한 것이다.) === //
+	@Override
+	public List<BoardVO> boardListSearch_withPaging(Map<String, String> paraMap) {
+		
+		List<BoardVO> boardList = sqlsession.selectList("board.boardListSearch_withPaging", paraMap);
+		
+		return boardList;
+		
+	} // end of public List<BoardVO> boardListSearch_withPaging
 	
 
 
