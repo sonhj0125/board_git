@@ -1,9 +1,13 @@
 package com.spring.app.board.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -1159,6 +1163,18 @@ public class BoardController {
 		*/
 		mav.addObject("goBackURL", goBackURL);
 		
+		
+		///////////////////////////////////////////////////////////////////
+		
+		mav.addObject("totalCount", totalCount);	 // 페이징 처리 시 보여주는 순번을 나타내기 위함
+		mav.addObject("currentShowPageNo", currentShowPageNo);	 // 페이징 처리 시 보여주는 순번을 나타내기 위함
+		mav.addObject("sizePerPage", sizePerPage);	 // 페이징 처리 시 보여주는 순번을 나타내기 위함
+		
+		
+		///////////////////////////////////////////////////////////////////
+		
+		
+		
 		mav.setViewName("board/list.tiles1");
 		//  /WEB-INF/views/tiles1/board/list.jsp 파일을 생성한다.
 		
@@ -1176,6 +1192,8 @@ public class BoardController {
 		
 		String seq = "";
 		String goBackURL = "";
+		String searchType = "";
+		String searchWord = "";
 		
 		Map<String, ?> inputFlashMap = RequestContextUtils.getInputFlashMap(request);
 		// redirect 되어서 넘어온 데이터가 있는지 꺼내어 와본다.
@@ -1188,13 +1206,51 @@ public class BoardController {
 	        // "키" 값을 주어서 redirect 되어서 넘어온 데이터를 꺼내어 온다. 
 	        // "키" 값을 주어서 redirect 되어서 넘어온 데이터의 값은 Map<String, String> 이므로 Map<String, String> 으로 casting 해준다.
 
+	        // System.out.println("~~~ 확인용 seq : " + redirect_map.get("seq"));
+	        
+	        // === #143. 이전글제목, 다음글제목 보기 시작  === //
+	        searchType = redirect_map.get("searchType");
+	        
+	        try {
+	        	
+	              searchWord = URLDecoder.decode(redirect_map.get("searchWord"), "UTF-8"); // 한글데이터가 포함되어 있으면 반드시 한글로 복구해야 한다. 
+	              goBackURL = URLDecoder.decode(redirect_map.get("goBackURL"), "UTF-8");   // 한글데이터가 포함되어 있으면 반드시 한글로 복구해야 한다.
+	              
+	        } catch (UnsupportedEncodingException e) {
+	             e.printStackTrace();
+	        } 
+	        
+	        // === #144.   === //
+	        
+	        
+	        
+	        
+			// System.out.println("~~~ 확인용 goBackURL : " + goBackURL);
+			// System.out.println("~~~ 확인용 searchType : " + searchType);
+			// System.out.println("~~~ 확인용 searchWord : " + searchWord);
+			/*
+				~~~ 확인용 seq : 8
+				~~~ 확인용 goBackURL : %2Flist.action%3FsearchType%3Dsubject%26searchWord%3Djava
+				~~~ 확인용 searchType : subject
+				~~~ 확인용 searchWord : java
+				--------------------------
+				~~~ 확인용 seq : 180
+				~~~ 확인용 goBackURL : %2Flist.action%3FsearchType%3Dname%26searchWord%3D%25EC%2597%2584%26currentShowPageNo%3D3
+				~~~ 확인용 searchType : name
+				~~~ 확인용 searchWord : %EC%97%84
+				-------------------------------
+				~~~ 확인용 seq : 206
+				~~~ 확인용 goBackURL : /list.action?searchType=subject&searchWord=%EC%97%84
+				~~~ 확인용 searchType : subject
+				~~~ 확인용 searchWord : 엄
+			*/
+			// === #143. 이전글제목, 다음글제목 보기 끝  === //
+			
 			
 			seq = redirect_map.get("seq");
-	        /*   
-	            System.out.println("~~~ 확인용 seq : " + redirect_map.get("seq"));
-			*/
+			
+			
 		}
-		
 		/////////////////////////////////////////////////////////////////////////////////
 		
 		else {	// redirect 되어서 넘어온 데이터가 아닌 경우
@@ -1213,6 +1269,8 @@ public class BoardController {
             // ~~~~~~ 확인용 seq : null
 			
 			
+			
+			
 	        // === #134. 5특정글을 조회한 후 "검색된결과목록보기" 버튼을 클릭했을 때 돌아갈 페이지를 만들기 위함. === //
 	        goBackURL = request.getParameter("goBackURL");
 	        // System.out.println("~~~ 확인용(view.action) goBackURL :" + goBackURL);
@@ -1224,8 +1282,34 @@ public class BoardController {
 			   ~~~ 확인용(view.action) goBackURL :/list.action?searchType=subject&searchWord=%EC%A0%95%ED%99%94&currentShowPageNo=3
 			*/
 			
-			
+	        
+	        
+	        // >>> 글목록에서 검색되어진 글내용일 경우 이전글제목, 다음글제목은 검색되어진 결과물내의 이전글과 다음글이 나오도록 하기 위한 것이다.  시작    <<< // 
+ 			searchType = request.getParameter("searchType");
+ 			searchWord = request.getParameter("searchWord");
+ 			
+ 			if(searchType == null) {
+ 				searchType = "";
+ 			}
+ 			
+ 			if(searchWord == null) {
+ 				searchWord = "";
+ 			}
+ 			
+ 			// System.out.println("~~~ 확인용(view.action)searchType : " + searchType);
+ 			// System.out.println("~~~ 확인용(view.action)searchWord : " + searchWord);
+ 			/*
+ 			  	~~~ 확인용(view.action)searchType : 
+ 				~~~ 확인용(view.action)searchWord : 
+ 				
+ 			 	~~~ 확인용(view.action)searchType : subject
+ 				~~~ 확인용(view.action)searchWord : 엄정화
+ 			 */
+ 			
+ 			// >>> 글목록에서 검색되어진 글내용일 경우 이전글제목, 다음글제목은 검색되어진 결과물내의 이전글과 다음글이 나오도록 하기 위한 것이다.  끝    <<< // 
+    
 		} // end of if(inputFlashMap != null)
+		
 		
 		mav.addObject("goBackURL", goBackURL);
 		
@@ -1252,6 +1336,12 @@ public class BoardController {
 			Map<String, String> paraMap = new HashMap<>();
 			paraMap.put("seq", seq);
 			paraMap.put("login_userid", login_userid);
+			
+			// >>> 글목록에서 검색되어진 글내용일 경우 이전글제목, 다음글제목은 검색되어진 결과물내의 이전글과 다음글이 나오도록 하기 위한 것이다.  시작    <<< // 
+			paraMap.put("searchType", searchType);
+			paraMap.put("searchWord", searchWord);
+			// >>> 글목록에서 검색되어진 글내용일 경우 이전글제목, 다음글제목은 검색되어진 결과물내의 이전글과 다음글이 나오도록 하기 위한 것이다.  끝   <<< // 
+			
 			
 			// === #68. !!! 중요 !!! 
             //     글1개를 보여주는 페이지 요청은 select 와 함께 
@@ -1297,6 +1387,11 @@ public class BoardController {
 	    	}
 	    
 			mav.addObject("boardvo", boardvo);
+			
+			// === #140. 이전글제목, 다음글제목 보기 === //
+			mav.addObject("paraMap", paraMap);
+			
+			
 			mav.setViewName("board/view.tiles1");
 			// /WEB-INF/views/tiles1/board/view.jsp 파일을 생성한다.
 			
@@ -1312,13 +1407,48 @@ public class BoardController {
 		
 	} // end of public ModelAndView view(ModelAndView)
 	
+
+
 	
 	
-	@GetMapping("/view_2.action")
+//	@GetMapping("/view_2.action")
+	@PostMapping("/view_2.action")
 	public ModelAndView view_2(ModelAndView mav, HttpServletRequest request, RedirectAttributes redirectAttr) {
 		
 		// 조회하고자 하는 글번호 받아오기
 		String seq = request.getParameter("seq");
+		
+		// === #141. 이전글제목, 다음글제목 보기 시작 === //
+		String goBackURL = request.getParameter("goBackURL");
+		String searchType = request.getParameter("searchType");
+		String searchWord = request.getParameter("searchWord");
+		
+		/* 
+        	redirect:/ 를 할때 "한글데이터는 0에서 255까지의 허용 범위 바깥에 있으므로 인코딩될 수 없습니다" 라는 
+        	java.lang.IllegalArgumentException 라는 오류가 발생한다.
+         	이것을 방지하려면 아래와 같이 하면 된다.
+		*/
+		try {
+	         searchWord = URLEncoder.encode(searchWord, "UTF-8");
+	         goBackURL = URLEncoder.encode(goBackURL, "UTF-8");
+	         
+	      //   System.out.println("~~~~ view_2.action 의  URLEncoder.encode(searchWord, \"UTF-8\") : " + searchWord);
+	            //  ~~~~ view_2.action 의  URLEncoder.encode(searchWord, "UTF-8") : %EC%84%9C%EC%98%81%ED%95%99
+	         
+	      //   System.out.println("~~~~ view_2.action 의  URLEncoder.encode(goBackURL, \"UTF-8\") : " + goBackURL);
+	          //   ~~~~ view_2.action 의  URLEncoder.encode(goBackURL, "UTF-8") : %2Flist.action%3FsearchType%3Dname+searchWord%3D%25EC%2584%259C%25EC%2598%2581%25ED%2595%2599+currentShowPageNo%3D11 
+	         
+	      //   System.out.println(URLDecoder.decode(searchWord, "UTF-8")); // URL인코딩 되어진 한글을 원래 한글모양으로 되돌려주는 것임.
+	          //   손혜정
+	         
+	      //   System.out.println(URLDecoder.decode(goBackURL, "UTF-8"));  // URL인코딩 되어진 한글을 원래 한글모양으로 되돌려주는 것임.
+	          //  /list.action?searchType=name searchWord=%EC%84%9C%EC%98%81%ED%95%99 currentShowPageNo=11
+	         
+	    } catch (UnsupportedEncodingException e) {
+	         e.printStackTrace();
+	    }
+		// === #141. 이전글제목, 다음글제목 보기 끝 === //
+		
 		
 		HttpSession session = request.getSession();
 		session.setAttribute("readCountPermission", "yes");
@@ -1328,6 +1458,12 @@ public class BoardController {
 		
 		Map<String, String> redirect_map = new HashMap<>();
 		redirect_map.put("seq", seq);
+		
+		// === #142. 이전글제목, 다음글제목 보기 시작 === //
+		redirect_map.put("goBackURL", goBackURL);
+		redirect_map.put("searchType", searchType);
+		redirect_map.put("searchWord", searchWord);
+		// === #142. 이전글제목, 다음글제목 보기 끝 === //
 		
 		redirectAttr.addFlashAttribute("redirect_map", redirect_map);
 		// redirectAttr.addFlashAttribute("키", 밸류값); 으로 사용하는데 오로지 1개의 데이터만 담을 수 있으므로 여러개의 데이터를 담으려면 Map 을 사용해야 한다.
@@ -1340,6 +1476,8 @@ public class BoardController {
 		return mav;
 		
 	} // end of public ModelAndView view_2(ModelAndView mav, HttpServletRequest request, RedirectAttributes redirectAttr)
+	
+	
 	
 	
 	
@@ -1675,8 +1813,70 @@ public class BoardController {
 	
 	
 	
-	
-	
+	// === #146. 원게시물에 딸린 댓글내용들을 페이징 처리하기 (Ajax로 처리)  === //
+	@ResponseBody
+	@GetMapping(value="/commentList.action", produces="text/plain;charset=UTF-8")
+	public String commentList(HttpServletRequest request) {
+		
+		String parentSeq = request.getParameter("parentSeq");
+		String currentShowPageNo = request.getParameter("currentShowPageNo");
+		
+		if(currentShowPageNo == null) {
+			currentShowPageNo = "1";	// 1 페이지로
+		}
+		
+		int sizePerPage = 5; 	// 한 페이지당 5개의 댓글을 보여줄 것
+		
+		
+		// **** 가져올 게시글의 범위를 구한다.(공식임!!!) **** 
+        /*
+             currentShowPageNo      startRno     endRno
+            --------------------------------------------
+                 1 page        ===>    1           10
+                 2 page        ===>    11          20
+                 3 page        ===>    21          30
+                 4 page        ===>    31          40
+                 ......                ...         ...
+        */
+		
+		int startRno = ((Integer.parseInt(currentShowPageNo) - 1) * sizePerPage) + 1; // 시작 행번호 
+        int endRno = startRno + sizePerPage - 1; // 끝 행번호
+        
+        Map<String, String> paraMap = new HashMap<>();
+        paraMap.put("parentSeq", parentSeq);
+        paraMap.put("startRno", String.valueOf(startRno));
+        paraMap.put("endRno", String.valueOf(endRno));
+		
+		List<CommentVO> commentList = service.getCommentList_paging(paraMap);
+		int totalCount = service.getCommentTotalCount(parentSeq);	// 페이징 처리시 보여주는 순번을 나타내기 위한 것
+		
+		JSONArray jsonArr = new JSONArray();	// []
+		
+		if(commentList != null) {	// 댓글이 있는 경우
+			
+			for(CommentVO cmtvo : commentList) {
+				
+				JSONObject jsonObj = new JSONObject();			// {}
+				jsonObj.put("seq", cmtvo.getSeq());				// {"seq":4}
+				jsonObj.put("fk_userid", cmtvo.getFk_userid());	// {"seq":4, "userid":"ejss0125"}
+				jsonObj.put("name", cmtvo.getName());			// {"seq":4, "userid":"ejss0125", "name":"손혜정"}	
+				jsonObj.put("content", cmtvo.getContent());		// {"seq":4, "userid":"ejss0125","name":"손혜정", "content":"나도갈래"}
+				jsonObj.put("regdate", cmtvo.getRegDate() );	// {"seq":4, "userid":"ejss0125","name":"손혜정", "content":"나도갈래", "regdate":"2024-06-18 15:36:41"}
+				
+				jsonObj.put("sizePerPage", sizePerPage);		// 페이징 처리시 보여주는 순번을 나타내기 위한 것
+				jsonObj.put("totalCount", totalCount);			// 페이징 처리시 보여주는 순번을 나타내기 위한 것
+				
+				jsonArr.put(jsonObj);
+				
+			} // end of for(CommentVO cmtvo : commentList)
+		}
+		
+		
+		return jsonArr.toString();	// "[{"seq":4, "userid":"ejss0125","name":"손혜정", "content":"나도갈래", "regdate":"2024-06-18 15:36:41"}]"
+									// 또는
+									// "[]"
+		
+	} // end of public String commentList
 	
 	
 	

@@ -25,7 +25,10 @@
 
 	$(document).ready(function(){
 		
-		goReadComment()		// 페이지 처리 안한 댓글 읽어오기
+		// goReadComment()		// 페이지 처리 안한 댓글 읽어오기
+		
+		// === #144. Ajax 로 불러온 댓글 내용들을 페이징 처리하기 === //
+		goViewComment(1);	// 페이징 처리 한 댓글 읽어오기
 		
 		$("span.move").hover(function(e){	// mouseover
             	$(e.target).addClass("moveColor");
@@ -57,10 +60,10 @@
 			if($(e.target).text() == "수정") {
 		
 				// alert("댓글수정");
-				// alert($(e.target).parent().parent().children("td:nth-child(1)").text()); // 수정 전 댓글내용
+				// alert($(e.target).parent().parent().children("td:nth-child(2)").text()); // 수정 전 댓글내용
 				
-				const $content = $(e.target).parent().parent().children("td:nth-child(1)");	// $content => 선택자를 의미
-				origin_comment_content = $(e.target).parent().parent().children("td:nth-child(1)").text();
+				const $content = $(e.target).parent().parent().children("td:nth-child(2)");	// $content => 선택자를 의미
+				origin_comment_content = $(e.target).parent().parent().children("td:nth-child(2)").text();
 				
 				$content.html(`<input id='comment_update' type='text' value='\${origin_comment_content}' size='40'	/>`);	// 댓글 내용을 수정할 수 있도록 input 태그를 만들어준다.
 				
@@ -84,9 +87,9 @@
 				
 				// alert("댓글수정완료");
 				// alert($(e.target).next().val()); // 수정해야 할 댓글 시퀀스 번호
-				// alert($(e.target).parent().parent().children("td:nth-child(1)").children("input").val()); // 수정 후 댓글 내용
+				// alert($(e.target).parent().parent().children("td:nth-child(2)").children("input").val()); // 수정 후 댓글 내용
 				
-				const content = $(e.target).parent().parent().children("td:nth-child(1)").children("input").val();
+				const content = $(e.target).parent().parent().children("td:nth-child(2)").children("input").val();
 				
 				$.ajax({
 					
@@ -97,13 +100,13 @@
 					dataType:"json",
 					success:function(json){
 						
-						// $(e.target).parent().parent().children("td:nth-child(1)").html(content);
+						// $(e.target).parent().parent().children("td:nth-child(2)").html(content);
+						
+						// goReadComment();	// 페이징 처리 안한 댓글 읽어오기
+						goViewComment(1);	// 페이징 처리 한 댓글 읽어오기
 						
 						$(e.target).text("수정").removeClass("btn-info").addClass("btn-secondary");
 						$(e.target).next().next().text("삭제").removeClass("btn-danger").addClass("btn-secondary");
-						
-						goReadComment();	// 페이징 처리 안한 댓글 읽어오기
-						
 						
 					},
 					error: function(request, status, error){
@@ -125,9 +128,9 @@
 	    	
 	         if($(e.target).text() == "취소") {
 	            //  alert("댓글 수정 취소 누름!");
-	            //  alert($(e.target).parent().parent().children("td:nth-child(1)").html());
+	            //  alert($(e.target).parent().parent().children("td:nth-child(2)").html());
 	            
-	            const $content = $(e.target).parent().parent().children("td:nth-child(1)");
+	            const $content = $(e.target).parent().parent().children("td:nth-child(2)");
 	            $content.html(`\${origin_comment_content}`);
 	            
 	            $(e.target).text("삭제").removeClass("btn-danger").addClass("btn-secondary");
@@ -149,7 +152,8 @@
 	                      ,"parentSeq":"${requestScope.boardvo.seq}"},
 	                  dataType:"json",
 	                  success:function(json){
-	                     goReadComment();// 페이징 처리 안 한 댓글 읽어오기(delete 하면 select 해와야함 그래서 이 함수 호출)
+	                     // goReadComment();	// 페이징 처리 안 한 댓글 읽어오기(delete 하면 select 해와야함 그래서 이 함수 호출)
+	                     goViewComment(1);		// 페이징 처리 한 댓글 읽어오기
 	                  },
 	                  error: function(request, status, error){
 	                        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
@@ -162,8 +166,6 @@
 	         } // end of if($(e.target).text() == "취소")
 	         
 	      }); // end of $(document).on('click', "button.btnDeleteComment", function(e){})
-		
-		
 		
 		
 		
@@ -195,6 +197,8 @@
 		// 첨부파일이 있는 댓글 쓰기인 경우
 		
 	} // end of function goAddWrite()
+	
+	
 	
 	
 	// 첨부파일이 없는 댓글 쓰기인 경우
@@ -235,15 +239,12 @@
 					alert(json.name + "님의 포인트는 300점을 초과할 수 없으므로 댓글쓰기가 불가합니다.");	
 				}
 				else {
-					goReadComment();		// 페이지 처리 안한 댓글 읽어오기
-											// 페이지 처리 한 댓글 읽어오기	
+					// goReadComment();		// 페이지 처리 안한 댓글 읽어오기
+					goViewComment(1);		// 페이지 처리 한 댓글 읽어오기	
 				}
-				
 				
 			 	$("input:text[name='content']").val("");
 		
-				
-				
 			},
 			error: function(request, status, error){
 		        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
@@ -252,6 +253,8 @@
 		}); // end of $.ajax
 		
 	} // end of function goAddWrite_noAttach()
+	
+	
 	
 	
 	
@@ -312,6 +315,295 @@
 		
 	} // end of function goReadComment()
 	
+	
+	
+	
+	
+	<%-- === #145. Ajax 로 불러온 댓글 내용들을 페이징 처리하기 ===  --%>
+	
+	function goViewComment(currentShowPageNo){
+		
+		$.ajax({
+			
+			url:"<%=ctxPath%>/commentList.action",
+			data:{"parentSeq":"${requestScope.boardvo.seq}",
+				  "currentShowPageNo":currentShowPageNo},
+			dataType:"json",
+			success:function(json){
+				
+				// console.log(JSON.stringify(json));
+				// [{"name":"손혜정","regdate":"2024-06-21 12:17:58","fk_userid":"ejss0125","seq":"51","content":"열두번째 댓글입니다."},{"name":"손혜정","regdate":"2024-06-21 12:17:55","fk_userid":"ejss0125","seq":"50","content":"열한번째 댓글입니다."},{"name":"손혜정","regdate":"2024-06-21 12:17:51","fk_userid":"ejss0125","seq":"49","content":"열번째 댓글입니다."},{"name":"손혜정","regdate":"2024-06-21 12:17:48","fk_userid":"ejss0125","seq":"48","content":"아홉번째 댓글입니다."},{"name":"손혜정","regdate":"2024-06-21 12:17:42","fk_userid":"ejss0125","seq":"47","content":"여덟번째 댓글입니다."}]
+				
+				let v_html = "";
+				
+				if(json.length > 0){
+					
+					$.each(json, function(index, item){
+						
+						v_html += "<tr>";
+						v_html += 	"<td class='comment'>"+(item.totalCount - (currentShowPageNo - 1) * item.sizePerPage - index)+"</td>";
+						
+						<%--  
+							>>>	페이징 처리시 보여주는 순번 공식 <<<
+	                		데이터개수 - (페이지번호 - 1) * 1페이지당보여줄개수 - 인덱스번호 => 순번 
+					             
+			                <예제>
+			               	 데이터개수 : 12
+					        1페이지당보여줄개수 : 5
+			             
+			                ==> 1 페이지       
+			                12 - (1-1) * 5 - 0  => 12
+			                12 - (1-1) * 5 - 1  => 11
+			                12 - (1-1) * 5 - 2  => 10
+			                12 - (1-1) * 5 - 3  =>  9
+			                12 - (1-1) * 5 - 4  =>  8
+			             
+			                ==> 2 페이지
+			                12 - (2-1) * 5 - 0  =>  7
+			                12 - (2-1) * 5 - 1  =>  6
+			                12 - (2-1) * 5 - 2  =>  5
+			                12 - (2-1) * 5 - 3  =>  4
+			                12 - (2-1) * 5 - 4  =>  3
+			             
+			                ==> 3 페이지
+			                12 - (3-1) * 5 - 0  =>  2
+			                12 - (3-1) * 5 - 1  =>  1 
+			         	--%>
+					
+			                
+		                v_html += 	"<td>"+item.content+"</td>";
+						v_html += 	"<td class='comment'>"+item.name+"</td>";
+						v_html += 	"<td class='comment'>"+item.regdate+"</td>";
+						
+						if( ${sessionScope.loginuser != null} && "${sessionScope.loginuser.userid}" == item.fk_userid ) {
+							
+							v_html += "<td class='comment'><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button><input type='hidden' value='"+item.seq+"'/>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button></td>";
+						
+						}
+						
+						v_html += "</tr>";
+						
+					}); // end of $.each 
+			                
+				}
+				else {
+					
+					v_html += "<tr>";
+					v_html += 	"<td colspan='5' class='comment'>댓글이 없습니다.</td>";
+					v_html += "</tr>";
+				}
+				
+				$("tbody#commentDisplay").html(v_html);
+				
+				// === # 154. 페이지바 함수 호출 === // 
+				const totalPage = Math.ceil(json[0].totalCount/json[0].sizePerPage);	// Math.floor은 작은 값으로 내리기, Math.ceil은 큰 값으로 올리기
+			
+				// console.log("totalPage : ", totalPage);
+				// totalPage : 3
+				
+				makeCommentPageBar(currentShowPageNo, totalPage);
+				
+			},
+			error: function(request, status, error){
+		        alert("code: "+request.status+"\n"+"message: "+request.responseText+"\n"+"error: "+error);
+		    }
+			
+		}); // end of $.ajax
+		
+	} // end of function goViewComment
+	
+	
+	
+	
+	   // === #153. 페이지바 함수 만들기 ===
+	   function makeCommentPageBar(currentShowPageNo, totalPage) {
+	      
+	      const blockSize = 10;
+	      // blockSize 는 1개 블럭(토막)당 보여지는 페이지번호의 개수이다.
+	      /*
+	                      1  2  3  4  5  6  7  8  9 10 [다음][마지막]  -- 1개블럭
+	         [맨처음][이전]  11 12 13 14 15 16 17 18 19 20 [다음][마지막]  -- 1개블럭
+	         [맨처음][이전]  21 22 23
+	      */
+	      
+	      let loop = 1;
+	      /*
+	          loop는 1부터 증가하여 1개 블럭을 이루는 페이지번호의 개수[ 지금은 10개(== blockSize) ] 까지만 증가하는 용도이다.
+	       */
+	      
+	      let pageNo = Math.floor((currentShowPageNo - 1)/blockSize) * blockSize + 1;
+	      // *** !! 공식이다. !! *** //
+	      /*
+	         currentShowPageNo 가 3페이지 라면 pageNo 는 1 이 되어야 한다.
+	            ((3 - 1)/10) * 10 + 1;
+	            ( 2/10 ) * 10 + 1;
+	            ( 0.2 ) * 10 + 1;
+	            Math.floor( 0.2 ) * 10 + 1;  // 소수부가 있을시 Math.floor(0.2) 은 0.2 보다 작은 최대의 정수인 0을 나타낸다.
+	            0 * 10 + 1 
+	            1
+	            
+	            currentShowPageNo 가 11페이지 이라면 pageNo 는 11 이 되어야 한다.
+	            ((11 - 1)/10) * 10 + 1;
+	            ( 10/10 ) * 10 + 1;
+	            ( 1 ) * 10 + 1;
+	            Math.floor( 1 ) * 10 + 1;  // 소수부가 없을시 Math.floor(1) 은 그대로 1 이다.
+	            1 * 10 + 1
+	            11
+	            
+	            currentShowPageNo 가 20페이지 이라면 pageNo 는 11 이 되어야 한다.
+	            ((20 - 1)/10) * 10 + 1;
+	            ( 19/10 ) * 10 + 1;
+	            ( 1.9 ) * 10 + 1;
+	            Math.floor( 1.9 ) * 10 + 1;  // 소수부가 있을시 Math.floor(1.9) 은 1.9 보다 작은 최대의 정수인 1을 나타낸다.
+	            1 * 10 + 1
+	            11
+	         
+	            
+	            1  2  3  4  5  6  7  8  9  10  -- 첫번째 블럭의 페이지번호 시작값(pageNo)은 1 이다.
+	            11 12 13 14 15 16 17 18 19 20  -- 두번째 블럭의 페이지번호 시작값(pageNo)은 11 이다.
+	            21 22 23 24 25 26 27 28 29 30  -- 세번째 블럭의 페이지번호 시작값(pageNo)은 21 이다.
+	            
+	            currentShowPageNo         pageNo
+	           ----------------------------------
+	                 1                      1 = Math.floor((1 - 1)/10) * 10 + 1
+	                 2                      1 = Math.floor((2 - 1)/10) * 10 + 1
+	                 3                      1 = Math.floor((3 - 1)/10) * 10 + 1
+	                 4                      1
+	                 5                      1
+	                 6                      1
+	                 7                      1 
+	                 8                      1
+	                 9                      1
+	                 10                     1 = Math.floor((10 - 1)/10) * 10 + 1
+	                
+	                 11                    11 = Math.floor((11 - 1)/10) * 10 + 1
+	                 12                    11 = Math.floor((12 - 1)/10) * 10 + 1
+	                 13                    11 = Math.floor((13 - 1)/10) * 10 + 1
+	                 14                    11
+	                 15                    11
+	                 16                    11
+	                 17                    11
+	                 18                    11 
+	                 19                    11 
+	                 20                    11 = Math.floor((20 - 1)/10) * 10 + 1
+	                 
+	                 21                    21 = Math.floor((21 - 1)/10) * 10 + 1
+	                 22                    21 = Math.floor((22 - 1)/10) * 10 + 1
+	                 23                    21 = Math.floor((23 - 1)/10) * 10 + 1
+	                 ..                    ..
+	                 29                    21
+	                 30                    21 = Math.floor((30 - 1)/10) * 10 + 1
+	      
+	      
+	          1  2  3  4  5  6  7  8  9  10  -- 첫번째 블럭의 페이지번호 시작값(pageNo)은 1 이다.
+	          11 12 13 14 15 16 17 18 19 20  -- 두번째 블럭의 페이지번호 시작값(pageNo)은 11 이다.
+	          21 22 23 24 25 26 27 28 29 30  -- 세번째 블럭의 페이지번호 시작값(pageNo)은 21 이다.
+	          
+	          currentShowPageNo         pageNo
+	         ----------------------------------
+	               1                      1 = ((1 - 1)/10) * 10 + 1
+	               2                      1 = ((2 - 1)/10) * 10 + 1
+	               3                      1 = ((3 - 1)/10) * 10 + 1
+	               4                      1
+	               5                      1
+	               6                      1
+	               7                      1 
+	               8                      1
+	               9                      1
+	               10                     1 = ((10 - 1)/10) * 10 + 1
+	              
+	               11                    11 = ((11 - 1)/10) * 10 + 1
+	               12                    11 = ((12 - 1)/10) * 10 + 1
+	               13                    11 = ((13 - 1)/10) * 10 + 1
+	               14                    11
+	               15                    11
+	               16                    11
+	               17                    11
+	               18                    11 
+	               19                    11 
+	               20                    11 = ((20 - 1)/10) * 10 + 1
+	               
+	               21                    21 = ((21 - 1)/10) * 10 + 1
+	               22                    21 = ((22 - 1)/10) * 10 + 1
+	               23                    21 = ((23 - 1)/10) * 10 + 1
+	               ..                    ..
+	               29                    21
+	               30                    21 = ((30 - 1)/10) * 10 + 1
+	      */
+	      
+	      let pageBar_HTML = "<ul style='list-style:none;'>";
+	      
+	      // === [맨처음][이전] 만들기 === //
+	      if(pageNo != 1) {
+	         pageBar_HTML += "<li style='display:inline-block; width:70px; font-size:12pt;'><a href='javascript:goViewComment(1)'>[맨처음]</a></li>";
+	         pageBar_HTML += "<li style='display:inline-block; width:50px; font-size:12pt;'><a href='javascript:goViewComment("+ (pageNo-1) + ")'>[이전]</a></li>"; 
+	      }
+	      
+	      while( !(loop > blockSize || pageNo > totalPage) ) {
+	         
+	         if(pageNo == currentShowPageNo) {
+	            pageBar_HTML += "<li style='display:inline-block; width:30px; font-size:12pt; border:solid 1px gray; color:red; padding:2px 4px;'>"+pageNo+"</li>";
+	         }
+	         else {
+	            pageBar_HTML += "<li style='display:inline-block; width:30px; font-size:12pt;'><a href='javascript:goViewComment(" + pageNo + ")'>"+pageNo+"</a></li>"; 
+	         }
+	         
+	         loop++;
+	         pageNo++;
+	         
+	      }// end of while------------------------
+	      
+	      // === [다음][마지막] 만들기 === //
+	      if(pageNo <= totalPage) {
+	         pageBar_HTML += "<li style='display:inline-block; width:50px; font-size:12pt;'><a href='javascript:goViewComment("+ pageNo + ")'>[다음]</a></li>";
+	         pageBar_HTML += "<li style='display:inline-block; width:70px; font-size:12pt;'><a href='javascript:goViewComment("+ totalPage + ")'>[마지막]</a></li>"; 
+	      }
+	      
+	      pageBar_HTML += "</ul>";
+	      
+	      // === #156. 댓글 페이지바 출력하기 ===
+	      $("div#pageBar").html(pageBar_HTML);
+	      
+	   } // end of function makeCommentPageBar(currentShowPageNo) --------------------
+	
+	
+	
+	
+	
+	
+	<%-- === #139. 이전글제목, 다음글제목 보기 --%>
+	function goView(seq)	{
+	
+		const goBackURL = "${requestScope.goBackURL}";
+		// goBackURL : "/list.action?searchType=subject&searchWord=정화&currentShowPageNo=3"
+
+	<%--			
+		// 아래처럼 get 방식으로 보내면 안된다. 왜냐하면 get방식에서 &는 전송될 데이터의 구분자로 사용되기 때문이다. 
+		location.href = `<%=ctxPath%>/view.action?seq=\${seq}&goBackURL=\${goBackURL}`;
+	--%>
+		
+	<%-- 	
+		그러므로 & 를 글자 그대로 인식하는 post 방식으로 보내야 한다.
+		아래에 #132 에 표기된 form 태그를 먼저 만든다. --%>
+		const frm = document.goViewFrm;
+		frm.seq.value = seq;
+		frm.goBackURL.value = goBackURL;
+		
+		if(${not empty requestScope.paraMap}) {	// 검색조건이 있을 경우
+			
+			frm.searchType.value = "${requestScope.paraMap.searchType}";
+			frm.searchWord.value = "${requestScope.paraMap.searchWord}";
+			
+		}
+		
+		frm.method = "post";
+		frm.action = "<%=ctxPath%>/view_2.action";
+		frm.submit();
+		
+			
+	} // end of function goView(seq)
+	
+	
 </script>
 
 <div style="display: flex;">
@@ -366,8 +658,18 @@
 	   	
 	   	<div class="mt-5">
 	   		<%-- 글 조회수 1 증가를 위해서 view.action 대신에 view_2.action 으로 바꾼다. --%>
+	   	<%-- 
 	   		<div style="margin-bottom: 1%;">이전글제목&nbsp;&nbsp;<span class="move" onclick="javascript:location.href='view_2.action?seq=${requestScope.boardvo.previousseq}'">${requestScope.boardvo.previoussubject}</span></div>
 	   		<div style="margin-bottom: 1%;">다음글제목&nbsp;&nbsp;<span class="move" onclick="javascript:location.href='view_2.action?seq=${requestScope.boardvo.nextseq}'">${requestScope.boardvo.nextsubject}">${requestScope.boardvo.nextsubject}</span></div>
+	   	--%>
+	   	
+		   	<%-- === #137. 이전글제목, 다음글제목 보기  --%>
+		   	<%--  // >>> 글목록에서 검색되어진 글내용일 경우 이전글제목, 다음글제목은 검색되어진 결과물내의 이전글과 다음글이 나오도록 하기 위한 것이다.  시작    <<< // --%>
+		   	<div style="margin-bottom: 1%;">이전글제목&nbsp;&nbsp;<span class="move" onclick="goView(${requestScope.boardvo.previousseq})">${requestScope.boardvo.previoussubject}</span></div>
+		   	<div style="margin-bottom: 1%;">다음글제목&nbsp;&nbsp;<span class="move" onclick="goView(${requestScope.boardvo.nextseq})">${requestScope.boardvo.nextsubject}</span></div>
+		   	<%--  // >>> 글목록에서 검색되어진 글내용일 경우 이전글제목, 다음글제목은 검색되어진 결과물내의 이전글과 다음글이 나오도록 하기 위한 것이다.  끝    <<< // --%>
+	   	
+	   		
 	   		<br>
 	   		<button type="button" class="btn btn-secondary btn-sm mr-3" onclick="javascript:location.href='<%= ctxPath%>/list.action'">전체목록보기</button>
 	   		
@@ -422,23 +724,40 @@
 	      	<table class="table" style="width: 1024px; margin-top: 2%; margin-bottom: 3%;">
 	         	<thead>
 	         		<tr>
+	            		<th style="width:6%">순번</th>
 	            		<th style="text-align: center;">내용</th>
 	            		<th style="width: 8%; text-align: center;">작성자</th>
 	            		<th style="width: 12%; text-align: center;">작성일자</th>
 	            		<th style="width: 12%; text-align: center;">수정/삭제</th>
 	         		</tr>
 	         	</thead>
-         		<tbody id="commentDisplay">
-         		
-         		
-         		
-         		</tbody>
+         		<tbody id="commentDisplay"></tbody>
 	      	</table>
 	   		
+	   		<%-- === #155. 댓글페이지바가 보여지는 곳 === --%>
+	   		<div style="display: flex; margin-bottom: 50px;">
+          		<div id="pageBar" style="margin: auto; text-align: center;"></div>
+       		</div>
 	   		
 	   		
 	   	</div>
 	   	
    	</div>
 </div>
+   	
+   	
+<%-- === #138. 	페이징 처리되어진 후 특정 글제목을 클릭하여 상세내용을 본 이후
+         	          사용자가 "검색된결과목록보기" 버튼을 클릭했을때 돌아갈 페이지를 알려주기 위해
+          		현재 페이지 주소를 뷰단으로 넘겨준다.  --%>
+<form name="goViewFrm">
+	<input type="hidden" name="seq" />
+	<input type="hidden" name="goBackURL" />
+	<input type="hidden" name="searchType" />
+	<input type="hidden" name="searchWord" />
+</form>       	
+   	
+   	
+   	
+   	
+   	
    	

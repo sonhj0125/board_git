@@ -103,6 +103,12 @@ public interface BoardDAO {
 	// 글목록 가져오기 (페이징 처리 했으며, 검색어가 있는 것 또는 검색어 없는 것 모두 포함한 것이다.)
 	List<BoardVO> boardListSearch_withPaging(Map<String, String> paraMap);
 
+	// 원게시물에 딸린 댓글내용들을 페이징 처리하기(Ajax 로 처리)
+	List<CommentVO> getCommentList_paging(Map<String, String> paraMap);
+
+	// 페이징 처리시 보여주는 순번을 나타내기 위한 것
+	int getCommentTotalCount(String parentSeq);
+
 	
 
 	

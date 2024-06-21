@@ -151,7 +151,8 @@
    	
    	
    	
-   	<!-- === #65. 글 1개 조회하기  ===  -->
+   	<!-- 
+   	=== #65. 글 1개 조회하기  ===  
    	<select id="getView" parameterType="HashMap" resultType="BoardVO">
    		SELECT previousseq, previoussubject, seq, fk_userid, name, subject
      		 , content, readCount, pw, nextseq, nextsubject 
@@ -168,6 +169,48 @@
 		)V
 		WHERE V.seq = #{seq}
    	</select>   	
+   	-->
+   	
+   	
+   	
+   	<!-- === #136. 글 1개 조회하기  === 
+   			먼저, 위의 #65 을 주석처리한 다음에 아래와 같이 한다.
+   	
+   	-->
+	<select id="getView" parameterType="HashMap" resultType="BoardVO">
+   		SELECT previousseq, previoussubject, seq, fk_userid, name, subject
+     		 , content, readCount, regDate, pw, nextseq, nextsubject 
+		FROM
+		(
+		    select lag(seq, 1) over( order by seq desc ) AS previousseq         
+		         , lag(subject, 1) over( order by seq desc ) AS previoussubject
+		         , seq, fk_userid, name, subject, content, readCount
+		         , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate, pw
+		         , lead(seq, 1) over( order by seq desc ) AS nextseq       
+		         , lead(subject, 1) over( order by seq desc ) AS nextsubject
+		    from tbl_board
+		    where status = 1
+			
+			<choose>
+				<when test='searchType == "subject" and searchWord != ""'>
+					and lower(subject) like '%'||lower(#{searchWord})||'%'
+				</when>
+				<when test='searchType == "content" and searchWord != ""'>
+					and lower(content) like '%'||lower(#{searchWord})||'%'
+				</when>
+				<when test='searchType == "subject_content" and searchWord != ""'>
+					and (lower(subject) like '%'||lower(#{searchWord})||'%' or lower(content) like '%'||lower(#{searchWord})||'%')
+				</when>
+				<when test='searchType == "name" and searchWord != ""'>
+					and lower(name) like '%'||lower(#{searchWord})||'%'
+				</when>
+				<otherwise></otherwise>
+			</choose>
+		)V
+		WHERE V.seq = #{seq}
+   	</select>   
+   	
+   	
    	
    	
    	
@@ -234,7 +277,8 @@
 		where status = 1 and parentSeq = #{parentSeq}
 		order by seq desc
 	</select>
-
+	
+	
 
 	<!-- === #98. 댓글 수정(Ajax 로 처리)  === -->
 	<update id="updateComment" parameterType="HashMap">
@@ -402,11 +446,34 @@
 	
 	
 
+	<!-- === #149. 원게시물에 딸린 댓글내용들을 페이징 처리하기(Ajax 로 처리) === -->
+	<select id="getCommentList_paging" parameterType="HashMap" resultType="CommentVO">
+		<!-- 첨부파일이 없는 경우  -->
+		SELECT seq, fk_userid, name, content, regDate
+		FROM
+		(
+			select row_number() over(order by seq desc) AS rno 
+				 , seq, fk_userid, name, content
+	     		 , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+			from tbl_comment
+			where status = 1 and parentSeq = #{parentSeq}
+			order by seq desc
+		) V
+		WHERE rno BETWEEN #{startRno} AND #{endRno}
+	
+	
+		<!-- 첨부파일이 있는 경우  -->
+	
+	</select>
 
 
-
-
-
+	<!-- === #152. 페이징 처리시 보여주는 순번을 나타내기 위한 것  === -->
+	<select id="getCommentTotalCount" parameterType="String" resultType="int">
+		select count(*)
+		from tbl_comment
+		where parentSeq = #{parentSeq}
+	</select>
+	
 
 
 

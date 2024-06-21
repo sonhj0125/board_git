@@ -582,6 +582,30 @@ private AES256 aES256;
 	} // end of public List<BoardVO> boardListSearch_withPaging
 
 
+
+	// === #147. 원게시물에 딸린 댓글내용들을 페이징 처리하기(Ajax 로 처리) === //
+	@Override
+	public List<CommentVO> getCommentList_paging(Map<String, String> paraMap) {
+		
+		List<CommentVO> commentList = dao.getCommentList_paging(paraMap);
+		
+		return commentList;
+		
+	} // end of public List<CommentVO> getCommentList_paging
+
+
+
+	// === #150. 페이징 처리시 보여주는 순번을 나타내기 위한 것 === //
+	@Override
+	public int getCommentTotalCount(String parentSeq) {
+		
+		int totalCount = dao.getCommentTotalCount(parentSeq);
+		
+		return totalCount;
+		
+	} // end of public int getCommentTotalCount
+
+
 	
 	
 	

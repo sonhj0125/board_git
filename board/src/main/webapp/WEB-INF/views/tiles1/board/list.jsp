@@ -170,7 +170,9 @@
 	}); // end of $(document).ready(function(){})
 
 	
+	
 	// Function Declaration
+	
 	function goView(seq)	{
 		
 	<%--
@@ -190,6 +192,13 @@
 		const frm = document.goViewFrm;
 		frm.seq.value = seq;
 		frm.goBackURL.value = goBackURL;
+		
+		if(${not empty requestScope.paraMap}) {	// 검색조건이 있을 경우
+			
+			frm.searchType.value = "${requestScope.paraMap.searchType}";
+			frm.searchWord.value = "${requestScope.paraMap.searchWord}";
+			
+		}
 		
 		frm.method = "post";
 		frm.action = "<%=ctxPath%>/view.action";
@@ -223,17 +232,47 @@
    	<table style="width: 1024px" class="table table-bordered">
       	<thead>
           	<tr>
+             	<th style="width: 70px;  text-align: center;">순번</th>
              	<th style="width: 70px;  text-align: center;">글번호</th>
-            	<th style="width: 360px; text-align: center;">제목</th>
+            	<th style="width: 300px; text-align: center;">제목</th>
             	<th style="width: 70px;  text-align: center;">성명</th>
             	<th style="width: 150px; text-align: center;">날짜</th>
-            	<th style="width: 70px;  text-align: center;">조회수</th>
+            	<th style="width: 60px;  text-align: center;">조회수</th>
           	</tr>
       	</thead>
       	<tbody>
        		<c:if test="${not empty requestScope.boardList}">
-       			<c:forEach var="boardvo" items="${requestScope.boardList}">
+       			<c:forEach var="boardvo" items="${requestScope.boardList}" varStatus="status">
        				<tr>
+       					<td align="center">
+       						 ${ (requestScope.totalCount) - (requestScope.currentShowPageNo - 1) * (requestScope.sizePerPage) - (status.index)} 
+       					<%-- 
+       						>>> 페이징 처리시 보여주는 순번 공식  <<<
+	                    	 데이터개수 - (페이지번호 - 1) * 1페이지당보여줄개수 - 인덱스번호 => 순번 
+			                  
+		                     <예제>
+	                    	   데이터개수 : 12
+		                     1페이지당보여줄개수 : 5
+		                  
+		                     ==> 1 페이지       
+		                     12 - (1-1) * 5 - 0  => 12
+		                     12 - (1-1) * 5 - 1  => 11
+		                     12 - (1-1) * 5 - 2  => 10
+		                     12 - (1-1) * 5 - 3  =>  9
+		                     12 - (1-1) * 5 - 4  =>  8
+		                  
+		                     ==> 2 페이지
+		                     12 - (2-1) * 5 - 0  =>  7
+		                     12 - (2-1) * 5 - 1  =>  6
+		                     12 - (2-1) * 5 - 2  =>  5
+		                     12 - (2-1) * 5 - 3  =>  4
+		                     12 - (2-1) * 5 - 4  =>  3
+		                  
+		                     ==> 3 페이지
+		                     12 - (3-1) * 5 - 0  =>  2
+		                     12 - (3-1) * 5 - 1  =>  1 
+				        --%>
+       					</td>
        					<td align="center">${boardvo.seq}</td>
        					<td>
        						<c:if test="${boardvo.commentCount > 0}">
@@ -298,9 +337,10 @@
 <form name="goViewFrm">
 	<input type="hidden" name="seq" />
 	<input type="hidden" name="goBackURL" />
+	<input type="hidden" name="searchType" />
+	<input type="hidden" name="searchWord" />
 </form>    
 
-    
     
     
     
