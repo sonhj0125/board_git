@@ -1880,9 +1880,12 @@ public class BoardController {
 	
 	
 	
-	
-	
-	
+	@GetMapping(value="/opendata/korea_tour_api.action")
+	public String korea_tour() {
+      
+		return "opendata/korea_tour_api.tiles1";
+		//  /WEB-INF/views/tiles1/opendata/korea_tour_api.jsp 페이지를 만들어야 한다.
+	} // end of public String korea_tour
 	
 	
 	

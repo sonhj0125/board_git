@@ -1,0 +1,30 @@
+※제목을“이태원거리”로조회 (한페이지에1개씩, 첫페이지를 조회)
+
+http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&title=%EC%9D%B4%ED%83%9C%EC%9B%90%EA%B1%B0%EB%A6%AC&numOfRows=1&pageNo=1
+
+
+http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&title=%EC%9D%B4%ED%83%9C%EC%9B%90%EA%B1%B0%EB%A6%AC&numOfRows=60
+
+
+※제목을“한라산”로조회 (한페이지에1개씩, 첫페이지를 조회)
+네이버에서 검색어로 한라산 이라고 검색한 후 결과 URL 을 복사하여
+메모장에 붙이면 URL 인코딩된 값을 얻을 수 있음.
+
+https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=%ED%95%9C%EB%9D%BC%EC%82%B0
+
+http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&title=%ED%95%9C%EB%9D%BC%EC%82%B0&numOfRows=1&pageNo=1
+
+
+http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&title=%ED%95%9C%EB%9D%BC%EC%82%B0&numOfRows=211
+
+
+http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&_type=json&title=%ED%95%9C%EB%9D%BC%EC%82%B0&numOfRows=211
+
+
+http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&_type=json&title=%ED%95%9C%EB%9D%BC%EC%82%B0&numOfRows=20&pageNo=7
+
+
+
+
+
+

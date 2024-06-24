@@ -28,6 +28,7 @@
 		// goReadComment()		// 페이지 처리 안한 댓글 읽어오기
 		
 		// === #144. Ajax 로 불러온 댓글 내용들을 페이징 처리하기 === //
+		
 		goViewComment(1);	// 페이징 처리 한 댓글 읽어오기
 		
 		$("span.move").hover(function(e){	// mouseover
@@ -101,9 +102,17 @@
 					success:function(json){
 						
 						// $(e.target).parent().parent().children("td:nth-child(2)").html(content);
-						
 						// goReadComment();	// 페이징 처리 안한 댓글 읽어오기
-						goViewComment(1);	// 페이징 처리 한 댓글 읽어오기
+						
+						
+						////////////////////////////////////////////////////////////////////////////////////////
+						// goViewComment(1);	// 페이징 처리 한 댓글 읽어오기
+						
+						const currentShowPageNo = $(e.target).parent().parent().find("input.currentShowPageNo").val();
+						// alert("currentShowPageNo : "+currentShowPageNo);
+						goViewComment(currentShowPageNo);	// 페이징 처리 한 댓글 읽어오기s
+						////////////////////////////////////////////////////////////////////////////////////////
+						
 						
 						$(e.target).text("수정").removeClass("btn-info").addClass("btn-secondary");
 						$(e.target).next().next().text("삭제").removeClass("btn-danger").addClass("btn-secondary");
@@ -377,7 +386,7 @@
 						
 						if( ${sessionScope.loginuser != null} && "${sessionScope.loginuser.userid}" == item.fk_userid ) {
 							
-							v_html += "<td class='comment'><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button><input type='hidden' value='"+item.seq+"'/>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button></td>";
+							v_html += "<td class='comment'><button class='btn btn-secondary btn-sm btnUpdateComment'>수정</button><input type='hidden' value='"+item.seq+"'/>&nbsp;<button class='btn btn-secondary btn-sm btnDeleteComment'>삭제</button><input type='hidden' value='"+currentShowPageNo+"' class='currentShowPageNo' /></td>";
 						
 						}
 						

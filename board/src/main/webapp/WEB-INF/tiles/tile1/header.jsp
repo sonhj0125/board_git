@@ -108,6 +108,15 @@
 		        </div>
 		     </li>
 		     
+		    <li class="nav-item dropdown">
+            	<a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">공공데이터</a>  
+              	<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                 	<a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental.action">서울따릉이지도</a>
+                 	<a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental_insert.action">오라클입력및조회</a>
+                 	<a class="dropdown-item" href="<%=ctxPath%>/opendata/korea_tour_api.action">한국관광공사사진</a>
+              	</div>
+       		</li>
+		     
 		    <!-- ==== 인터셉터 알아보기 ====  -->
 		    <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">인터셉터알아보기</a>  
