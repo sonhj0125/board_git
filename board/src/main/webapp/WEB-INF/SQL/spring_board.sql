@@ -380,6 +380,74 @@ WHERE V.seq = 7;
 
 
 
+--- 서울시 따릉이대여소 마스터 정보 ---
+create table seoul_bicycle_rental
+(lendplace_id  varchar2(20)
+,statn_addr1   Nvarchar2(100)
+,statn_addr2   Nvarchar2(100)
+,statn_lat     number
+,statn_lnt     number
+);
+-- Table SEOUL_BICYCLE_RENTAL이(가) 생성되었습니다.
+
+select *
+from seoul_bicycle_rental;
+
+select count(*)
+from seoul_bicycle_rental;
+
+
+select statn_addr1
+     , instr(statn_addr1, ' ', 1)+1
+     , substr(statn_addr1, instr(statn_addr1, ' ', 1)+1)
+     
+     , instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)
+     , substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1)
+   
+     , lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt   
+from seoul_bicycle_rental;
+
+
+
+select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU
+     , lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt   
+from seoul_bicycle_rental;
+
+
+SELECT GU, COUNT(*) AS CNT
+FROM 
+(
+select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU
+     , lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt   
+from seoul_bicycle_rental
+) V
+WHERE GU LIKE '%구'
+GROUP BY GU
+ORDER BY CNT DESC;
+
+
+
+WITH A 
+AS (
+    SELECT GU, COUNT(*) AS CNT
+    FROM 
+    (
+    select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU
+         , lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt   
+    from seoul_bicycle_rental
+    ) V
+    WHERE GU LIKE '%구'
+    GROUP BY GU
+    ORDER BY CNT DESC       
+)
+SELECT A.GU, A.CNT, TO_CHAR( ROUND((A.CNT / B.TOTAL) * 100, 1), '990.0') AS PERCNTAGE
+FROM A CROSS JOIN (SELECT SUM(CNT) AS TOTAL FROM A) B;
+
+
+
+
+
+
 
 
 

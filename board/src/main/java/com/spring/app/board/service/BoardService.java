@@ -9,6 +9,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.CommentVO;
+import com.spring.app.board.domain.Seoul_bicycle_rental_VO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
 
@@ -96,6 +97,12 @@ public interface BoardService {
 
 	// 페이징 처리시 보여주는 순번을 나타내기 위한 것
 	int getCommentTotalCount(String parentSeq);
+
+	// 서울 따릉이 오라클 입력하기
+	int insert_seoul_bicycle_rental(Seoul_bicycle_rental_VO vo);
+
+	// 서울 따릉이 오라클 조회하기
+	List<Map<String, String>> select_seoul_bicycle_rental();
 
 	
 

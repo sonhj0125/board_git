@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.CommentVO;
 import com.spring.app.board.domain.MemberVO;
+import com.spring.app.board.domain.Seoul_bicycle_rental_VO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
 
@@ -469,6 +470,30 @@ public class BoardDAO_imple implements BoardDAO {
 		return totalCount;
 		
 	} // end of public int getCommentTotalCount
+
+
+
+	// === 서울 따릉이 오라클 입력하기 === // 
+	@Override
+	public int insert_seoul_bicycle_rental(Seoul_bicycle_rental_VO vo) {
+	
+		int n = sqlsession.insert("board.insert_seoul_bicycle_rental", vo);
+		
+		return n;
+		
+	} // end of public int insert_seoul_bicycle_rental(Seoul_bicycle_rental_VO vo)
+
+
+
+	// === 서울 따릉이 오라클 조회하기 === //
+	@Override
+	public List<Map<String, String>> select_seoul_bicycle_rental() {
+	
+		List<Map<String, String>> mapList = sqlsession.selectList("board.select_seoul_bicycle_rental");
+		
+		return mapList;
+		
+	} // end of public List<Map<String, String>> select_seoul_bicycle_rental
 	
 
 

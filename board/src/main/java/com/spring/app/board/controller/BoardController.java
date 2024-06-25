@@ -1,5 +1,10 @@
 package com.spring.app.board.controller;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -7,13 +12,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.Subject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +34,7 @@ import org.springframework.web.servlet.support.RequestContextUtils;
 import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.CommentVO;
 import com.spring.app.board.domain.MemberVO;
+import com.spring.app.board.domain.Seoul_bicycle_rental_VO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
 import com.spring.app.board.service.BoardService;
@@ -1886,6 +1893,120 @@ public class BoardController {
 		return "opendata/korea_tour_api.tiles1";
 		//  /WEB-INF/views/tiles1/opendata/korea_tour_api.jsp 페이지를 만들어야 한다.
 	} // end of public String korea_tour
+	
+	
+	
+	
+	@ResponseBody
+	@GetMapping(value="/opendata/seoul_bicycle_rental_JSON.action", produces="text/plain;charset=UTF-8")
+	public String seoul_bicycle_rental_JSON(HttpServletRequest request) throws IOException, ParseException {
+		
+		/*
+	      	서울시 따릉이대여소 마스터 정보
+	      	https://data.seoul.go.kr/dataList/OA-21235/S/1/datasetView.do 에서 내려받기(JSON) 한 것임.
+	    */
+	    
+	    /*
+	        JSON 파일을 읽고, 파싱하여 값을 읽어오려면 json.simple.JSONParser 을 사용하면 된다. 
+         	먼저, 라이브러리를 추가한다 (MAVEN)
+	        <dependency>
+	        	<groupId>com.googlecode.json-simple</groupId>
+	            <artifactId>json-simple</artifactId>
+	            <version>1.1.1</version>
+	        </dependency>       
+	    */
+		// json 파일이 저장되어 있는 WAS(톰캣)의 디스크 경로명을 알아와야만 한다. 
+        // WAS 의 webapp 의 절대경로를 알아와야 한다.
+		HttpSession session = request.getSession();
+		String root = session.getServletContext().getRealPath("/");
+		
+		String jsonFilePath = root+"resources"+File.separator+"seoul_opendata"+File.separator+"seoul_bicycle_rental.json";
+		// File.separator 은 경로의 구분자로서 윈도우라면 "\" 을 말하고,
+		// Mac, Unix, Linux 라면 "/" 를 말한다.
+		
+		// jsonFilePath 가 json 파일이 된다.
+		// System.out.println("~~~ 확인용 jsonFilePath => " + jsonFilePath);
+		// ~~~ 확인용 jsonFilePath => C:\NCS\workspace_spring_framework\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\board\resources\seoul_opendata\seoul_bicycle_rental.json
+
+		JSONParser parser = new JSONParser();
+		// import 시 org.json.simple.parser.JSONParser 이다.
+		
+		// JSON 파일 읽기
+		Reader reader = new FileReader(jsonFilePath);
+		// JSONObject jsonObj = (JSONObject)parser.parse(reader); 은 안된다..! --> org.json임 simple을 사용해야함!
+		org.json.simple.JSONObject jsonObj = (org.json.simple.JSONObject)parser.parse(reader);
+		
+		org.json.simple.JSONArray jsonArr = (org.json.simple.JSONArray)jsonObj.get("DATA");	
+		// seoul_bicycle_rental.json.json 파일에 있는 불러올 데이터의 key 값이다!
+		
+		return jsonArr.toString();
+		
+	} // end of public String seoul_bicycle_rental_JSON()
+	
+	
+	
+	
+	@GetMapping(value="/opendata/seoul_bicycle_rental.action")
+	   public String opendata_seoul_bicycle_rental() {
+	      
+	      return "opendata/seoul_bicycle_rental.tiles1";
+	       //  /WEB-INF/views/tiles1/opendata/seoul_bicycle_rental.jsp 페이지를 만들어야 한다.
+	      
+	   } // end of public String opendata_seoul_bicycle_rental
+	
+	
+	
+	
+	@GetMapping("/opendata/seoul_bicycle_rental_insert.action")
+	public String seoul_bicycle_rental_insert() {
+		
+		return "opendata/seoul_bicycle_rental_insert.tiles1";
+	    //  /WEB-INF/views/tiles1/opendata/seoul_bicycle_rental_insert.jsp 페이지를 만들어야 한다.
+		
+	} // end of public String seoul_bicycle_rental_insert
+	
+	
+	
+	@ResponseBody
+	@PostMapping("/opendata/seoul_bicycle_rental_insert_END.action")
+	public String seoul_bicycle_rental_insert_END(Seoul_bicycle_rental_VO vo) {
+		
+		int n = service.insert_seoul_bicycle_rental(vo);
+		
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("n", n);
+		
+		return jsonObj.toString();
+		
+	} // end of public String seoul_bicycle_rental_insert_END
+	
+	
+	
+	@ResponseBody
+	@GetMapping(value="/opendata/seoul_bicycle_rental_select.action")
+	public String seoul_bicycle_rental_select() {
+      
+		List<Map<String, String>> mapList = service.select_seoul_bicycle_rental();
+      
+		JSONArray jsonArr = new JSONArray();
+      
+		if(mapList != null) {
+			
+			for(Map<String, String> map : mapList) {
+				
+				JSONObject jsonObj = new JSONObject();
+				jsonObj.put("GU", map.get("GU"));
+				jsonObj.put("CNT", map.get("CNT"));
+				jsonObj.put("PERCNTAGE", map.get("PERCNTAGE"));
+            
+				jsonArr.put(jsonObj);
+				
+			}// end of for----------------------
+			
+		} // end of if(mapList != null)
+            
+		return jsonArr.toString();
+   } // end of public String seoul_bicycle_rental_select
 	
 	
 	

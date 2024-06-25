@@ -8,6 +8,7 @@
 		<typeAlias type="com.spring.app.board.domain.MemberVO" alias="MemberVO"/>
 		<typeAlias type="com.spring.app.board.domain.BoardVO" alias="BoardVO"/>
 		<typeAlias type="com.spring.app.board.domain.CommentVO" alias="CommentVO"/>
+		<typeAlias type="com.spring.app.board.domain.Seoul_bicycle_rental_VO" alias="Seoul_bicycle_rental_VO"/>
 	</typeAliases>
 
 </configuration>

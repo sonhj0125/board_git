@@ -477,6 +477,50 @@
 
 
 
+	<!-- === 서울 따릉이 오라클 입력하기  === -->
+	<insert id="insert_seoul_bicycle_rental" parameterType="Seoul_bicycle_rental_VO">
+		insert into seoul_bicycle_rental(lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt)
+      	values(#{lendplace_id}, #{statn_addr1}, #{statn_addr2}, #{statn_lat}, #{statn_lnt})
+	</insert>
+
+
+
+
+	<!-- === 서울 따릉이 오라클 조회하기  === -->
+	<resultMap type="HashMap" id="seoul_bicycle_Map">
+		<result property="GU" column="GU" javaType="String" />
+		<result property="CNT" column="CNT" javaType="String" />
+		<result property="PERCNTAGE" column="PERCNTAGE" javaType="String" />
+	</resultMap>
+	
+	<select id="select_seoul_bicycle_rental" resultMap="seoul_bicycle_Map">
+		WITH A 
+		AS (
+		    SELECT GU, COUNT(*) AS CNT
+		    FROM 
+		    (
+		    select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU
+		         , lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt   
+		    from seoul_bicycle_rental
+		    ) V
+		    WHERE GU LIKE '%구'
+		    GROUP BY GU
+		    ORDER BY CNT DESC       
+		)
+		SELECT A.GU, A.CNT, TO_CHAR( ROUND((A.CNT / B.TOTAL) * 100, 1), '990.0') AS PERCNTAGE
+		FROM A CROSS JOIN (SELECT SUM(CNT) AS TOTAL FROM A) B
+	</select>
+
+
+
+
+
+
+
+
+
+
+
 
 
 
