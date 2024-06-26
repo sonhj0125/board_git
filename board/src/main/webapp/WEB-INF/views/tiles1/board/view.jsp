@@ -690,6 +690,15 @@
 	   			<button type="button" class="btn btn-secondary btn-sm mr-3" onclick="javascript:location.href='<%= ctxPath%>/del.action?seq=${requestScope.boardvo.seq}'">글삭제하기</button>
 	   		</c:if>
 	   		
+	   		<%-- === #161. 어떤 글에 대한 답변글쓰기는 로그인 된 회원의 gradelevel 컬럼의 값이 10인 직원들만 답변글쓰기가 가능하다. --%>
+         	<c:if test="${not empty sessionScope.loginuser && sessionScope.loginuser.gradelevel == 10}">
+         		<%-- 
+               		<span>groupno : ${requestScope.boardvo.groupno}</span>
+               		<span>depthno : ${requestScope.boardvo.depthno}</span>
+            	--%>
+            	<button type="button" class="btn btn-secondary btn-sm mr-3" onclick="javascript:location.href='<%= ctxPath%>/add.action?subject=${requestScope.boardvo.subject}&groupno=${requestScope.boardvo.groupno}&fk_seq=${requestScope.boardvo.seq}&depthno=${requestScope.boardvo.depthno}'">답변글쓰기</button>
+         	</c:if>
+	   		
 	   		
 	   		<%-- === #83. 댓글쓰기 폼 추가 === --%>
 	   		<c:if test="${not empty sessionScope.loginuser}">

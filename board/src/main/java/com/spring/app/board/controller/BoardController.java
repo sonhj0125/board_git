@@ -808,8 +808,24 @@ public class BoardController {
 	// === #51. 게시판 글쓰기 홈페이지 요청 === // 
 	@GetMapping("/add.action")
 	public ModelAndView requiredLogin_add(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
-		
 		// 게시판과 회원관리는 로그인 유무가 중요, 로그인을 해야 사용할 수 있는 기능이다. ==> AOP 사용(CommonAop.java)
+		
+		// === #162. 답변글쓰기가 추가된 경우 시작 === //
+		String subject = "[답변] "+request.getParameter("subject");
+		String groupno = request.getParameter("groupno");
+		String fk_seq = request.getParameter("fk_seq");
+		String depthno = request.getParameter("depthno");
+		
+		if(fk_seq == null) {	// 원글은 groupno, fk_seq, depthno가 null
+			fk_seq = "";
+		}
+		
+		mav.addObject("subject",subject);
+		mav.addObject("groupno",groupno);
+		mav.addObject("fk_seq",fk_seq);
+		mav.addObject("depthno",depthno);
+		// === #162. 답변글쓰기가 추가된 경우 끝 === //
+		
 		
 		mav.setViewName("board/add.tiles1");
 		// /WEB-INF/views/tiles1/board/add.jsp 페이지를 만들어야 한다.

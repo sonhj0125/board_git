@@ -380,6 +380,154 @@ WHERE V.seq = 7;
 
 
 
+----------------------------------------------------------------------
+      ---- **** 댓글 및 답변글 및 파일첨부가 있는 게시판 **** ----
+      
+--- *** 답변글쓰기는 일반회원은 불가하고 직원(관리파트)들만 답변글쓰기가 가능하도록 한다. *** ---    
+
+--- *** tbl_member(회원) 테이블에 gradelevel 이라는 컬럼을 추가하겠다. *** ---
+alter table tbl_member
+add gradelevel number default 1;
+-- Table TBL_MEMBER이(가) 변경되었습니다.
+
+-- *** 직원(관리자)들에게는 gradelevel 컬럼의 값을 10 으로 부여하겠다. 
+--     gradelevel 컬럼의 값이 10 인 직원들만 답변글쓰기가 가능하다 *** --
+update tbl_member set gradelevel = 10
+where userid in('admin', 'ejss0125');
+-- 2개 행 이(가) 업데이트되었습니다.
+
+commit;
+-- 커밋 완료.
+
+select *
+from tbl_member
+order by gradelevel desc;
+
+
+drop table tbl_comment purge;
+drop sequence commentSeq;
+drop table tbl_board purge;
+drop sequence boardSeq;
+
+
+
+create table tbl_board
+(seq           number                not null    -- 글번호
+,fk_userid     varchar2(20)          not null    -- 사용자ID
+,name          varchar2(20)          not null    -- 글쓴이 
+,subject       Nvarchar2(200)        not null    -- 글제목
+--,content     Nvarchar2(2000)       not null    -- 글내용
+,content       clob                  not null    -- 글내용   CLOB(4GB 까지 저장 가능한 데이터 타입) 타입
+,pw            varchar2(20)          not null    -- 글암호
+,readCount     number default 0      not null    -- 글조회수
+,regDate       date default sysdate  not null    -- 글쓴시간
+,status        number(1) default 1   not null    -- 글삭제여부   1:사용가능한 글,  0:삭제된글
+,commentCount  number default 0      not null    -- 댓글의 개수 
+
+,groupno       number                not null    -- 답변글쓰기에 있어서 그룹번호 
+                                                 -- 원글(부모글)과 답변글은 동일한 groupno 를 가진다.
+                                                 -- 답변글이 아닌 원글(부모글)인 경우 groupno 의 값은 groupno 컬럼의 최대값(max)+1 로 한다.
+
+,fk_seq         number default 0      not null   -- fk_seq 컬럼은 절대로 foreign key가 아니다.!!!!!!
+                                                 -- fk_seq 컬럼은 자신의 글(답변글)에 있어서 
+                                                 -- 원글(부모글)이 누구인지에 대한 정보값이다.
+                                                 -- 답변글쓰기에 있어서 답변글이라면 fk_seq 컬럼의 값은 
+                                                 -- 원글(부모글)의 seq 컬럼의 값을 가지게 되며,
+                                                 -- 답변글이 아닌 원글일 경우 0 을 가지도록 한다.
+
+,depthno        number default 0       not null  -- 답변글쓰기에 있어서 답변글 이라면
+                                                 -- 원글(부모글)의 depthno + 1 을 가지게 되며,
+                                                 -- 답변글이 아닌 원글일 경우 0 을 가지도록 한다.
+
+,fileName       varchar2(255)                    -- WAS(톰캣)에 저장될 파일명(2023112409291535243254235235234.png)                                       
+,orgFilename    varchar2(255)                    -- 진짜 파일명(강아지.png)  // 사용자가 파일을 업로드 하거나 파일을 다운로드 할때 사용되어지는 파일명 
+,fileSize       number                           -- 파일크기  
+
+,constraint PK_tbl_board_seq primary key(seq)
+,constraint FK_tbl_board_fk_userid foreign key(fk_userid) references tbl_member(userid)
+,constraint CK_tbl_board_status check( status in(0,1) )
+);
+-- Table TBL_BOARD이(가) 생성되었습니다.
+
+create sequence boardSeq
+start with 1
+increment by 1
+nomaxvalue
+nominvalue
+nocycle
+nocache;
+-- Sequence BOARDSEQ이(가) 생성되었습니다.
+
+
+
+create table tbl_comment
+(seq           number               not null   -- 댓글번호
+,fk_userid     varchar2(20)         not null   -- 사용자ID
+,name          varchar2(20)         not null   -- 성명
+,content       varchar2(1000)       not null   -- 댓글내용
+,regDate       date default sysdate not null   -- 작성일자
+,parentSeq     number               not null   -- 원게시물 글번호
+,status        number(1) default 1  not null   -- 글삭제여부
+                                               -- 1 : 사용가능한 글,  0 : 삭제된 글
+                                               -- 댓글은 원글이 삭제되면 자동적으로 삭제되어야 한다.
+,constraint PK_tbl_comment_seq primary key(seq)
+,constraint FK_tbl_comment_userid foreign key(fk_userid) references tbl_member(userid)
+,constraint FK_tbl_comment_parentSeq foreign key(parentSeq) references tbl_board(seq) on delete cascade
+,constraint CK_tbl_comment_status check( status in(1,0) ) 
+);
+-- Table TBL_COMMENT이(가) 생성되었습니다.
+
+create sequence commentSeq
+start with 1
+increment by 1
+nomaxvalue
+nominvalue
+nocycle
+nocache;
+-- Sequence COMMENTSEQ이(가) 생성되었습니다.
+
+desc tbl_board;
+
+begin
+    for i in 1..100 loop
+        insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status, groupno)
+        values(boardSeq.nextval, 'ejss0125', '손혜정', '손혜정 입니다'||i, '안녕하세요? 손혜정'|| i ||' 입니다.', '1234', default, default, default, i);
+    end loop;
+end;
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+begin
+    for i in 101..200 loop
+        insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status, groupno)
+        values(boardSeq.nextval, 'eomjh', '엄정화', '엄정화 입니다'||i, '안녕하세요? 엄정화'|| i ||' 입니다.', '1234', default, default, default, i);
+    end loop;
+end;
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+
+
+commit;
+-- 커밋 완료.
+
+
+select * 
+from tbl_board 
+order by seq desc;
+
+update tbl_board set subject = '문의드립니다. 자바가 뭔가요?'
+where seq = 198;
+-- 1 행 이(가) 업데이트되었습니다.
+
+commit;
+
+select * 
+from tbl_board 
+where seq = 198;
+
+
+
+
+
+
 --- 서울시 따릉이대여소 마스터 정보 ---
 create table seoul_bicycle_rental
 (lendplace_id  varchar2(20)
@@ -442,6 +590,36 @@ AS (
 )
 SELECT A.GU, A.CNT, TO_CHAR( ROUND((A.CNT / B.TOTAL) * 100, 1), '990.0') AS PERCNTAGE
 FROM A CROSS JOIN (SELECT SUM(CNT) AS TOTAL FROM A) B;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

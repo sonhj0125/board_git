@@ -59,6 +59,13 @@ public class MemberVO {
     // 마지막으로 암호를 변경한 날짜가 현재시각으로 부터 3개월이 지나지 않았으면 false
     
     
+	// === #158. 먼저 답변글쓰기는 일반회원은 불가하고 직원(관리파트)들만 답변글쓰기가 가능하도록 하기 위해서 
+	//       	  먼저 오라클에서 tbl_member 테이블에  gradelevel 이라는 컬럼을 추가해야 한다.
+	private int gradelevel; // 등급레벨
+	
+	
+	
+	
 	//////////////////////////////////////////
     // ===== method (Getter, Setter) =====
     
@@ -209,6 +216,16 @@ public class MemberVO {
 		this.requirePwdChange = requirePwdChange;
 	}
 	
+	
+	public int getGradelevel() {
+		return gradelevel;
+	}
+
+	public void setGradelevel(int gradelevel) {
+		this.gradelevel = gradelevel;
+	}
+	
+	
 	////////////////////////////////////////////////
 		   
 	public int getAge() { // 만나이 구하기
@@ -260,8 +277,7 @@ public class MemberVO {
 		return age;
 		
 	} // end of public int getAge()
-	
-	
+
 	
 	
 }

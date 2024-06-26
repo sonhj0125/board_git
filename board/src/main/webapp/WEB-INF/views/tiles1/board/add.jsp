@@ -15,7 +15,7 @@
 
 	$(document).ready(function(){
      
-	  	<%-- === #166. 스마트 에디터 구현 시작 === --%>
+	  	<%-- === #166.-1  스마트 에디터 구현 시작 === --%>
       	//전역변수
       	var obj = [];
       
@@ -111,8 +111,16 @@
 <div style="display: flex;">
   <div style="margin: auto; padding-left: 3%;">
      
-     <h2 style="margin-bottom: 30px;">글쓰기</h2>
-      
+     <%-- === 원글쓰기인 경우 === --%>
+     <c:if test='${requestScope.fk_seq eq ""}'>
+     	<h2 style="margin-bottom: 30px;">글쓰기</h2>
+     </c:if>
+     
+     <%-- === 답변글쓰기인 경우 === --%>
+     <c:if test='${requestScope.fk_seq ne ""}'>
+     	<h2 style="margin-bottom: 30px;">답변글쓰기</h2>
+     </c:if>
+     
        <form name="addFrm"> 
         <table style="width: 1024px" class="table table-bordered">
          <tr>
@@ -126,7 +134,14 @@
          <tr>
             <th style="width: 15%; background-color: #DDDDDD;">제목</th>
             <td>
-                <input type="text" name="subject" size="100" maxlength="200" /> 
+	            <%-- === 원글쓰기인 경우 === --%>
+	            <c:if test='${requestScope.fk_seq eq ""}'>
+	     			<input type="text" name="subject" size="100" maxlength="200" />
+	     		</c:if>
+	            <%-- === 답변글쓰기인 경우 === --%>
+	            <c:if test='${requestScope.fk_seq ne ""}'>
+	     			<input type="text" name="subject" size="100" maxlength="200" value="${requestScope.subject}" readonly/> 
+	     		</c:if>
             </td>
          </tr>
          
@@ -144,6 +159,12 @@
             </td>
          </tr>   
         </table>
+        
+        <%-- === #163. 답변 글쓰기가 추가된 경우 시작 === --%>
+        <input type="text" name="groupno" 	value="${requestScope.groupno}" />
+        <input type="text" name="fk_seq" 	value="${requestScope.fk_seq}" />
+        <input type="text" name="depthno" 	value="${requestScope.depthno}" />
+        <%-- === 답변 글쓰기가 추가된 경우 끝 === --%>
         
         <div style="margin: 20px;">
             <button type="button" class="btn btn-secondary btn-sm mr-3" id="btnWrite">글쓰기</button>

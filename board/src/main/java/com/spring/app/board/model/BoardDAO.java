@@ -116,6 +116,9 @@ public interface BoardDAO {
 	// 서울 따릉이 오라클 조회하기
 	List<Map<String, String>> select_seoul_bicycle_rental();
 
+	// tbl_board 테이블에서 groupno 컬럼의 최대값 알아오기 
+	int getGroupnoMax();
+
 	
 
 	

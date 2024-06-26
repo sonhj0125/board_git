@@ -494,6 +494,18 @@ public class BoardDAO_imple implements BoardDAO {
 		return mapList;
 		
 	} // end of public List<Map<String, String>> select_seoul_bicycle_rental
+
+
+
+	// === # 165. tbl_board 테이블에서 groupno 컬럼의 최대값 알아오기 === //
+	@Override
+	public int getGroupnoMax() {
+		
+		int maxgrouno = sqlsession.selectOne("board.getGroupnoMax");
+		
+	    return maxgrouno;
+	      
+	} // end of public int getGroupnoMax
 	
 
 

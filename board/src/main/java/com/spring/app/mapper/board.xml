@@ -86,7 +86,7 @@
 
 	<!-- === #47. 로그인 처리하기 === -->
 	<!-- /board/src/main/resources/mybatis/mybatis-config.xml 에서 typeAlias 설정을 해주었기 때문에
-		 resultType에 com.spring.app.board.domain.MemberVO 대신 MemberVO만 작성 가능하다.  -->
+		 resultType에 com.spring.app.board.domain.MemberVO 대신 MemberVO만 작성 가능하다.  
 	<select id="getLoginMember" resultType="MemberVO" parameterType="HashMap">
 		SELECT userid, name, coin, point, pwdchangegap,
 		       NVL(lastlogingap, trunc(months_between(sysdate, registerday))) AS lastlogingap, 
@@ -103,6 +103,31 @@
 		  from tbl_loginhistory 
 		  where fk_userid = #{userid} ) H
 	</select>
+	-->	
+
+	<!--  === #159. 로그인 처리하기 ===
+					먼저, 위의 #47을 주석처리 하고서 아래처럼 한다.
+	 -->
+	<select id="getLoginMember" resultType="MemberVO" parameterType="HashMap">
+		SELECT userid, name, coin, point, pwdchangegap,
+		       NVL(lastlogingap, trunc(months_between(sysdate, registerday))) AS lastlogingap, 
+			   idle, email, mobile, postcode, address, detailaddress, extraaddress,
+			   gradelevel
+		FROM 
+		( select userid, name, coin, point, 
+		         trunc( months_between(sysdate, lastpwdchangedate) ) AS pwdchangegap,
+				 registerday, idle, email, mobile, postcode, address, detailaddress, extraaddress, gradelevel
+		  from tbl_member 
+		  where status = 1 and userid = #{userid} and pwd = #{pwd}
+		) M 
+		CROSS JOIN 
+		( select trunc( months_between(sysdate, max(logindate)) ) as lastlogingap 
+		  from tbl_loginhistory 
+		  where fk_userid = #{userid} ) H
+	</select>
+
+
+
 
 	<!-- === tbl_member 테이블의 idle 컬럽의 값을 1로 변경하기 === -->
 	<update id="updateIdle" parameterType="String">
@@ -118,15 +143,49 @@
 	</insert>
 
 
-	<!-- === #57. 파일첨부가 없는 글쓰기 ===  VO에서 get 다음에 뭐뭐뭐 를 ${}안에 쓰면 됨 근데 컬럼명같이랑 똑같이 해놓음-->
+	<!-- === #57. 파일첨부가 없는 글쓰기 ===  VO에서 get 다음에 뭐뭐뭐 를 ${}안에 쓰면 됨 근데 컬럼명같이랑 똑같이 해놓음
+
+   	<insert id="add" parameterType="boardVO">
+         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
+         values(boardSeq.nextval, #{fk_userid}, #{name}, #{subject}, #{content}, #{pw}, default, default, default)
+   	</insert>
+   	-->
+   	
+   	
+   	
+   <!-- === #167. 원글쓰기 또는 답변글쓰기(파일첨부가 없는 글쓰기)
+           	        먼저 위의 #57.을 주석처리 한 후에 아래처럼 해야 한다. === -->
+   <insert id="add" parameterType="BoardVO">
+      <!-- 원글쓰기인 경우 -->
+      <if test='fk_seq.equals("")'>
+   <!-- <if test='fk_seq == ""'> -->
+         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status, groupno, fk_seq, depthno)
+         values(boardSeq.nextval, #{fk_userid}, #{name}, #{subject}, #{content}, #{pw}, default, default, default, #{groupno}, default, default)
+      </if>
+      
+      <!-- 답변글쓰기인 경우 -->
+      <if test='!fk_seq.equals("")'>
+         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status, groupno, fk_seq, depthno)
+         values(boardSeq.nextval, #{fk_userid}, #{name}, #{subject}, #{content}, #{pw}, default, default, default, #{groupno}, #{fk_seq}, #{depthno}+1)
+      </if>
+   </insert>
+ 
+   	
+   	<!-- === #57. 파일첨부가 없는 글쓰기 ===  VO에서 get 다음에 뭐뭐뭐 를 ${}안에 쓰면 됨 근데 컬럼명같이랑 똑같이 해놓음 
+	
    	<insert id="add" parameterType="boardVO">
          insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
          values(boardSeq.nextval, #{fk_userid}, #{name}, #{subject}, #{content}, #{pw}, default, default, default)
    	</insert>
    	
    	
+   	<insert id="add" parameterType="boardVO">
+         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
+         values(boardSeq.nextval, #{fk_userid}, #{name}, #{subject}, #{content}, #{pw}, default, default, default)
+   	</insert>
    	
-   	<!-- #61. 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기 ===  
+   	
+   	#61. 페이징 처리를 안한, 검색어가 없는 전체 글목록 보여주기 ===  
    	<select id="boardListNoSearch" resultType="BoardVO">
 	   	select seq, fk_userid, name, subject
 	     	 , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
@@ -151,6 +210,7 @@
    	
    	
    	
+
    	<!-- 
    	=== #65. 글 1개 조회하기  ===  
    	<select id="getView" parameterType="HashMap" resultType="BoardVO">
@@ -175,8 +235,8 @@
    	
    	<!-- === #136. 글 1개 조회하기  === 
    			먼저, 위의 #65 을 주석처리한 다음에 아래와 같이 한다.
+    
    	
-   	-->
 	<select id="getView" parameterType="HashMap" resultType="BoardVO">
    		SELECT previousseq, previoussubject, seq, fk_userid, name, subject
      		 , content, readCount, regDate, pw, nextseq, nextsubject 
@@ -209,6 +269,48 @@
 		)V
 		WHERE V.seq = #{seq}
    	</select>   
+	-->
+   	
+   	
+   	
+   	<!-- === #160. (댓글 및 답변글 글쓰기 게시판에서)검색조건이 있을시 글 1개 조회하기  === 
+                먼저, 위의 #136. 을 주석처리한 다음에 아래와 같이 한다.
+      -->
+      <select id="getView" parameterType="HashMap" resultType="BoardVO">
+         SELECT previousseq, previoussubject, seq, fk_userid, name, subject
+               , content, readCount, pw, nextseq, nextsubject , regDate
+               , groupno, fk_seq, depthno
+            FROM
+            (
+                select lag(seq, 1) over( order by seq desc ) AS previousseq         
+                     , lag(subject, 1) over( order by seq desc ) AS previoussubject
+                     , seq, fk_userid, name, subject, content, readCount
+                     , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate, pw
+                     , lead(seq, 1) over( order by seq desc ) AS nextseq       
+                     , lead(subject, 1) over( order by seq desc ) AS nextsubject
+                     , groupno, fk_seq, depthno
+                from tbl_board
+                where status = 1
+               
+               <choose>
+                  <when test='searchType == "subject" and searchWord != ""'>
+                     and lower(subject) like '%'||lower(#{searchWord})||'%'
+                  </when>
+                  <when test='searchType == "content" and searchWord != ""'>
+                     and lower(content) like '%'||lower(#{searchWord})||'%'
+                  </when>
+                  <when test='searchType == "subject_content" and searchWord != ""'>
+                     and (lower(subject) like '%'||lower(#{searchWord})||'%' or lower(content) like '%'||lower(#{searchWord})||'%')
+                  </when>
+                  <when test='searchType == "name" and searchWord != ""'>
+                     and lower(name) like '%'||lower(#{searchWord})||'%'
+                  </when>
+                  <otherwise></otherwise>
+               </choose>
+            )V
+            WHERE V.seq = #{seq}
+      </select>   
+    
    	
    	
    	
@@ -513,8 +615,11 @@
 
 
 
-
-
+	<!-- === #166. tbl_board 테이블에서 groupno 컬럼의 최대값 알아오기 === -->
+	<select id="getGroupnoMax" resultType="int">
+		select nvl(max(groupno), 0)
+		from tbl_board
+	</select>
 
 
 
