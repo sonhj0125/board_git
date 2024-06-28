@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-    
+
 <%
    String ctxPath = request.getContextPath();
     //      /board
@@ -15,11 +15,11 @@
      });
      
      
-     $("input:password[id='pwd']").keydown(function(e){
-        if(e.keyCode == 13) { // 엔터를 했을 경우
-           func_Login();
-        }
-     });
+     $("input#pwd").bind("keyup", function(e){
+         if(e.keyCode == 13) {
+        	 func_Login();
+         }
+      });
      
   });// end of $(document).ready(function(){})--------------
 
@@ -32,14 +32,14 @@
      const pwd = $("input#pwd").val(); 
    
      if(userid.trim()=="") {
-        alert("아이디를 입력하세요!!");
+        alert("아이디를 입력하세요!");
        $("input#userid").val(""); 
        $("input#userid").focus();
        return; // 종료 
      }
    
      if(pwd.trim()=="") {
-       alert("비밀번호를 입력하세요!!");
+       alert("비밀번호를 입력하세요!");
        $("input#pwd").val(""); 
        $("input#pwd").focus();
        return; // 종료 

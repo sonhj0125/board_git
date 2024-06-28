@@ -12,7 +12,7 @@
 <meta charset="UTF-8">
 <title>form 연습2</title>
 
-<script type="text/javascript" src="<%= ctxPath%>/resources/js/jquery-3.7.1.min.js"></script>
+<script type="text/javascript" src="<%=ctxPath%>/resources/js/jquery-3.7.1.min.js"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
 		
@@ -34,7 +34,6 @@
 </head>
 <body>
 	<div>/test/test_form2.action 페이지</div>
-	<br>
 	<form name="testFrm" action="<%= ctxPath%>/test/test_form2.action" method="post"> 
 		번호 : <input type="text" name="no" /><br>
 		성명 : <input type="text" name="name" /><br>

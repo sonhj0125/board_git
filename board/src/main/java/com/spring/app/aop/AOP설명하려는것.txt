@@ -28,10 +28,9 @@ com.spring.yhboard.yjcontroller.ProductController
 
 ===============================================================
 
-Aspect Oriented Programming  (AOP 관심지향프로그래밍)
+Aspect Oriented Programming  (AOP)  ==> 관심 지향 프로그래밍
 
 Object Oriented Programming  (OOP) 
-
 -- 1. 상속성 
 
       객체를 생성할 때 있어서 공통의 속성(필드)및 공통의 기능(메소드)들은 

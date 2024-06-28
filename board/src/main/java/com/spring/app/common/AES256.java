@@ -12,16 +12,13 @@ import javax.crypto.spec.SecretKeySpec;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Component;
 
-// === #43. 양방향 암호화 알고리즘인 AES256 암호화를 지원하는 클래스 생성하기 
-//			(기본생성자가 없으므로 @Component 를 쓰면 오류가 발생한다.
-// 			그래서 servlet-context.xml 파일에 직접 파라미터가 있는 생성자로 bean 등록을 해주어야 한다.) ==== 
-
+//=== #43. 양방향 암호화 알고리즘인 AES256 암호화를 지원하는 클래스 생성하기 
+//	  (기본생성자가 없으므로 @Component 를 쓰면 오류가 발생한다. (NoSuchBeanDefinitionException)
+//	      그래서 servlet-context.xml 파일에 직접 파라미터가 있는 생성자로 bean 등록을 해주어야 한다.) ====
 
 /**
  * 양방향 암호화 알고리즘인 AES256 암호화를 지원하는 클래스
  */
-
-// @Component	// bean으로 올라가지 않음! 기본생성자가 없으면(파라미터가 존재하는 생성자가 있는 경우 기본생성자는 없어진다) 올라가지 않는다..!!
 public class AES256 {
     private String iv;
     private Key keySpec;
@@ -31,7 +28,6 @@ public class AES256 {
      * @param key 암호화/복호화를 위한 키값
      * @throws UnsupportedEncodingException 키값의 길이가 16미만일 경우 발생
      */
-    
     public AES256(String key) throws UnsupportedEncodingException {
         this.iv = key.substring(0, 16);
         byte[] keyBytes = new byte[16]; 

@@ -9,4 +9,3 @@
    <h2 class="my-5">SQL 에러 발생</h2>
    <img src="<%= ctxPath%>/resources/images/error.gif" />
 </div>    
-    

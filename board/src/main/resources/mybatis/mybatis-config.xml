@@ -10,6 +10,5 @@
 		<typeAlias type="com.spring.app.board.domain.CommentVO" alias="CommentVO"/>
 		<typeAlias type="com.spring.app.board.domain.Seoul_bicycle_rental_VO" alias="Seoul_bicycle_rental_VO"/>
 	</typeAliases>
-	
 
 </configuration>

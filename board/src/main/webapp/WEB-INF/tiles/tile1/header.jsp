@@ -4,9 +4,7 @@
 <%@ page import="java.net.InetAddress" %>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%-- 
-<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %> <!-- Spring security taglib을 사용 --> 
---%>
+<%-- taglib prefix="sec" uri="http://www.springframework.org/security/tags" --%> <!-- Spring security taglib을 사용 --> 
 
 <%-- ===== #27. tile1 중 header 페이지 만들기 (#26. 은 실수로 기입하지 않아서 없음) ===== --%> 
 <%
@@ -51,9 +49,9 @@
 		                                     <%-- .text-info 는 글자색으로 청록색임 --%>  
 		        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
 		           <a class="dropdown-item" href="<%= ctxPath %>/index.action">Home</a>
-		           <%-- 
-		           <a class="dropdown-item" href="<%= serverName%><%=ctxPath%>/chatting/multichat.action">웹채팅</a>
-		           --%>   
+		        <%--
+		           <a class="dropdown-item" href="<%= serverName%><%=ctxPath%>/chatting/multichat.action">웹채팅</a>   
+		        --%>
 		        </div>
 		     </li>
 		     
@@ -107,15 +105,15 @@
 		           <a class="dropdown-item" href="<%=ctxPath%>/schedule/scheduleManagement.action">일정관리</a>
 		        </div>
 		     </li>
-		     
-		    <li class="nav-item dropdown">
-            	<a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">공공데이터</a>  
-              	<div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                 	<a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental.action">서울따릉이지도</a>
-                 	<a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental_insert.action">오라클입력및조회</a>
-                 	<a class="dropdown-item" href="<%=ctxPath%>/opendata/korea_tour_api.action">한국관광공사사진</a>
-              	</div>
-       		</li>
+			
+		     <li class="nav-item dropdown">
+	             <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">공공데이터</a>  
+	             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+	                <a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental.action">서울따릉이지도</a>
+	                <a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental_insert.action">오라클입력및조회</a>
+	                <a class="dropdown-item" href="<%=ctxPath%>/opendata/korea_tour_api.action">한국관광공사사진</a>
+	             </div>
+          	 </li>
 		     
 		    <!-- ==== 인터셉터 알아보기 ====  -->
 		    <li class="nav-item dropdown">
@@ -130,18 +128,17 @@
 		        </div>
 		    </li>
 		      
-      		
+      
 			<!-- ==== (#스프링보안14) Spring Security(스프링 보안) 알아보기 ====  -->
-		    
-		    
-		    
-		    
-		    
-		    
+			
+			
+			
+			
+			
      	 </ul>
        </div>
 		
-	  <%-- === #49. 로그인이 성공되어지면 로그인되어진 사용자의 이메일 주소를 출력하기 === --%>
+	   <%-- === #49. 로그인이 성공되면 로그인한 사용자의 이메일 주소를 출력하기 === --%>
 	   <c:if test="${not empty sessionScope.loginuser}">
 		  <div style="float: right; font-size: 9pt;">
 			 <span style="color: navy; font-weight: bold;">${sessionScope.loginuser.email}</span> 님<br>로그인중.. 
@@ -149,13 +146,13 @@
 	   </c:if>
 	   
 	  <%-- ==== (#스프링보안14) Spring Security(스프링 보안) 알아보기 ==== --%>
-	   
-	   
-	   
-	   
-	   
-	   
-		
+	  <%--
+	   <c:if test="${not empty sessionScope.sesMemberinfo}">
+		  <div style="float: right; font-size: 9pt;">
+			 <span style="color: navy; font-weight: bold;">${sessionScope.sesMemberinfo.member_name}</span> 님<br>로그인중.. 
+		  </div>
+	   </c:if> 
+	  --%>
 	</nav>
 	<%-- 상단 네비게이션 끝 --%>
 	
