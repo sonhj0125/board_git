@@ -327,7 +327,7 @@ commit;
 begin
     for i in 1..100 loop
         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
-        values(boardSeq.nextval, 'ejss0125', '손혜정', '손혜정 입니다'||i, '안녕하세요? 손혜정'|| i ||' 입니다.', '1234', default, default, default);
+        values(boardSeq.nextval, 'seoyh', '서영학', '서영학 입니다'||i, '안녕하세요? 서영학'|| i ||' 입니다.', '1234', default, default, default);
     end loop;
 end;
 
@@ -465,7 +465,7 @@ desc tbl_board;
 begin
     for i in 1..100 loop
         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status, groupno)
-        values(boardSeq.nextval, 'ejss0125', '손혜정', '손혜정 입니다'||i, '안녕하세요? 손혜정'|| i ||' 입니다.', '1234', default, default, default, i);
+        values(boardSeq.nextval, 'seoyh', '서영학', '서영학 입니다'||i, '안녕하세요? 서영학'|| i ||' 입니다.', '1234', default, default, default, i);
     end loop;
 end;
 
@@ -542,6 +542,25 @@ select *
 from tbl_board
 order by seq desc;
 
+
+----- **** ==== 댓글쓰기에 파일첨부까지 한 것 ==== **** -----
+alter table tbl_comment
+add fileName varchar2(255); -- WAS(톰캣)에 저장될 파일명(2024070109291535243254235235234.png)
+-- Table TBL_COMMENT이(가) 변경되었습니다.
+
+alter table tbl_comment
+add orgFilename varchar2(255); -- 진짜 파일명(강아지.png)  // 사용자가 파일을 업로드 하거나 파일을 다운로드 할때 사용되어지는 파일명 
+-- Table TBL_COMMENT이(가) 변경되었습니다.
+
+alter table tbl_comment
+add fileSize number;  -- 파일크기
+-- Table TBL_COMMENT이(가) 변경되었습니다.
+
+
+select *
+from tbl_comment
+where parentseq = 215
+order by seq desc;
 
 
 

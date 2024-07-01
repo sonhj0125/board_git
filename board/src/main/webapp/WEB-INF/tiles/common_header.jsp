@@ -170,7 +170,7 @@
 				<c:if test="${not empty sessionScope.loginuser.empimg}">
 					<img style="border-radius: 50%; height:50px; width: 50px;" src="<%=ctxPath%>/resources/images/profile/${sessionScope.loginuser.empimg}" />
 				</c:if>
-				
+								
    			</div>
    			<div class="dropdown-content">
 			    <a href="<%=ctxPath%>/manage/info/viewInfo.on">프로필</a>

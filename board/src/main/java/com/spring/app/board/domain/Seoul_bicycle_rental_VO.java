@@ -2,15 +2,12 @@ package com.spring.app.board.domain;
 
 public class Seoul_bicycle_rental_VO {
 
-	// field
 	private String lendplace_id;
 	private String statn_addr1;
-	private String statn_addr2;
-	private double statn_lat;
+	private String statn_addr2; 
+	private double statn_lat; 
 	private double statn_lnt;
 	
-	
-	// method
 	public String getLendplace_id() {
 		return lendplace_id;
 	}
@@ -49,6 +46,6 @@ public class Seoul_bicycle_rental_VO {
 	
 	public void setStatn_lnt(double statn_lnt) {
 		this.statn_lnt = statn_lnt;
-	}
+	}  
 	
 }

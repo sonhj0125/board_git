@@ -8,23 +8,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping(value = "/emp/*") // /emp/empList.action 과 같이 경로를 다 /emp/ 이하로 설정
+@RequestMapping(value="/emp/*")
 public class EmpController {
-	
-	// service, dao 추가 必
-	
-	@GetMapping("empList.action") // 상단의 RequestMapping 으로 인해 /emp/empList.action 에서 /emp/ 생략 가능
-	public String requiredLogin_empList(HttpServletRequest request, HttpServletResponse response) {
+
+	@GetMapping("empList.action")
+	public String requiredLogin_empList(HttpServletRequest request, HttpServletResponse response) { 
 		
 		return "emp/empList.tiles2";
-		// /WEB-INF/views/tiles2/emp/empList.jsp
-	}
-	
-	
-	@GetMapping("chart.action")
-	public String chart() {
+		//  /WEB-INF/views/tiles2/emp/empList.jsp  페이지를 만들어야 한다.
 		
-		return "";
 	}
+	
+	
+	
+	
 	
 }

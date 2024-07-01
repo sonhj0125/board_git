@@ -272,7 +272,7 @@
     (다중파일업로드가 지원되는 브라우저는 HTML 5를 지원하는 브라우저로서 
      IE10 이상, 크롬, 파이어폭스임)
      
-     attach_photo.js 파일의 38번째줄을 보시면 checkDragAndDropAPI() 함수내에 존재하는
+     attach_photo.js 파일의 44번째줄을 보시면 checkDragAndDropAPI() 함수내에 존재하는
      
      bSupportDragAndDropAPI = false; 를 
      bSupportDragAndDropAPI = true; 으로 변경해주어야 한다.

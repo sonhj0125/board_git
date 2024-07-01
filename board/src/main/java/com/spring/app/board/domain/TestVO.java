@@ -1,13 +1,11 @@
 package com.spring.app.board.domain;
 
 public class TestVO {
-	
-	// field
+
 	private String no;
 	private String name;
 	private String writeday;
 	
-	// method
 	public String getNo() {
 		return no;
 	}

@@ -52,16 +52,15 @@ full distribution on Eclipse 4.16 <== JDK 8.X 을 마지막으로 지원해주�
       ==> Project name(프로젝트명) 입력 : board
           Location 은 자동적으로 Workspace 경로인 C:\NCS\workspace_spring_framework\board 로 잡힌다. 
           Templates: (아래에 내려가서) "Spring MVC Project" 에 클릭하고서 Next 버튼을 클릭한다.
-	
-	 그런데 최근들어(2024년 2월말경) "Spring MVC Project" 이 안보인다. 이것을 보이게 하려면, 아래와 같이 진행한다.
-	 1) STS3 을 종료한다.
-	 2) 탐색기에서 워크스페이스 C:\NCS\workspace_spring_framework 에 들어간다.
-	 3) .metadata ==> .plugins ==> org.springsource.ide.eclipse.commons.content.core 에 https-content.xml 파일을 넣는다.
-	 4) .metadata ==> .sts ==> content ==> org.springframework.templates.mvc-3.2.2 에 org.springframework.templates.mvc-3.2.2.zip 파일을 복사해서 푼다.
-
-	 5) STS3을 시작한다.
-	 6) 다시 처음부터 위의 메뉴 spring legacy project를 시작한다.
-
+          그런데 최근들어(2024년 2월말경) "Spring MVC Project" 이 안 보인다. 
+          이것("Spring MVC Project")을 보이게 하려면 아래와 같이 하면 된다.
+          (1). STS3 을 종료한다. 
+          (2). 탐색기에서 워크스페이스(C:\NCS\workspace_spring_framework)에 들어간다.
+               .metadata ==> .plugins ==> org.springsource.ide.eclipse.commons.content.core ==> 여기가 텅 비어었다. ==> 쌤이 준 https-content.xml 파일을 org.springsource.ide.eclipse.commons.content.core 속에 붙여넣는다.
+          (3). 탐색기에서 워크스페이스(C:\NCS\workspace_spring_framework)에 들어간다.
+               .metadata ==> .sts ==> content ==> org.springframework.templates.mvc-3.2.2 ==> 여기가 텅 비어었다. ==> 쌤이 준 org.springframework.templates.mvc-3.2.2.zip 파일을 복사해서 .metadata\.sts\content\org.springframework.templates.mvc-3.2.2 에 압축을 푼다.
+          (4). STS3 을 시작한다.
+          (5). 다시 처음부터 위의 메뉴 File ==> New ==> Spring Legacy Project 을 시작한다. 
 
       ==> Spring MVC Project requires a download of 16608 byte. Proceed? 대화상자가 나온다 Yes 버튼을 클릭한다. 
       ==> top-level package (기본 패키지명) 입력(3단계 이상 권장. 일반적으로 회사도메인명.컨텍스트명으로 함)
@@ -74,7 +73,7 @@ full distribution on Eclipse 4.16 <== JDK 8.X 을 마지막으로 지원해주�
  6. WAS는 기본으로 설치되는 VMware tc Server Developer Edition v4.1 을 마우스 우클릭하여 삭제한다.
        아래처럼 Tomcat v9.0 Server at localhost 를 설치한다. 
          ▣ 메뉴 Window ==> Preferences ==> Server ==> Runtime Environments ==> VMware tc Server Developer Edition v4.1 을 Remove 한다
-          이어서 Add 를 클릭 ==> Apache Tomcat v9.0 에 클릭 Next ==> Tomcat installation directory 에 톰캣이 설치된 경로인 C:\SW\apache-tomcat-9.0.79 로 설정한다.
+          이어서 Add 를 클릭 ==> Apache Tomcat v9.0 에 클릭 Next ==> Tomcat installation directory 에 톰캣이 설치된 경로인 C:\apache-tomcat-9.0.79 로 설정한다.
           이어서 JRE 는 JDK11 이 설치된 경로인 jdk-11 로 설정하고서 Finish 버튼을 클릭한다.  
      Apply and Close 를 클릭하여 Preferences 창을 닫는다.
     
@@ -271,8 +270,7 @@ full distribution on Eclipse 4.16 <== JDK 8.X 을 마지막으로 지원해주�
 	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
-<!-- Root Context: defines shared resources visible to all other web components -->
-</beans>
+
 ------------------------------------------------------------------------------------------------------------
 
  15. >>>>  /프로젝트명(board)/src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml 파일 수정하기 <<<<<

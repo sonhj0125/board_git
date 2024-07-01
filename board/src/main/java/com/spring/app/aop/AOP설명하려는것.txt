@@ -28,7 +28,7 @@ com.spring.yhboard.yjcontroller.ProductController
 
 ===============================================================
 
-Aspect Oriented Programming  (AOP)  ==> 관심 지향 프로그래밍
+Aspect Oriented Programming  (AOP)
 
 Object Oriented Programming  (OOP) 
 -- 1. 상속성 

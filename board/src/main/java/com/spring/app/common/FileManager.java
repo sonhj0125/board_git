@@ -104,7 +104,7 @@ public class FileManager {
         // 운영체제가 Windows 이라면 File.separator 은 "\" 이고,
         // 운영체제가 UNIX 또는 Linux 이라면 File.separator 은 "/" 이다.
         // 해당경로에 \ 를 더하고 파일명을 더한 경로까지 나타내어준 파일명(문자열)을 만든다. 
-		// pathname 은 예를 들면, C:\NCS\workspace_spring_framework\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\board\resources\files\202406280929331297604752551900.jpg 이다.   
+		// pathname 은 예를 들면, C:\NCS\workspace_spring_framework\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\board\resources\files\20240628092043154731282615400.jpg 이다.   
 		
 		try {
 			if(originalFilename == null || "".equals(originalFilename) ) {
@@ -121,7 +121,6 @@ public class FileManager {
 		
 		
 		try {
-			
 			File file = new File(pathname);
 			// 다운로드 할 파일명(pathname)을 가지고 File 객체를 생성한다. 
 			
@@ -220,8 +219,9 @@ public class FileManager {
 		
 		// 업로드할 경로가 존재하지 않는 경우 폴더를 생성 한다.
 		File dir = new File(path);
-		if(!dir.exists())
+		if(!dir.exists()) {
 			dir.mkdirs();
+		}	
 		
 		String pathname = path + File.separator + newFilename;
 		
@@ -247,50 +247,6 @@ public class FileManager {
 	https://joorang.tistory.com/10 
 	사이트를 참조 하면 잘 된다.
   */
-
-	// 이미지 폭
-	public int getImageWidth(String pathname) {
-	   
-	   int width = -1;
-		
-	   File file = new File(pathname);
-	   
-	   if (! file.exists())
-		   return width;
-		
-	   ParameterBlock pb=new ParameterBlock(); 
-       pb.add(pathname); 
-       
-       RenderedOp rOp=JAI.create("fileload",pb); 
-
-       BufferedImage bi=rOp.getAsBufferedImage(); 
-
-       width = bi.getWidth(); 		
-		
-	   return width;
-	}
-		
-	// 이미지 높이
-	public int getImageHeight(String pathname) {
-	   
-	   int height = -1;
-		
-	   File file = new File(pathname);
-	     
-	   if (! file.exists())
-		   return height;
-		
-	   ParameterBlock pb=new ParameterBlock(); 
-       pb.add(pathname); 
-       
-       RenderedOp rOp=JAI.create("fileload",pb); 
-
-       BufferedImage bi=rOp.getAsBufferedImage(); 
-
-       height = bi.getHeight();		
-		
-	   return height;
-	}	
 	
 	
 }

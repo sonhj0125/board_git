@@ -67,7 +67,7 @@
 		
 		loopshowNowTime();
 		
-//		showWeather();
+	//	showWeather();
 		
 	});// end of $(document).ready(function(){});------------
 	
