@@ -47,7 +47,7 @@
 		     <li class="nav-item dropdown">
 		        <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">인사관리</a>  
 		        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-		           <a class="dropdown-item" href="<%=ctxPath%>/emp/empList.action">직원목록</a>
+		           <a class="dropdown-item" href="<%=ctxPath%>/emp/employeeList.action">직원목록</a>
 		           <a class="dropdown-item" href="<%=ctxPath%>/emp/chart.action">통계차트</a>
 		           <a class="dropdown-item" href="<%=ctxPath%>/emp/mapperInterface/exmaple.action">Mapper Interface예제</a> 
 				   <a class="dropdown-item" href="<%=ctxPath%>/emp/geocoder.action">주소를위경도변경</a>

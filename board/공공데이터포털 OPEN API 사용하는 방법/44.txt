@@ -1,4 +1,4 @@
 
 >> 웹상의 JSON 결과를 파일로 저장시키기 <<
 
-http://apis.data.go.kr/B551011/PhotoGalleryService1/gallerySearchList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&_type=json&keyword=제주&numOfRows=384
+http://apis.data.go.kr/B551011/PhotoGalleryService1/gallerySearchList1?serviceKey=sGD3L5Oc%2BdocgnqeQCPd%2BAc3ZVQ0MlXpc5IXGuLyOZLXDRww4NhSSGO6BKlZ1NyyZfZmCYTBlWErmOxVtuUyzg%3D%3D&MobileOS=ETC&MobileApp=AppTest&_type=json&keyword=제주&numOfRows=384

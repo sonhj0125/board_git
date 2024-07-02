@@ -635,6 +635,72 @@ SELECT A.GU, A.CNT, TO_CHAR( ROUND((A.CNT / B.TOTAL) * 100, 1), '990.0') AS PERC
 FROM A CROSS JOIN (SELECT SUM(CNT) AS TOTAL FROM A) B;
 
 
+select *
+from tbl_comment
+order by seq desc;
+
+
+
+SELECT seq, fk_userid, name, content, regdate
+ , fileName, orgFilename, fileSize
+FROM 
+(
+select row_number() over(order by seq desc) AS rno 
+  , seq, fk_userid, name, content
+  , to_char(regdate, 'yyyy-mm-dd hh24:mi:ss') AS regdate
+  , nvl(fileName, ' ') AS fileName
+  , nvl(orgFilename, ' ') AS orgFilename
+  , nvl(to_char(fileSize), ' ') AS fileSize
+  
+from tbl_comment
+where status = 1 and parentSeq = 204
+order by seq desc
+) V
+WHERE rno BETWEEN 1 AND 2
+
+
+-----------------------------------------------------------------------
+
+-- ***** 사원관리 ***** --
+show user;
+-- USER이(가) "HR"입니다.
+
+select distinct nvl(department_id, -9999) as department_id
+from employees
+order by department_id asc;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

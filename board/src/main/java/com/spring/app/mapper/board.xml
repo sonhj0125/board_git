@@ -660,7 +660,7 @@
 	
 	<!-- === #149. 원게시물에 딸린 댓글내용들을 페이징 처리하기 (Ajax 로 처리) ===  -->
 	<select id="getCommentList_Paging" parameterType="HashMap" resultType="CommentVO">
-	   <!-- 첨부파일이 없는 경우 -->
+	   	<!-- 첨부파일이 없는 경우
 	    SELECT seq, fk_userid, name, content, regdate 
 	    FROM 
 	    (
@@ -671,8 +671,25 @@
 		 where status = 1 and parentSeq = #{parentSeq}
 		 order by seq desc
 	    ) V
+	    WHERE rno BETWEEN #{startRno} AND #{endRno} -->
+	    
+	   	<!-- === #196. 첨부파일이 있는 경우 === -->
+	   	SELECT seq, fk_userid, name, content, regdate
+	   		 , fileName, orgFilename, fileSize
+	    FROM 
+	    (
+	     select row_number() over(order by seq desc) AS rno 
+	          , seq, fk_userid, name, content
+		      , to_char(regdate, 'yyyy-mm-dd hh24:mi:ss') AS regdate
+		      , nvl(fileName, ' ') AS fileName
+		      , nvl(orgFilename, ' ') AS orgFilename
+		      , nvl(to_char(fileSize), ' ') AS fileSize
+		      
+		 from tbl_comment
+		 where status = 1 and parentSeq = #{parentSeq}
+		 order by seq desc
+	    ) V
 	    WHERE rno BETWEEN #{startRno} AND #{endRno}
-	   <!-- 첨부파일이 있는 경우 -->
 	   
 	</select>
 	
@@ -701,7 +718,23 @@
 	</insert>
 	
 	
-	 
+	 	
+	<!-- === #166. tbl_board 테이블에서 groupno 컬럼의 최대값 알아오기 === -->
+	<select id="getGroupnoMax" resultType="int">
+		select nvl(max(groupno), 0)
+		from tbl_board
+	</select>
+	
+	
+	
+	<!-- === #202. 파일첨부가 되어진 댓글 1개에서 서버에 업로드되어진 파일명과 오리지널파일명을 조회해주는 것 === -->
+	<select id="getCommentOne" resultType="CommentVO" parameterType="String">
+		select fileName, orgFilename
+		from tbl_comment
+		where seq = #{seq}
+	</select>
+	
+	
 	
 	<!--  === 서울따릉이 오라클 입력 하기 ===  -->
 	<insert id="insert_seoul_bicycle_rental" parameterType="Seoul_bicycle_rental_VO">  
@@ -734,12 +767,7 @@
 		FROM A CROSS JOIN (SELECT SUM(CNT) AS TOTAL FROM A) B
 	</select>
 	
-	
-	<!-- === #166. tbl_board 테이블에서 groupno 컬럼의 최대값 알아오기 === -->
-	<select id="getGroupnoMax" resultType="int">
-		select nvl(max(groupno), 0)
-		from tbl_board
-	</select>
+
 	
 	
 	

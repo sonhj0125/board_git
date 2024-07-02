@@ -348,6 +348,16 @@ public class BoardDAO_imple implements BoardDAO {
 		return n;
 	}
 
+
+	// === #201. 파일첨부가 되어진 댓글 1개에서 서버에 업로드되어진 파일명과 오리지널파일명을 조회해주는 것 === //  
+	@Override
+	public CommentVO getCommentOne(String seq) {
+		
+		CommentVO commentvo = sqlsession.selectOne("board.getCommentOne", seq);
+		return commentvo;
+		
+	} // end of public CommentVO getCommentOne
+
 	
 	
 	

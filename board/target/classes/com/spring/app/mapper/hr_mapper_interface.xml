@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ==== #29. mapper 기본설정 ==== -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<!-- === #206. SqlSessionTemplate(myBatis 3.0 이전 버전)을 사용하지 않는 Mapper Interface(myBatis 3.0 이상 버전 부터 사용가능함) 예제 === -->
+<!--           매퍼.xml 파일이 DAO인터페이스를 구현하는 DAO클래스의 역할을 대신해준다.  
+               namespace는 DAO인터페이스명으로 해야 한다. -->
+<mapper namespace="com.spring.app.employees.model.EmpDAO">
+
+	<select id="deptIdList" resultType="String">
+		select distinct nvl(department_id, -9999) as department_id
+		from employees
+		order by department_id asc
+	</select>
+	<!-- 각 쿼리문 태그에 id 값에 수행 내용이 일치하는 메소드가 참조할수 있도록  
+	     com.spring.app.employees.model.EmpDAO 인터페이스에 선언된 추상메소드의 메소드명과 동일한 문자열로 기입해야 한다. -->	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

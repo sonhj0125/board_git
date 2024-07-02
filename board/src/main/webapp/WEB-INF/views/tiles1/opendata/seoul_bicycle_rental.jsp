@@ -40,7 +40,7 @@
 <%-- 
    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=발급받은 APP KEY(JavaScript 키)를 넣으시면 됩니다."></script> 
 --%>
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=자기AppKey입력"></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=a76ee334caf87a1587c2f7fcd7b84570"></script>
 
  <script type="text/javascript">
     $(document).ready(function(){

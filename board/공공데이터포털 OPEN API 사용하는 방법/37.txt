@@ -1,6 +1,6 @@
 ※제목을“이태원거리”로조회 (한페이지에1개씩, 첫페이지를 조회)
 
-http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&title=%EC%9D%B4%ED%83%9C%EC%9B%90%EA%B1%B0%EB%A6%AC&numOfRows=1&pageNo=1
+http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=sGD3L5Oc%2BdocgnqeQCPd%2BAc3ZVQ0MlXpc5IXGuLyOZLXDRww4NhSSGO6BKlZ1NyyZfZmCYTBlWErmOxVtuUyzg%3D%3D&MobileOS=ETC&MobileApp=AppTest&title=%EC%9D%B4%ED%83%9C%EC%9B%90%EA%B1%B0%EB%A6%AC&numOfRows=1&pageNo=1
 
 
 http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=공공데이터포털에서발급받은(Encoding)일반인증키&MobileOS=ETC&MobileApp=AppTest&title=%EC%9D%B4%ED%83%9C%EC%9B%90%EA%B1%B0%EB%A6%AC&numOfRows=60

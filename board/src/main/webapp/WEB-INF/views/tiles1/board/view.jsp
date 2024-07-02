@@ -339,8 +339,12 @@
 				 ,"currentShowPageNo":currentShowPageNo},
 			dataType:"json",
 			success:function(json){
-				console.log(JSON.stringify(json));
-				// [{"name":"서영학","regdate":"2024-06-21 12:19:41","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"23","content":"열두번째 댓글 입니다"},{"name":"서영학","regdate":"2024-06-21 12:19:30","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"22","content":"열한번째 댓글 입니다"},{"name":"서영학","regdate":"2024-06-21 12:19:24","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"21","content":"열번째 댓글 입니다"},{"name":"서영학","regdate":"2024-06-21 12:19:16","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"20","content":"아홉번째 댓글 입니다"},{"name":"서영학","regdate":"2024-06-21 12:19:10","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"19","content":"여덟번째 댓글 입니다"}] 
+				
+				// console.log(JSON.stringify(json));
+				// 첨부파일 기능이 없는 경우 [{"name":"서영학","regdate":"2024-06-21 12:19:41","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"23","content":"열두번째 댓글 입니다"},{"name":"서영학","regdate":"2024-06-21 12:19:30","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"22","content":"열한번째 댓글 입니다"},{"name":"서영학","regdate":"2024-06-21 12:19:24","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"21","content":"열번째 댓글 입니다"},{"name":"서영학","regdate":"2024-06-21 12:19:16","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"20","content":"아홉번째 댓글 입니다"},{"name":"서영학","regdate":"2024-06-21 12:19:10","totalCount":12,"sizePerPage":5,"fk_userid":"seoyh","seq":"19","content":"여덟번째 댓글 입니다"}] 
+				// 첨부파일 기능이 있는 경우 [{"fileName":"202407011242351568385607668800.png","fileSize":"1543703","name":"엄정화","regdate":"2024-07-01 12:42:35","totalCount":2,"sizePerPage":5,"fk_userid":"eomjh","seq":"2","content":"하하하하하하","orgFilename":"스크린샷 2024-03-07 120026.png"},{"fileName":"202407011241081568299183452200.png","fileSize":"2439096","name":"엄정화","regdate":"2024-07-01 12:41:08","totalCount":2,"sizePerPage":5,"fk_userid":"eomjh","seq":"1","content":"하하","orgFilename":"스크린샷 2024-03-07 120008.png"}]
+				// 또는 []
+				
 				
 				let v_html = "";
 				if(json.length > 0){
@@ -375,6 +379,24 @@
 					  --%>
 						
 						 v_html += "<td>"+item.content+"</td>";
+						 
+						 <%-- === #198. 첨부파일 기능이 추가된 경우 시작 === --%>
+						 if(${sessionScope.loginuser != null}){
+							 v_html += "<td><a href='<%=ctxPath%>/downloadComment.action?seq="+item.seq+"'>"+item.orgFilename+"</a></td>";
+						 }
+						 else {
+							 v_html += "<td>"+item.orgFilename+"</td>";
+						 }
+						 
+						 if(item.fileSize.trim() == ""){
+							 v_html += "<td></td>";
+						 }
+						 else {
+							 v_html += "<td>"+Number(item.fileSize).toLocaleString('en')+"</td>";
+						 }
+						 
+						 <%-- === 첨부파일 기능이 추가된 경우 끝 === --%>
+						 
 				    	 v_html += "<td class='comment'>"+item.name+"</td>";
 				    	 v_html += "<td class='comment'>"+item.regdate+"</td>";
 				    		
@@ -713,6 +735,12 @@
 			   <tr>
 				  <th style="width: 6%">순번</th>
 				  <th style="text-align: center;">내용</th>
+				  
+				  <%-- === 댓글쓰기에 첨부파일이 있는 경우 시작 === --%>
+				  <th style="width:10%;">첨부파일</th>
+				  <th style="width:8%;">bytes</th>
+				  <%-- === 댓글쓰기에 첨부파일이 있는 경우 끝 === --%>
+				  
 				  <th style="width: 8%; text-align: center;">작성자</th>
 				  <th style="width: 12%; text-align: center;">작성일자</th>
 				  <th style="width: 12%; text-align: center;">수정/삭제</th>

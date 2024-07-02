@@ -86,10 +86,10 @@
            
            const choice = $("select#choice").val();
            if(choice == "keyword"){
-        	   url_address = "http://apis.data.go.kr/B551011/PhotoGalleryService1/gallerySearchList1?serviceKey=자기인증키입력&MobileOS=ETC&MobileApp=AppTest&_type=json&keyword="+encodeVal+"&numOfRows=20&pageNo="+pageNo;  
+        	   url_address = "http://apis.data.go.kr/B551011/PhotoGalleryService1/gallerySearchList1?serviceKey=sGD3L5Oc%2BdocgnqeQCPd%2BAc3ZVQ0MlXpc5IXGuLyOZLXDRww4NhSSGO6BKlZ1NyyZfZmCYTBlWErmOxVtuUyzg%3D%3D&MobileOS=ETC&MobileApp=AppTest&_type=json&keyword="+encodeVal+"&numOfRows=20&pageNo="+pageNo;  
            }
            else if(choice == "title"){
-        	   url_address = "http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=자기인증키입력&MobileOS=ETC&MobileApp=AppTest&_type=json&title="+encodeVal+"&numOfRows=20&pageNo="+pageNo;    
+        	   url_address = "http://apis.data.go.kr/B551011/PhotoGalleryService1/galleryDetailList1?serviceKey=sGD3L5Oc%2BdocgnqeQCPd%2BAc3ZVQ0MlXpc5IXGuLyOZLXDRww4NhSSGO6BKlZ1NyyZfZmCYTBlWErmOxVtuUyzg%3D%3D&MobileOS=ETC&MobileApp=AppTest&_type=json&title="+encodeVal+"&numOfRows=20&pageNo="+pageNo;    
            }
             
            $.ajax({

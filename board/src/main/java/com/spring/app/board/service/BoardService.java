@@ -96,12 +96,16 @@ public interface BoardService {
 	// 글쓰기(파일첨부가 있는 글쓰기) 
 	int add_withFile(BoardVO boardvo);
 	
+	// 파일첨부가 되어진 댓글 1개에서 서버에 업로드되어진 파일명과 오리지널파일명을 조회해주는 것  
+	CommentVO getCommentOne(String seq);
 	
 	// === 서울따릉이 오라클 입력 하기 === //
 	int insert_seoul_bicycle_rental(Seoul_bicycle_rental_VO vo);
 
 	// === 서울따릉이 오라클 조회 하기 === //
 	List<Map<String, String>> select_seoul_bicycle_rental();
+
+
 
 	 
 

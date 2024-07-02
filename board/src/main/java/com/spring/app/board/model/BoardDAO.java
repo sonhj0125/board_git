@@ -110,6 +110,9 @@ public interface BoardDAO {
 	// 글쓰기(첨부파일이 있는 경우)
 	int add_withFile(BoardVO boardvo);
 
+	// 파일첨부가 되어진 댓글 1개에서 서버에 업로드되어진 파일명과 오리지널파일명을 조회해주는 것  
+	CommentVO getCommentOne(String seq);
+
 	
 
 	

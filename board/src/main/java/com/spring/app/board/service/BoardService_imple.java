@@ -538,7 +538,20 @@ public class BoardService_imple implements BoardService {
 		
 		int n = dao.add_withFile(boardvo); // 첨부파일이 있는 경우 
 		return n;
-	}
+		
+	} // end of public int add_withFile
+	
+	
+
+	// === #200. 파일첨부가 되어진 댓글 1개에서 서버에 업로드되어진 파일명과 오리지널파일명을 조회해주는 것  === //
+	@Override
+	public CommentVO getCommentOne(String seq) {
+		
+		CommentVO commentvo = dao.getCommentOne(seq);
+		
+		return commentvo;
+		
+	} // end of public CommentVO getCommentOne
 
 
 	
