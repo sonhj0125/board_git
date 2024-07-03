@@ -670,10 +670,15 @@ from employees
 order by department_id asc;
 
 
-
-
-
-
+SELECT E.department_id, D.department_name, E.employee_id, 
+       E.first_name || ' ' || E.last_name AS fullname,
+       to_char(E.hire_date, 'yyyy-mm-dd') AS hire_date,
+       nvl(E.salary + E.salary*E.commission_pct, E.salary) AS monthsal,
+       func_gender(E.jubun) as gender,
+       func_age(E.jubun) as age
+FROM employees E LEFT JOIN departments D
+ON E.department_id = D.department_id
+ORDER BY E.department_id, E.employee_id;
 
 
 

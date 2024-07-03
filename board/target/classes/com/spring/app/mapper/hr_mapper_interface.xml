@@ -17,8 +17,38 @@
 	<!-- 각 쿼리문 태그에 id 값에 수행 내용이 일치하는 메소드가 참조할수 있도록  
 	     com.spring.app.employees.model.EmpDAO 인터페이스에 선언된 추상메소드의 메소드명과 동일한 문자열로 기입해야 한다. -->	
 	
+   <resultMap type="HashMap" id="empDeptMap">
+      <result property="department_id"    column="department_id"       javaType="String" />
+      <result property="department_name"  column="department_name"    javaType="String" />
+      <result property="employee_id"       column="employee_id"       javaType="String" />
+      <result property="fullname"       column="fullname"          javaType="String" />
+      <result property="hire_date"       column="hire_date"          javaType="String" />
+      <result property="monthsal"       column="monthsal"          javaType="String" />
+      <result property="gender"          column="gender"          javaType="String" />
+      <result property="age"             column="age"             javaType="String" />
+   </resultMap>
 	
-	
+	<select id="employeeList" parameterType="HashMap" resultMap="empDeptMap">
+		SELECT E.department_id, D.department_name, E.employee_id, 
+	     	   E.first_name || ' ' || E.last_name AS fullname,
+	       	   to_char(E.hire_date, 'yyyy-mm-dd') AS hire_date,
+	       	   nvl(E.salary + E.salary*E.commission_pct, E.salary) AS monthsal,
+	           func_gender(E.jubun) as gender,
+	           func_age(E.jubun) as age
+		FROM employees E LEFT JOIN departments D
+		ON E.department_id = D.department_id
+		WHERE 1=1
+		<if test="arr_deptId != null">
+			AND nvl(E.department_id, -9999) IN
+			<foreach collection="arr_deptId" index="i" open="(" separator="," close=")">
+				'${arr_deptId[i]}'
+			</foreach>
+		</if>
+		<if test="gender != null">
+			AND func_gender(E.jubun) = #{gender}
+		</if>
+		ORDER BY E.department_id, E.employee_id
+	</select>
 	
 	
 	
