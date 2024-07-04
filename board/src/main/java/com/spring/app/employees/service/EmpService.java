@@ -16,4 +16,7 @@ public interface EmpService {
 	// employees 테이블에서 조건에 만족하는 사원들을 가져와서 Excel 파일로 만들기
 	void employeeList_to_Excel(Map<String, Object> paraMap, Model model);
 
+	// Excel 파일을 업로드 하면 엑셀데이터를 데이터베이스 테이블에 insert 해주는 예제
+	int add_employee_list(List<Map<String, String>> paraMapList);
+
 }

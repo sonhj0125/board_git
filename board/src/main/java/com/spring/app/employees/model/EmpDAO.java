@@ -18,6 +18,7 @@ public interface EmpDAO {
 	// employees 테이블에서 조건에 만족하는 사원들을 가져오기
 	List<Map<String, String>> employeeList(Map<String, Object> paraMap);
 
+
 	
 	
 }

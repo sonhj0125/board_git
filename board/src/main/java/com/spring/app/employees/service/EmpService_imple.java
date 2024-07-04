@@ -22,12 +22,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import com.spring.app.employees.model.EmpDAO;
+import com.spring.app.employees.model2.EmpDAO2;
+
 
 @Service
 public class EmpService_imple implements EmpService {
 
 	@Autowired
 	private EmpDAO dao;
+	
+	@Autowired
+	private EmpDAO2 dao2;
 
 	
 	// employees 테이블에서 근무중인 사원들의 부서번호 가져오기 
@@ -252,6 +257,19 @@ public class EmpService_imple implements EmpService {
         model.addAttribute("workbookName", "HR사원정보");
     	
 	} // end of public void employeeList_to_Excel
+
+
+	
+	
+	// Excel 파일을 업로드 하면 엑셀데이터를 데이터베이스 테이블에 insert 해주는 예제
+	@Override
+	public int add_employee_list(List<Map<String, String>> paraMapList) {
+		
+		int insert_count = dao2.add_employee_list(paraMapList);
+		
+		return insert_count;
+		
+	} // end of public int add_employee_list
 
 	
 	

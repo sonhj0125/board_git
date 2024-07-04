@@ -16,19 +16,19 @@ import org.springframework.web.servlet.view.AbstractView;
   AbstractView 를 이용하여 파일다운로드를 구현한다.
    즉, AbstractView 를 상속받아 파일다운로드를 처리해주는 뷰로 사용될 클래스를 만들어 준다. 
 */
-public class ExcelDownloadView extends AbstractView {
-   
-   @Override
-   protected void renderMergedOutputModel( Map<String, Object> model, 
-                                 		   HttpServletRequest request,
-                                 		   HttpServletResponse response) throws Exception { 
-      
-      Locale locale = (Locale) model.get("locale");             // 넘겨받은 모델(다운로드되어질 엑셀파일의 정보)
+public class ExcelDownloadView extends AbstractView { 
+	
+	@Override
+	protected void renderMergedOutputModel(	Map<String, Object> model, 
+											HttpServletRequest request,
+											HttpServletResponse response) throws Exception { 
+		
+		Locale locale = (Locale) model.get("locale");             // 넘겨받은 모델(다운로드되어질 엑셀파일의 정보)
         // Locale 클래스는 지역의 [언어][나라] 등의 정보를 담고 있는 클래스이다. 
-      
-      String workbookName = (String) model.get("workbookName"); // 넘겨받은 모델(다운로드되어질 엑셀파일의 정보)
-      
-      // 엑셀파일로 다운로드시 다운로드 되어지는 파일 이름의 중복을 피하기 위해 현재시간을 이용해서 파일 이름에 추가하도록 한다.
+		
+		String workbookName = (String) model.get("workbookName"); // 넘겨받은 모델(다운로드되어질 엑셀파일의 정보)
+		
+		// 엑셀파일로 다운로드시 다운로드 되어지는 파일 이름의 중복을 피하기 위해 현재시간을 이용해서 파일 이름에 추가하도록 한다.
         java.util.Date now = new java.util.Date();
         SimpleDateFormat dayformat = new SimpleDateFormat("yyyyMMdd", locale);
         SimpleDateFormat hourformat = new SimpleDateFormat("hhmmss", locale);
@@ -36,7 +36,7 @@ public class ExcelDownloadView extends AbstractView {
         String hour = hourformat.format(now);
         String fileName = workbookName + "_" + day + "_" + hour + ".xlsx";         
         
-        // === 여기서부터는 각 브라우저에 따른 파일이름 인코딩작업이다. 시작 === //
+        // 여기서부터는 각 브라우저에 따른 파일이름 인코딩작업이다.
         String browser = request.getHeader("User-Agent");
         if (browser.indexOf("MSIE") > -1) {
             fileName = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
@@ -62,7 +62,6 @@ public class ExcelDownloadView extends AbstractView {
         } else {
              fileName = "\"" + new String(fileName.getBytes("UTF-8"), "8859_1")+ "\"";
         }
-        // === 여기서부터는 각 브라우저에 따른 파일이름 인코딩작업이다. 끝 === //
         
         response.setContentType("application/download;charset=utf-8");
         // 임의의 파일 다운로드 형식은 utf-8 문자코드로 사용한다.
@@ -91,7 +90,7 @@ public class ExcelDownloadView extends AbstractView {
             // 바이트(bytes)를 출력하기 위해서는 ServletOutputStream 을 사용하고
             // 문자(character data)를 출력하기 위한 PrintWriter 를 사용한다.
             
-            workbook.write(ost); // !!! 엑셀파일생성 !!!
+            workbook.write(ost); // 엑셀파일생성
        } catch (Exception e) {
            e.printStackTrace();
        } finally {
@@ -114,6 +113,6 @@ public class ExcelDownloadView extends AbstractView {
            }
        }
         
-   }// end of protected void renderMergedOutputModel(   Map<String, Object> model,   HttpServletRequest request,   HttpServletResponse response) throws Exception------------------
+	}
 
 }

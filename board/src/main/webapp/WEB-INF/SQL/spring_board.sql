@@ -681,7 +681,7 @@ ON E.department_id = D.department_id
 ORDER BY E.department_id, E.employee_id;
 
 
-
+desc employees;
 
 
 

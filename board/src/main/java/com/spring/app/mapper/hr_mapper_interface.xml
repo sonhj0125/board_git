@@ -29,7 +29,9 @@
    </resultMap>
 	
 	<select id="employeeList" parameterType="HashMap" resultMap="empDeptMap">
-		SELECT E.department_id, D.department_name, E.employee_id, 
+		SELECT nvl(to_char(E.department_id), ' ') AS department_id, 
+			   nvl(D.department_name, ' ') AS department_name, 
+			   E.employee_id, 
 	     	   E.first_name || ' ' || E.last_name AS fullname,
 	       	   to_char(E.hire_date, 'yyyy-mm-dd') AS hire_date,
 	       	   nvl(E.salary + E.salary*E.commission_pct, E.salary) AS monthsal,

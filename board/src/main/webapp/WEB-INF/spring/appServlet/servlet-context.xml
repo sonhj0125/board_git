@@ -46,7 +46,7 @@
 	       <beans:bean id="excelDownloadView" class="com.spring.app.excel.ExcelDownloadView"/>
        	 	그리하여 com.spring.excel.ExcelDownloadView 클래스가 실행된다.    
 	                
-	                  컨트롤러에서 view단 매핑시 jsp 파일로 매핑되지 않고, 해당 객체로 바로 매핑해주기 위해서는 
+	                컨트롤러에서 view단 매핑시 jsp 파일로 매핑되지 않고, 해당 객체로 바로 매핑해주기 위해서는 
 	       servlet-context.xml 에서 BeanNameViewResolver 를 빈즈로 등록해주어야 한다.
        	       여기서 중요한것은 BeanNameViewResolver 빈즈의 순서가 InternalResourceViewResolver 보다 우선 이어야한다는 것이다.
 	      

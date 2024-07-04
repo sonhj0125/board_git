@@ -11,5 +11,13 @@
 		insert into spring_exam(no, name, address, writeday)
 		values(2001, '엄정화', '서울시 마포구', default)
 	</insert>
+	
+	
+	<!-- === #213. Excel 파일을 업로드 하면 엑셀데이터를 데이터베이스 테이블에 insert 해주는 예제 === -->
+	<insert id="add_employee" parameterType="HashMap">
+		insert into employees(employee_id, first_name, last_name, email, phone_number, hire_date, job_id, salary, commission_pct, manager_id, department_id, jubun)
+		values(to_number(#{employee_id}), #{first_name}, #{last_name}, #{email}, #{phone_number}, to_date(#{hire_date}, 'yyyy-mm-dd'), #{job_id}, to_number(#{salary}), to_number(#{commission_pct}), to_number(#{manager_id}), to_number(#{department_id}), #{jubun})
+	</insert>
+	
 
 </mapper>
