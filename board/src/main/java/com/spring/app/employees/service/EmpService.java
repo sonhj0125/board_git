@@ -19,4 +19,7 @@ public interface EmpService {
 	// Excel 파일을 업로드 하면 엑셀데이터를 데이터베이스 테이블에 insert 해주는 예제
 	int add_employee_list(List<Map<String, String>> paraMapList);
 
+	// 인사관리 페이지에 접속한 이후에, 인사관리 페이지에 접속한 페이지URL, 사용자ID, 접속IP주소, 접속시간을 기록으로 DB에 tbl_empManger_accessTime 테이블에 insert 하도록 한다.
+	void insert_accessTime(Map<String, String> paraMap);
+
 }

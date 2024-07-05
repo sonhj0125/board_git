@@ -8,7 +8,9 @@
 		<typeAlias type="com.spring.app.board.domain.MemberVO" alias="MemberVO"/>    
 		<typeAlias type="com.spring.app.board.domain.BoardVO" alias="BoardVO"/>
 		<typeAlias type="com.spring.app.board.domain.CommentVO" alias="CommentVO"/>
-		<typeAlias type="com.spring.app.board.domain.Seoul_bicycle_rental_VO" alias="Seoul_bicycle_rental_VO"/>    
+		<typeAlias type="com.spring.app.board.domain.Seoul_bicycle_rental_VO" alias="Seoul_bicycle_rental_VO"/>
+		<typeAlias type="com.spring.app.schedule.domain.Calendar_small_category_VO" alias="Calendar_small_category_VO"/>
+		<typeAlias type="com.spring.app.schedule.domain.Calendar_schedule_VO" alias="Calendar_schedule_VO"/>    
 	</typeAliases>
 
 </configuration> 

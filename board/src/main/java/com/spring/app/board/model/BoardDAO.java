@@ -3,12 +3,15 @@ package com.spring.app.board.model;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.spring.app.board.domain.BoardVO;
 import com.spring.app.board.domain.CommentVO;
 import com.spring.app.board.domain.MemberVO;
 import com.spring.app.board.domain.Seoul_bicycle_rental_VO;
 import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
+import com.spring.app.employees.model2.EmpDAO2;
 
 public interface BoardDAO {
 
@@ -112,6 +115,9 @@ public interface BoardDAO {
 
 	// 파일첨부가 되어진 댓글 1개에서 서버에 업로드되어진 파일명과 오리지널파일명을 조회해주는 것  
 	CommentVO getCommentOne(String seq);
+
+	// 인사관리 페이지에 접속한 이후에, 인사관리 페이지에 접속한 페이지URL, 사용자ID, 접속IP주소, 접속시간을 기록으로 DB에 tbl_empManger_accessTime 테이블에 insert 하도록 한다.
+	void insert_accessTime(Map<String, String> paraMap);
 
 	
 

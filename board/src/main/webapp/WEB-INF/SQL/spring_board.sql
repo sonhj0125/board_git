@@ -659,6 +659,211 @@ order by seq desc
 WHERE rno BETWEEN 1 AND 2
 
 
+
+---- **** Arround Advice 를 위해서 만든 테이블 **** ----
+show user;
+-- USER이(가) "MYMVC_USER"입니다.
+
+/*
+drop table tbl_empManger_accessTime purge;
+drop sequence seq_seqAccessTime;
+*/
+
+create table tbl_empManger_accessTime
+(seqAccessTime   number
+,pageUrl         varchar2(150) not null
+,fk_userid       varchar2(40) not null
+,clientIP        varchar2(30) not null
+,accessTime      varchar2(20) default sysdate not null
+,constraint PK_tbl_empManger_accessTime primary key(seqAccessTime)
+,constraint FK_tbl_empManger_accessTime foreign key(fk_userid) references tbl_member(userid)
+);
+-- Table TBL_EMPMANGER_ACCESSTIME이(가) 생성되었습니다.
+
+create sequence seq_seqAccessTime
+start with 1
+increment by 1
+nomaxvalue
+nominvalue
+nocycle
+nocache;
+-- Sequence SEQ_SEQACCESSTIME이(가) 생성되었습니다.
+
+select * 
+from tbl_empManger_accessTime
+order by seqAccessTime desc;
+
+
+SELECT case 
+         when instr(PAGEURL, 'employeeList.action', 1, 1) > 0 then '직원목록' 
+         when instr(PAGEURL, 'chart.action', 1, 1) > 0   then '통계차트'
+         else '기타'
+       end AS PAGENAME
+     , name     
+     , CNT
+FROM 
+(
+    SELECT M.name, A.pageurl, A.cnt 
+    FROM 
+    (
+        select NVL(substr(pageurl, 1, instr(pageurl, '?', 1, 1)-1), pageurl) AS PAGEURL 
+             , fk_userid
+             , count(*) AS CNT 
+        from tbl_empManger_accessTime
+        group by NVL(substr(pageurl, 1, instr(pageurl, '?', 1, 1)-1), pageurl), fk_userid 
+    ) A JOIN tbl_member M
+    ON A.fk_userid = M.userid
+) V
+ORDER BY 1, 2;
+
+
+
+
+------------- >>>>>>>> 일정관리(풀캘린더) 시작 <<<<<<<< -------------
+show user;
+-- USER이(가) "MYMVC_USER"입니다.
+
+-- *** 캘린더 대분류(내캘린더, 사내캘린더  분류) ***
+create table tbl_calendar_large_category 
+(lgcatgono   number(3) not null      -- 캘린더 대분류 번호
+,lgcatgoname varchar2(50) not null   -- 캘린더 대분류 명
+,constraint PK_tbl_calendar_large_category primary key(lgcatgono)
+);
+-- Table TBL_CALENDAR_LARGE_CATEGORY이(가) 생성되었습니다.
+
+insert into tbl_calendar_large_category(lgcatgono, lgcatgoname)
+values(1, '내캘린더');
+
+insert into tbl_calendar_large_category(lgcatgono, lgcatgoname)
+values(2, '사내캘린더');
+
+commit;
+-- 커밋 완료.
+
+select * 
+from tbl_calendar_large_category;
+
+
+-- *** 캘린더 소분류 *** 
+-- (예: 내캘린더중 점심약속, 내캘린더중 저녁약속, 내캘린더중 운동, 내캘린더중 휴가, 내캘린더중 여행, 내캘린더중 출장 등등) 
+-- (예: 사내캘린더중 플젝주제선정, 사내캘린더중 플젝요구사항, 사내캘린더중 DB모델링, 사내캘린더중 플젝코딩, 사내캘린더중 PPT작성, 사내캘린더중 플젝발표 등등) 
+create table tbl_calendar_small_category 
+(smcatgono    number(8) not null      -- 캘린더 소분류 번호
+,fk_lgcatgono number(3) not null      -- 캘린더 대분류 번호
+,smcatgoname  varchar2(400) not null  -- 캘린더 소분류 명
+,fk_userid    varchar2(40) not null   -- 캘린더 소분류 작성자 유저아이디
+,constraint PK_tbl_calendar_small_category primary key(smcatgono)
+,constraint FK_small_category_fk_lgcatgono foreign key(fk_lgcatgono) 
+            references tbl_calendar_large_category(lgcatgono) on delete cascade
+,constraint FK_small_category_fk_userid foreign key(fk_userid) references tbl_member(userid)            
+);
+-- Table TBL_CALENDAR_SMALL_CATEGORY이(가) 생성되었습니다.
+
+
+create sequence seq_smcatgono
+start with 1
+increment by 1
+nomaxvalue
+nominvalue
+nocycle
+nocache;
+-- Sequence SEQ_SMCATGONO이(가) 생성되었습니다.
+
+
+select *
+from tbl_calendar_small_category
+order by smcatgono desc;
+
+
+-- *** 캘린더 일정 *** 
+create table tbl_calendar_schedule 
+(scheduleno    number                 -- 일정관리 번호
+,startdate     date                   -- 시작일자
+,enddate       date                   -- 종료일자
+,subject       varchar2(400)          -- 제목
+,color         varchar2(50)           -- 색상
+,place         varchar2(200)          -- 장소
+,joinuser      varchar2(4000)         -- 공유자   
+,content       varchar2(4000)         -- 내용   
+,fk_smcatgono  number(8)              -- 캘린더 소분류 번호
+,fk_lgcatgono  number(3)              -- 캘린더 대분류 번호
+,fk_userid     varchar2(40) not null  -- 캘린더 일정 작성자 유저아이디
+,constraint PK_schedule_scheduleno primary key(scheduleno)
+,constraint FK_schedule_fk_smcatgono foreign key(fk_smcatgono) 
+            references tbl_calendar_small_category(smcatgono) on delete cascade
+,constraint FK_schedule_fk_lgcatgono foreign key(fk_lgcatgono) 
+            references tbl_calendar_large_category(lgcatgono) on delete cascade   
+,constraint FK_schedule_fk_userid foreign key(fk_userid) references tbl_member(userid) 
+);
+-- Table TBL_CALENDAR_SCHEDULE이(가) 생성되었습니다.
+
+create sequence seq_scheduleno
+start with 1
+increment by 1
+nomaxvalue
+nominvalue
+nocycle
+nocache;
+-- Sequence SEQ_SCHEDULENO이(가) 생성되었습니다.
+
+select *
+from tbl_calendar_schedule 
+order by scheduleno desc;
+
+
+-- 일정 상세 보기
+select SD.scheduleno
+     , to_char(SD.startdate,'yyyy-mm-dd hh24:mi') as startdate
+     , to_char(SD.enddate,'yyyy-mm-dd hh24:mi') as enddate  
+     , SD.subject
+     , SD.color
+     , nvl(SD.place,'-') as place
+     , nvl(SD.joinuser,'공유자가 없습니다.') as joinuser
+     , nvl(SD.content,'') as content
+     , SD.fk_smcatgono
+     , SD.fk_lgcatgono
+     , SD.fk_userid
+     , M.name
+     , SC.smcatgoname
+from tbl_calendar_schedule SD 
+JOIN tbl_member M
+ON SD.fk_userid = M.userid
+JOIN tbl_calendar_small_category SC
+ON SD.fk_smcatgono = SC.smcatgono
+where SD.scheduleno = 21;
+
+
+insert into tbl_member(userid, pwd, name, email, mobile, postcode, address, detailaddress, extraaddress, gender, birthday, coin, point, registerday, lastpwdchangedate, status, idle, gradelevel)  
+values('leesunsin', '9695b88a59a1610320897fa84cb7e144cc51f2984520efb77111d94b402a8382', '이순신', '2IjrnBPpI++CfWQ7CQhjIw==', 'fCQoIgca24/q72dIoEVMzw==', '15864', '경기 군포시 오금로 15-17', '101동 202호', ' (금정동)', '1', '1995-10-04', 0, 0, default, default, default, default, default);
+-- 1 행 이(가) 삽입되었습니다.
+
+commit;
+
+select *
+from tbl_member
+where name = '이순신';
+
+------------- >>>>>>>> 일정관리(풀캘린더) 끝 <<<<<<<< -------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -----------------------------------------------------------------------
 
 -- ***** 사원관리 ***** --
@@ -683,7 +888,8 @@ ORDER BY E.department_id, E.employee_id;
 
 desc employees;
 
-
+select *
+from employees;
 
 
 

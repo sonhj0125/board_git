@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import com.spring.app.board.model.BoardDAO;
 import com.spring.app.employees.model.EmpDAO;
 import com.spring.app.employees.model2.EmpDAO2;
 
@@ -33,6 +34,9 @@ public class EmpService_imple implements EmpService {
 	
 	@Autowired
 	private EmpDAO2 dao2;
+	
+	@Autowired
+	private BoardDAO dao3;
 
 	
 	// employees 테이블에서 근무중인 사원들의 부서번호 가져오기 
@@ -270,6 +274,16 @@ public class EmpService_imple implements EmpService {
 		return insert_count;
 		
 	} // end of public int add_employee_list
+
+	
+
+	// #216. 인사관리 페이지에 접속한 이후에, 인사관리 페이지에 접속한 페이지URL, 사용자ID, 접속IP주소, 접속시간을 기록으로 DB에 tbl_empManger_accessTime 테이블에 insert 하도록 한다.
+	@Override
+	public void insert_accessTime(Map<String, String> paraMap) {
+		
+		dao3.insert_accessTime(paraMap);
+		
+	} // end of public void insert_accessTime
 
 	
 	

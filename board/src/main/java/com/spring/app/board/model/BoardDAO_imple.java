@@ -359,6 +359,17 @@ public class BoardDAO_imple implements BoardDAO {
 	} // end of public CommentVO getCommentOne
 
 	
+
+	// #217. 인사관리 페이지에 접속한 이후에, 인사관리 페이지에 접속한 페이지URL, 사용자ID, 접속IP주소, 접속시간을 기록으로 DB에 tbl_empManger_accessTime 테이블에 insert 하도록 한다.
+	@Override
+	public void insert_accessTime(Map<String, String> paraMap) {
+		
+		sqlsession.insert("board.insert_accessTime", paraMap);
+		
+		
+	} // end of public void insert_accessTime
+
+	
 	
 	
 	

@@ -51,9 +51,9 @@ public class EmpController {
 	
 	// === #203. 다중 체크박스를 사용시 SQL문에서 in 절을 처리하는 예제 === // 
 	@GetMapping("employeeList.action")
-	public String employeeList(HttpServletRequest request,
-							  @RequestParam(defaultValue = "") String str_deptId,
-							  @RequestParam(defaultValue = "") String gender) {
+	public String empmanager_employeeList(HttpServletRequest request,
+							  			  @RequestParam(defaultValue = "") String str_deptId,
+							  			  @RequestParam(defaultValue = "") String gender) {
 		
 		// employees 테이블에서 근무중인 사원들의 부서번호 가져오기
 		List<String> deptIdList = service.deptIdList();
