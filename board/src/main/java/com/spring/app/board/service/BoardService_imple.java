@@ -398,7 +398,7 @@ public class BoardService_imple implements BoardService {
 		
 		if(n1 == 1) {
 			n2 = dao.updateCommentCount(commentvo.getParentSeq()); // tbl_board 테이블에 commentCount 컬럼이 1증가(update) 
-			System.out.println("~~~~ 확인용 n2 : " + n2);
+			// System.out.println("~~~~ 확인용 n2 : " + n2);
 		}
 		
 		if(n2 == 1) {
