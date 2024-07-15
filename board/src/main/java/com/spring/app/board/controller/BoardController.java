@@ -2299,12 +2299,31 @@ public class BoardController {
 		}
 				
 		return jsonArr.toString();
-	}
+		
+	} // end of public String seoul_bicycle_rental_select
+	
+	
+	
+	
+	// === #222. (웹채팅관련4) === //
+	@GetMapping("/chatting/multichat.action")
+	public String requiredLogin_multichat(HttpServletRequest request, HttpServletResponse response) {
+		
+		
+		
+		
+		return "chatting/multichat.tiles1";
+		
+	} // end of public String requiredLogin_multichat
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 }
-
-
-
-
-
