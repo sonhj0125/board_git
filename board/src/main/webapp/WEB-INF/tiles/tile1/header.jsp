@@ -18,7 +18,7 @@
     InetAddress inet = InetAddress.getLocalHost();
 //  String serverIP = inet.getHostAddress();
      
- //   System.out.println("serverIP : " + serverIP);
+ // System.out.println("serverIP : " + serverIP);
  // serverIP : 192.168.0.201
 
     String serverIP = "192.168.0.201";

@@ -44,16 +44,16 @@ $(document).ready(function() {
 //  alert("pathname : " + pathname);
     // pathname : /board/chatting/multichat.action
       
-   const appCtx = pathname.substring(0, pathname.lastIndexOf("/")); // "전체 문자열".lastIndexOf("검사할 문자");    
+    const appCtx = pathname.substring(0, pathname.lastIndexOf("/")); // "전체 문자열".lastIndexOf("검사할 문자");    
 //   alert("appCtx : " + appCtx);
    // appCtx : /board/chatting
    
-   const root = url + appCtx;
-//   alert("root : " + root);
-   // root : 192.168.0.202:9099/board/chatting
+    const root = url + appCtx;
+    // alert("root : " + root);
+    // root : 192.168.0.202:9099/board/chatting
    
-   const wsUrl = "ws://" + root + "/multichatstart.action";
-   // 웹소켓통신을 하기 위해서는 http:// 을 사용하는 것이 아니라 ws:// 을 사용해야 한다.
+    const wsUrl = "ws://" + root + "/multichatstart.action";
+    // 웹소켓통신을 하기 위해서는 http:// 을 사용하는 것이 아니라 ws:// 을 사용해야 한다.
     // "/multichatstart.action" 에 대한 것은 /WEB-INF/spring/config/websocketContext.xml 파일에 있는 내용이다. 
     
     const websocket = new WebSocket(wsUrl);
@@ -105,8 +105,7 @@ $(document).ready(function() {
    websocket.onmessage = function(event) {
       
       // event.data 는 수신된 메시지이다. 즉, 지금은 「김다영 관리자 엄정화 」이다.
-      if(event.data.substr(0,1) == "「" && 
-         event.data.substr(event.data.length-1) == "」") {
+      if(event.data.substr(0,1) == "「" && event.data.substr(event.data.length-1) == "」") {
          
          $("div#connectingUserList").html(event.data);
          
@@ -212,7 +211,42 @@ $(document).ready(function() {
     });
     ////////////////////////////////////////////////////
     
+ 	// 귀속말대화끊기 버튼은 처음에는 보이지 않도록 한다.
+    $("button#btnAllDialog").hide();
     
+    // 아래는 귓속말을 위해서 대화를 나누는 상대방의 이름을 클릭하면 상대방이름의 웹소켓id 를 알아와서 input태그인 귓속말대상웹소켓.getId()에 입력하도록 하는 것.
+    
+    $(document).on("click", "span.loginuserName", function(){
+       /* span.loginuserName 은 
+          com.spring.chatting.websockethandler.WebsocketEchoHandler 의 
+          public void handleTextMessage(WebSocketSession wsession, TextMessage message) 메소드내에
+          166번 라인에 기재해두었음.
+       */
+       
+       const ws_id = $(this).prev().text();
+    // alert(ws_id);
+       $("input#to").val(ws_id); 
+        
+       $("span#privateWho").text($(this).text());
+       $("button#btnAllDialog").show(); // 귀속말대화끊기 버튼 보이기 
+        $("input#message").css({'background-color':'black', 'color':'white'});
+        $("input#message").attr("placeholder","귀속말 메시지 내용");
+        
+        isOnlyOneDialog = true; // 귀속말 대화임을 지정 
+    });  
+    
+    
+    // 귀속말대화끊기 버튼을 클릭한 경우에는 전체대상으로 채팅하겠다는 말이다.
+    $("button#btnAllDialog").click(function(){
+       
+       $("input#to").val("");
+       $("span#privateWho").text("");
+       $("input#message").css({'background-color':'', 'color':''});
+       $("input#message").attr("placeholder","메시지 내용");
+       $(this).hide();
+       
+       isOnlyOneDialog = false; // 귀속말 대화가 아닌 모두에게 공개되는 대화임을 지정.
+    });
     
 
 }); // end of $(document).ready(function() {}) --------------------

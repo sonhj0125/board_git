@@ -14,6 +14,15 @@
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.6.6</org.slf4j-version>
 		<org.apache.tiles-version>3.0.7</org.apache.tiles-version> <!-- ===== #9. Spring 프레임워크 버전 4.x 이상시  tiles 관련 추가하기 ===== -->
+		
+		
+		<!-- =====#228. 채팅관련10  몽고디비(mongodb) : 버전을 변경할 경우 확인 해야함 ===== -->
+		<org.mongodb-version>3.12.10</org.mongodb-version>
+		<org.spring-data-commons-version>2.5.6</org.spring-data-commons-version>
+		<org.spring-data-mongodb-version>3.2.6</org.spring-data-mongodb-version>
+		
+		
+		
 	</properties>
 	
 	<!-- ===== #1. 네이버 스마트 에디터에서 사진첨부 관련하여 이미지의 크기를 구하기위한 라이브러리 다운받는곳 =====  -->
@@ -439,6 +448,24 @@
           <scope>provided</scope>
       </dependency>
 		        
+		        
+	  <!-- ===== #229. 채팅관련11  몽고디비(mongodb) ===== -->
+      <dependency>
+         <groupId>org.mongodb</groupId>
+         <artifactId>mongo-java-driver</artifactId>
+         <version>${org.mongodb-version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.data</groupId>
+         <artifactId>spring-data-commons</artifactId>
+         <version>${org.spring-data-commons-version}</version>
+      </dependency>      
+      <dependency>
+         <groupId>org.springframework.data</groupId>
+         <artifactId>spring-data-mongodb</artifactId>
+         <version>${org.spring-data-mongodb-version}</version>
+      </dependency>	   
+      
 	</dependencies>
     <build>
         <plugins>
