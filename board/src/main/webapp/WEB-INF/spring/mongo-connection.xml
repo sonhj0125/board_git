@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 
-<!--  === #230. 채팅관련12 === -->
+<!-- === #230. 웹채팅관련12 === -->
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:context="http://www.springframework.org/schema/context"
@@ -10,7 +10,7 @@
 		http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-3.0.xsd">
 
 	<!-- 몽고디비 환경 설정 -->
-	<!-- 	
+	<!--
 	<mongo:mongo-client id="mongoClient" host="localhost" port="27017" credentials="id:password@database"/>
 	-->
 	<mongo:mongo-client id="mongoClient" host="localhost" port="27017"/>

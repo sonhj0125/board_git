@@ -197,7 +197,7 @@ $(document).ready(function(){
         
     var calendar = new FullCalendar.Calendar(calendarEl, {
 	 // === 구글캘린더를 이용하여 대한민국 공휴일 표시하기 시작 === //
-     //	googleCalendarApiKey : "자신의 Google API KEY 입력 AIzaSyCnshXA11IE9ZloR9Rcmmg_zW_8pzIpVEA",
+     //	googleCalendarApiKey : "자신의 Google API KEY 입력",
         /*
             >> 자신의 Google API KEY 을 만드는 방법 <<
             1. 먼저 크롬 웹브라우저를 띄우고, 자신의 구글 계정으로 로그인 한다.
@@ -220,7 +220,7 @@ $(document).ready(function(){
                Google Workspace --> Google Calendar API 를 클릭한다.
                "사용" 버튼을 클릭한다. 
         */
-    	googleCalendarApiKey : "AIzaSyCnshXA11IE9ZloR9Rcmmg_zW_8pzIpVEA",
+    	googleCalendarApiKey : "AIzaSyASM5hq3PTF2dNRmliR_rXpjqNqC-6aPbQ",
         eventSources :[ 
             {
             //  googleCalendarId : '대한민국의 휴일 캘린더 통합 캘린더 ID'

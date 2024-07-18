@@ -15,31 +15,21 @@ public class EmpDAO2_imple implements EmpDAO2 {
 	@Qualifier("sqlsession_2")
 	private SqlSessionTemplate sql;
 
-
-	// === #213. Excel 파일을 업로드 하면 엑셀데이터를 데이터베이스 테이블에 insert 해주는 예제 === // 
+	
+	// === #213. Excel 파일을 업로드하면 엑셀 데이터를 데이터베이스 테이블에 insert 해주는 예제 ===
 	@Override
-	public int add_employee_list(List<Map<String, String>> paraMapList) {
+	public int add_employeeList(List<Map<String, String>> paraMapList) {
 		
 		int insert_count = 0;
 		
-		for( Map<String, String> paraMap : paraMapList ) {
+		for(Map<String, String> paraMap : paraMapList) {
 			
 			int n = sql.insert("hr.add_employee", paraMap);
-			insert_count += n;
 			
-		} // end of for
+			insert_count += n;
+		}
 		
 		return insert_count;
-		
-	} // end of public int add_employeeList
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	}
 	
 }

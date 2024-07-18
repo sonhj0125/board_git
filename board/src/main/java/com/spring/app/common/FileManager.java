@@ -104,7 +104,7 @@ public class FileManager {
         // 운영체제가 Windows 이라면 File.separator 은 "\" 이고,
         // 운영체제가 UNIX 또는 Linux 이라면 File.separator 은 "/" 이다.
         // 해당경로에 \ 를 더하고 파일명을 더한 경로까지 나타내어준 파일명(문자열)을 만든다. 
-		// pathname 은 예를 들면, C:\NCS\workspace_spring_framework\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\board\resources\files\20240628092043154731282615400.jpg 이다.   
+		// pathname 은 예를 들면, C:\NCS\workspace_spring_framework\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\board\resources\files\20231124124825759362098213700.pdf 이다.   
 		
 		try {
 			if(originalFilename == null || "".equals(originalFilename) ) {
@@ -137,7 +137,7 @@ public class FileManager {
 				// "Content-Disposition" 속성을 이용하여 해당 패킷이 어떤 형식의 데이터인지 알 수 있게 해주어야 한다.
 				// 즉, 여기서 하는 작업의 내용물은 파일이 첨부된 것이므로 "attachment"로 설정하고 있다. 
 				// 이는 첨부파일을 의미하며, 첨부된 파일명을 알려주어야 한다. 
-		
+				
 				byte[] readByte = new byte[4096];
 				// 다운로드할 파일의 내용을 읽어오는 단위크기를 4096 byte로 하는 byte 배열 readByte 를 생성한다. 
 				
@@ -219,9 +219,8 @@ public class FileManager {
 		
 		// 업로드할 경로가 존재하지 않는 경우 폴더를 생성 한다.
 		File dir = new File(path);
-		if(!dir.exists()) {
+		if(!dir.exists())
 			dir.mkdirs();
-		}	
 		
 		String pathname = path + File.separator + newFilename;
 		
@@ -247,6 +246,50 @@ public class FileManager {
 	https://joorang.tistory.com/10 
 	사이트를 참조 하면 잘 된다.
   */
+
+	// 이미지 폭
+	public int getImageWidth(String pathname) {
+	   
+	   int width = -1;
+		
+	   File file = new File(pathname);
+	   
+	   if (! file.exists())
+		   return width;
+		
+	   ParameterBlock pb=new ParameterBlock(); 
+       pb.add(pathname); 
+       
+       RenderedOp rOp=JAI.create("fileload",pb); 
+
+       BufferedImage bi=rOp.getAsBufferedImage(); 
+
+       width = bi.getWidth(); 		
+		
+	   return width;
+	}
+		
+	// 이미지 높이
+	public int getImageHeight(String pathname) {
+	   
+	   int height = -1;
+		
+	   File file = new File(pathname);
+	     
+	   if (! file.exists())
+		   return height;
+		
+	   ParameterBlock pb=new ParameterBlock(); 
+       pb.add(pathname); 
+       
+       RenderedOp rOp=JAI.create("fileload",pb); 
+
+       BufferedImage bi=rOp.getAsBufferedImage(); 
+
+       height = bi.getHeight();		
+		
+	   return height;
+	}	
 	
 	
 }

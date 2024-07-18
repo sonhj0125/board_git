@@ -37,6 +37,7 @@ public class Sha256 {
             }
 
             return hexString.toString();
+            
         } catch(Exception e){
             e.printStackTrace();
             throw new RuntimeException();

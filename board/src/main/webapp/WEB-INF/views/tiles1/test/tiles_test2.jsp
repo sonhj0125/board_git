@@ -2,5 +2,5 @@
     pageEncoding="UTF-8"%>
 
 <div class="text-center text-success">
-	<h3>/test/tiles_test2.action 페이지 입니다.</h3>
-</div>    
+   <h3>/test/tiles_test2.action 페이지 입니다.</h3>
+</div>

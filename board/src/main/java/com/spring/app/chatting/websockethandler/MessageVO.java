@@ -45,8 +45,6 @@ public class MessageVO {
 		// gson.fromJson(source, MessageVO.class); 은 
 		// JSON 형태로 되어진 문자열 source를 실제 MessageVO 객체로 변환해준다.
 	
-		gson.toJson(messagevo);
-		
 		return messagevo;
 	}
 	

@@ -8,7 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.stereotype.Component;
 
-// === #231. 웹채팅관련14. 먼저 Mongodb Compass 에서 mydb 속에 chatting 이라는 컬렉션을 만든 후 아래의 작업을 해야한다.
+// === #232. 웹채팅관련14  먼저 Mongodb Compass에서 mydb 속에 chatting이라는 컬렉션을 만든 후 아래의 작업을 해야 한다!!!
 /*
 	@Document 
 	==> Spring Data MongoDB 에서만 사용할 수 있는 어노테이션으로, MongoDB Collection(컬렉션) 에 저장되는 도큐먼트로 사용할 Class 를 지정할 때 사용한다.

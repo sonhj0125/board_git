@@ -15,10 +15,10 @@
     <websocket:handlers>
         <websocket:mapping path="/chatting/multichatstart.action" handler="echoHandler" />
         
-        <!-- websocket:handlers 태그안에서 아래처럼 websocket:handshake-interceptors에
+        <!-- websocket:handlers 태그 안에서 아래처럼 websocket:handshake-interceptors에
              HttpSessionHandshakeInterceptor를 추가해주면
              WebsocketEchoHandler에 접근하기 전에 
-                                먼저 HttpSession에 접근하여 HttpSession에 저장된 값을 읽어 들여 WebsocketEchoHandler에서 사용할 수 있도록 처리해줌. -->
+                        먼저 HttpSession에 접근하여 HttpSession에 저장된 값을 읽어 들여 WebsocketEchoHandler에서 사용할 수 있도록 처리해줌. -->
         <websocket:handshake-interceptors>
    			<beans:bean class="org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor" />
     	</websocket:handshake-interceptors>

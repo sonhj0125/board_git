@@ -68,14 +68,14 @@
 		        </div>
 		     </li>
 		     
-		    <li class="nav-item dropdown">
-		        <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">공공데이터</a>  
-		        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-		           <a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental.action">서울따릉이지도</a>
-		           <a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental_insert.action">오라클입력및조회</a>
-		           <a class="dropdown-item" href="<%=ctxPath%>/opendata/korea_tour_api.action">한국관광공사사진</a>
-		        </div>
-		    </li>
+   		     <li class="nav-item dropdown">
+	             <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">공공데이터</a>  
+	             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+	                <a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental.action">서울따릉이지도</a>
+	                <a class="dropdown-item" href="<%=ctxPath%>/opendata/seoul_bicycle_rental_insert.action">오라클입력및조회</a>
+	                <a class="dropdown-item" href="<%=ctxPath%>/opendata/korea_tour_api.action">한국관광공사사진</a>
+	             </div>
+          	 </li>
 		     
 		    <!-- ==== 인터셉터 알아보기 ====  -->
 		    <li class="nav-item dropdown">
@@ -106,7 +106,7 @@
 
 	<div style="margin: auto; padding: 5px 0 15px 0; width: 80%;">
 		
-		<%-- 광고 캐러젤 시작--%>
+		<%-- 광고 캐러젤 시작 --%>
 		<div id="myCarousel" class="carousel slide" data-ride="carousel">
     	  <!-- Indicators -->
     	  <ol class="carousel-indicators">
@@ -135,7 +135,7 @@
 	         <span class="sr-only">Next</span>
 	      </a>
 	   </div>
-       <%-- 광고 캐러젤 끝--%>
+       <%-- 광고 캐러젤 끝 --%>
       
 	</div>
 	    

@@ -1,4 +1,3 @@
-
 ------ ***** spring 기초 ***** ------
 
 show user;
@@ -14,7 +13,9 @@ create table spring_test
 select *
 from spring_test;
 
------------------------------------------------------------------------------
+
+--------------------------------------------------------
+
 
 show user;
 -- USER이(가) "HR"입니다.
@@ -30,11 +31,12 @@ create table spring_exam
 select *
 from spring_exam;
 
--------------------------------------------------------------
+
+--------------------------------------------------------
+
 
 show user;
 -- USER이(가) "MYMVC_USER"입니다.
-
 
 insert into spring_test(no, name, writeday)
 values(102, '박보영', default);
@@ -44,11 +46,12 @@ values(103, '변우석', default);
 
 commit;
 
-select no, name, to_char(writeday,'yyyy-mm-dd hh24:mi:ss') AS writeday
+select no, name, to_char(writeday, 'yyyy-mm-dd hh24:mi:ss') AS writeday
 from spring_test
 order by no asc;
 
------------------------------------------------------------------------
+
+--------------------------------------------------------
 
 show user;
 -- USER이(가) "MYMVC_USER"입니다.
@@ -82,51 +85,45 @@ from tbl_main_image_product
 order by imgno asc;
 
 
-select *
-from tbl_member;
-
-select *
-from tbl_member
-where userid = 'seoyh' and pwd = '9695b88a59a1610320897fa84cb7e144cc51f2984520efb77111d94b402a8382';
 
 
 --- 로그인 처리 ---
-SELECT userid, name, coin, point, pwdchangegap, 
-	   NVL( lastlogingap, trunc( months_between(sysdate, registerday) ) ) AS lastlogingap,  
-	   idle, email, mobile, postcode, address, detailaddress, extraaddress     
+SELECT userid, name, coin, point, pwdchangegap,
+       NVL(lastlogingap, trunc(months_between(sysdate, registerday))) AS lastlogingap, 
+	   idle, email, mobile, postcode, address, detailaddress, extraaddress 
 FROM 
-	 ( select userid, name, coin, point, 
-			  trunc( months_between(sysdate, lastpwdchangedate) ) AS pwdchangegap,  
-			  registerday, idle, email, mobile, postcode, address, detailaddress, extraaddress   
-	   from tbl_member 
-       where status = 1 and userid = 'eomjh' and pwd = '9695b88a59a1610320897fa84cb7e144cc51f2984520efb77111d94b402a8382' ) M   
+( select userid, name, coin, point, 
+         trunc( months_between(sysdate, lastpwdchangedate) ) AS pwdchangegap,
+		 registerday, idle, email, mobile, postcode, address, detailaddress, extraaddress 
+  from tbl_member 
+  where status = 1 and userid = 'kimdy' and pwd = '9695b88a59a1610320897fa84cb7e144cc51f2984520efb77111d94b402a8382'
+) M 
 CROSS JOIN 
-( select trunc( months_between(sysdate, max(logindate)) ) AS lastlogingap  
+( select trunc( months_between(sysdate, max(logindate)) ) as lastlogingap 
   from tbl_loginhistory 
-  where fk_userid = 'eomjh' ) H;
+  where fk_userid = 'kimdy' ) H;
 
 
-select userid, lastpwdchangedate, status, idle
+
+select userid, lastpwdchangedate, idle,
+       trunc( months_between(sysdate, lastpwdchangedate) ) AS pwdchangegap
 from tbl_member
-where userid in ('seoyh', 'eomjh', 'leess');
-
-select *
-from tbl_loginhistory 
-order by historyno desc;
+where userid in ('kimdy', 'eomjh', 'leess');
 
 
-    ------- **** spring 게시판(답변글쓰기가 없고, 파일첨부도 없는) 글쓰기 **** -------
+
+
+------- **** spring 게시판(답변글쓰기가 없고, 파일첨부도 없는) 글쓰기 **** -------
 
 show user;
 -- USER이(가) "MYMVC_USER"입니다.    
-    
-    
+
 desc tbl_member;
 
 create table tbl_board
 (seq         number                not null    -- 글번호
 ,fk_userid   varchar2(20)          not null    -- 사용자ID
-,name        varchar2(20)          not null    -- 글쓴이 
+,name        varchar2(20)          not null    -- 글쓴이 (제3정규화 위배 : 식별자가 아닌 컬럼이 식별자가 아닌 컬럼에 의존)
 ,subject     Nvarchar2(200)        not null    -- 글제목
 ,content     Nvarchar2(2000)       not null    -- 글내용   -- clob (최대 4GB까지 허용) 
 ,pw          varchar2(20)          not null    -- 글암호
@@ -147,16 +144,6 @@ nominvalue
 nocycle
 nocache;
 
-select *
-from tbl_board
-order by seq desc;
-
-select historyno, fk_userid, 
-       to_char(logindate, 'yyyy-mm-dd hh24:mi:ss') as logindate, clientip
-from tbl_loginhistory
-order by historyno desc;
-
-
 select seq, fk_userid, name, subject
      , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
 from tbl_board
@@ -164,21 +151,32 @@ where status = 1
 order by seq desc;
 
 
-SELECT previousseq, previoussubject
+
+select historyno, fk_userid, to_char(logindate, 'yyyy-mm-dd hh24:mi:ss') as logindate, clientip
+from tbl_loginhistory
+order by historyno desc;
+
+
+
+-- 글 1개 조회하기
+SELECT previouseq, previoussubject
      , seq, fk_userid, name, subject, content, readCount, regDate, pw
      , nextseq, nextsubject
-FROM 
-    (
-      select lag(seq,1) over(order by seq desc) AS previousseq
-           , lag(subject,1) over(order by seq desc) AS previoussubject 
-           , seq, fk_userid, name, subject, content, readCount
-           , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate, pw
-           , lead(seq,1) over(order by seq desc) AS nextseq
-           , lead(subject, 1) over(order by seq desc) AS nextsubject 
-     from tbl_board
-     where status = 1
-    ) V
+FROM
+(
+    select lag(seq, 1) over(order by seq desc) AS previouseq
+        -- lag(seq) 와 같음
+         , lag(subject, 1) over(order by seq desc) AS previoussubject
+         , seq, fk_userid, name, subject, content, readCount
+         , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') as regDate, pw
+         , lead(seq, 1) over(order by seq desc) AS nextseq
+         , lead(subject, 1) over(order by seq desc) AS nextsubject
+    from tbl_board
+    where status = 1
+) V
 WHERE V.seq = 3;
+
+
 
 
 -----------------------------------------------------------------------------
@@ -195,13 +193,13 @@ drop table tbl_board purge;
 create table tbl_board
 (seq           number                not null    -- 글번호
 ,fk_userid     varchar2(20)          not null    -- 사용자ID
-,name          varchar2(20)          not null    -- 글쓴이 
+,name          varchar2(20)          not null    -- 글쓴이 (제3정규화 위배 : 식별자가 아닌 컬럼이 식별자가 아닌 컬럼에 의존)
 ,subject       Nvarchar2(200)        not null    -- 글제목
 ,content       Nvarchar2(2000)       not null    -- 글내용   -- clob (최대 4GB까지 허용) 
 ,pw            varchar2(20)          not null    -- 글암호
 ,readCount     number default 0      not null    -- 글조회수
 ,regDate       date default sysdate  not null    -- 글쓴시간
-,status        number(1) default 1   not null    -- 글삭제여부   1:사용가능한 글,  0:삭제된글
+,status        number(1) default 1   not null    -- 글삭제여부   1:사용가능한 글,  0:삭제된 글
 ,commentCount  number default 0      not null    -- 댓글의 개수
 ,constraint PK_tbl_board_seq primary key(seq)
 ,constraint FK_tbl_board_fk_userid foreign key(fk_userid) references tbl_member(userid)
@@ -221,6 +219,7 @@ nominvalue
 nocycle
 nocache;
 -- Sequence BOARDSEQ이(가) 생성되었습니다.
+
 
 
 ----- **** 댓글 테이블 생성 **** -----
@@ -250,6 +249,7 @@ nocycle
 nocache;
 -- Sequence COMMENTSEQ이(가) 생성되었습니다.
 
+
 select *
 from tbl_comment
 order by seq desc;
@@ -257,6 +257,7 @@ order by seq desc;
 select *
 from tbl_board
 order by seq desc;
+
 
 
 -- ==== Transaction 처리를 위한 시나리오 만들기 ==== --
@@ -276,19 +277,26 @@ alter table tbl_member
 add constraint CK_tbl_member_point check( point between 0 and 300 );
 -- Table TBL_MEMBER이(가) 변경되었습니다.
 
+
 update tbl_member set point = 301
-where userid = 'seoyh';
+where userid = 'kimdy';
 /*
-   오류 보고 -
-   ORA-02290: 체크 제약조건(MYMVC_USER.CK_TBL_MEMBER_POINT)이 위배되었습니다
+    오류 보고 -
+    ORA-02290: 체크 제약조건(MYMVC_USER.CK_TBL_MEMBER_POINT)이 위배되었습니다
 */
 
 update tbl_member set point = 300
-where userid = 'seoyh';
+where userid = 'kimdy';
 -- 1 행 이(가) 업데이트되었습니다.
 
 rollback;
 -- 롤백 완료.
+
+
+
+select *
+from tbl_board
+order by seq desc;
 
 select *
 from tbl_comment;
@@ -299,19 +307,21 @@ order by seq desc;
 
 select userid, point
 from tbl_member
-where userid in ('eomjh','seoyh');
+where userid in ('eomjh','kimdy');
 
-
-select seq, fk_userid, name, content
-     , to_char(regdate, 'yyyy-mm-dd hh24:mi:ss') AS regdate
+-- 원글에 대한 댓글 조회
+select seq, fk_userid, name, content, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
 from tbl_comment
 where status = 1 and parentSeq = 4
 order by seq desc;
 
 
--- ==== 이제는 Transaction 처리를 위한 시나리오 때문에 만들었던 포인트 체크제약을 없애겠다. ==== --
+-- ==== Transaction 처리를 위한 시나리오 때문에 만들었던 포인트 체크 제약을 없애겠다. ==== --
 alter table tbl_member
 drop constraint CK_tbl_member_point;
+-- Table TBL_MEMBER이(가) 변경되었습니다.
+
+
 
 update tbl_board set status = 0
 where seq between 1 and 5;
@@ -323,47 +333,97 @@ where seq between 1 and 5;
 
 commit;
 
+
+
+-- 페이징 처리를 한, 검색이 있는 글 목록 조회하기
+SELECT rno, seq, fk_userid, name, subject
+     , readCount, regDate , commentCount
+FROM
+(
+    select row_number() over(order by seq desc) AS rno
+         , seq, fk_userid, name, subject
+         , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+         , commentCount
+    from tbl_board
+    where status = 1
+    and lower(subject) like '%' || lower('java') || '%'
+ -- and lower(content) like '%' || lower('글내용') || '%'
+ -- and (lower(subject) like '%' || lower('글제목') || '%' or  lower(content) like '%' || lower('글내용') || '%')
+ -- and lower(name) like '%' || lower('글쓴이') || '%'
+) V
+WHERE V.rno between 1 and 10;
+
+
+
+
 -------------------------------------------------------------------------------
+/* 임시로 주석 처리
 begin
     for i in 1..100 loop
         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
-        values(boardSeq.nextval, 'seoyh', '서영학', '서영학 입니다'||i, '안녕하세요? 서영학'|| i ||' 입니다.', '1234', default, default, default);
+        values(boardSeq.nextval, 'kimdy', '김다영', '김다영입니다 '||i, '안녕하세요? 김다영 '|| i ||' 입니다.', '1234', default, default, default);
     end loop;
 end;
 
 begin
     for i in 101..200 loop
         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status)
-        values(boardSeq.nextval, 'eomjh', '엄정화', '엄정화 입니다'||i, '안녕하세요? 엄정화'|| i ||' 입니다.', '1234', default, default, default);
+        values(boardSeq.nextval, 'eomjh', '엄정화', '엄정화입니다 '||i, '안녕하세요? 엄정화 '|| i ||' 입니다.', '1234', default, default, default);
     end loop;
 end;
-
+*/
 commit;
 -- 커밋 완료.
 
 
+
+-- 검색 조건이 있을 시 글 1개 조회하기
 SELECT previousseq, previoussubject
-	 , seq, fk_userid, name, subject, content, readCount, regDate, pw
-	 , nextseq, nextsubject
-FROM 
+     , seq, fk_userid, name, subject, content, readCount, regDate, pw
+     , nextseq, nextsubject
+FROM
 (
- select lag(seq,1) over(order by seq desc) AS previousseq
-      , lag(subject,1) over(order by seq desc) AS previoussubject 
-	  , seq, fk_userid, name, subject, content, readCount
-	  , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate, pw
-	  , lead(seq,1) over(order by seq desc) AS nextseq
-	  , lead(subject, 1) over(order by seq desc) AS nextsubject 
- from tbl_board
- where status = 1
- and lower(subject) like '%'||lower('JaVa')||'%'
+    select lag(seq, 1) over(order by seq desc) AS previousseq
+         , lag(subject, 1) over(order by seq desc) AS previoussubject
+         , seq, fk_userid, name, subject, content, readCount
+         , to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') as regDate, pw
+         , lead(seq, 1) over(order by seq desc) AS nextseq
+         , lead(subject, 1) over(order by seq desc) AS nextsubject
+    from tbl_board
+    where status = 1
+    and lower(subject) like '%' || lower('JavA') || '%'
 ) V
 WHERE V.seq = 14;
+
+
+
+-- 원게시물에 달린 댓글 내용들을 페이징 처리하기
+SELECT seq, fk_userid, name, content, regDate
+FROM
+(
+    select row_number() over(order by seq desc) AS rno
+        , seq, fk_userid, name, content, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+    from tbl_comment
+    where status = 1 and parentSeq = 213
+) V
+where V.rno between 1 and 5;
+
+
+
+
+
+select count(*)
+from tbl_comment
+where status = 1 and parentSeq = 213;
+
+
+
 
 
 ----------------------------------------------------------------------
       ---- **** 댓글 및 답변글 및 파일첨부가 있는 게시판 **** ----
       
---- *** 답변글쓰기는 일반회원은 불가하고 직원(관리파트)들만 답변글쓰기가 가능하도록 한다. *** ---    
+--- *** 답변글쓰기는 일반회원은 불가하고 직원(관리파트)들만 답변글쓰기가 가능하도록 한다. *** ---
 
 --- *** tbl_member(회원) 테이블에 gradelevel 이라는 컬럼을 추가하겠다. *** ---
 alter table tbl_member
@@ -373,7 +433,7 @@ add gradelevel number default 1;
 -- *** 직원(관리자)들에게는 gradelevel 컬럼의 값을 10 으로 부여하겠다. 
 --     gradelevel 컬럼의 값이 10 인 직원들만 답변글쓰기가 가능하다 *** --
 update tbl_member set gradelevel = 10
-where userid in('admin', 'seoyh');
+where userid in('admin', 'kimdy');
 -- 2개 행 이(가) 업데이트되었습니다.
 
 commit;
@@ -419,13 +479,14 @@ create table tbl_board
                                                  -- 답변글이 아닌 원글일 경우 0 을 가지도록 한다.
 
 ,fileName       varchar2(255)                    -- WAS(톰캣)에 저장될 파일명(2024062609291535243254235235234.png)                                       
-,orgFilename    varchar2(255)                    -- 진짜 파일명(강아지.png)  // 사용자가 파일을 업로드 하거나 파일을 다운로드 할때 사용되어지는 파일명 
+,orgFilename    varchar2(255)                    -- 진짜 파일명(강아지.png)  // 사용자가 파일을 업로드 하거나 파일을 다운로드 할 때 사용되는 파일명 
 ,fileSize       number                           -- 파일크기  
 
 ,constraint PK_tbl_board_seq primary key(seq)
 ,constraint FK_tbl_board_fk_userid foreign key(fk_userid) references tbl_member(userid)
 ,constraint CK_tbl_board_status check( status in(0,1) )
 );
+-- Table TBL_BOARD이(가) 생성되었습니다.
 
 create sequence boardSeq
 start with 1
@@ -451,6 +512,7 @@ create table tbl_comment
 ,constraint FK_tbl_comment_parentSeq foreign key(parentSeq) references tbl_board(seq) on delete cascade
 ,constraint CK_tbl_comment_status check( status in(1,0) ) 
 );
+--  Table TBL_COMMENT이(가) 생성되었습니다.
 
 create sequence commentSeq
 start with 1
@@ -460,15 +522,17 @@ nominvalue
 nocycle
 nocache;
 
+
 desc tbl_board;
 
+/* 임시로 주석 처리
 begin
     for i in 1..100 loop
         insert into tbl_board(seq, fk_userid, name, subject, content, pw, readCount, regDate, status, groupno)
-        values(boardSeq.nextval, 'seoyh', '서영학', '서영학 입니다'||i, '안녕하세요? 서영학'|| i ||' 입니다.', '1234', default, default, default, i);
+        values(boardSeq.nextval, 'kimdy', '김다영', '김다영입니다 '||i, '안녕하세요? 김다영'|| i ||'입니다.', '1234', default, default, default, i);
     end loop;
 end;
-
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
 
 begin
     for i in 101..200 loop
@@ -476,8 +540,11 @@ begin
         values(boardSeq.nextval, 'eomjh', '엄정화', '엄정화 입니다'||i, '안녕하세요? 엄정화'|| i ||' 입니다.', '1234', default, default, default, i);
     end loop;
 end;
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+*/
 
 commit;
+-- PL/SQL 프로시저가 성공적으로 완료되었습니다.
 
 select * 
 from tbl_board 
@@ -485,6 +552,7 @@ order by seq desc;
 
 update tbl_board set subject = '문의드립니다. 자바가 뭔가요?'
 where seq = 198;
+-- 1 행 이(가) 업데이트되었습니다.
 
 commit;
 
@@ -493,59 +561,70 @@ from tbl_board
 where seq = 198;
 
 
---- *** 답변형 게시판의 목록보기 *** ---
-SELECT seq, fk_userid, name, subject, readCount, regDate, commentCount 
+
+-- tbl_board 테이블에서 groupno 컬럼의 최대값 알아오기
+select NVL(max(groupno),0) 
+from tbl_board;
+
+
+
+--- *** 답변형 게시판의 글 목록 조회하기 *** ---
+SELECT seq, fk_userid, name, subject, readCount, regDate, commentCount
      , groupno, fk_seq, depthno
 FROM
+(
+    SELECT rownum AS RNO
+         , seq, fk_userid, name, subject, readCount, regDate, commentCount
+         , groupno, fk_seq, depthno
+    FROM
     (
-        SELECT rownum AS RNO
-             , seq, fk_userid, name, subject, readCount, regDate, commentCount
+        select seq, fk_userid, name, subject
+             , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+             , commentCount
              , groupno, fk_seq, depthno
-        FROM 
-        (
-		 select seq, fk_userid, name, subject
-		      , readCount, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate 
-		      , commentCount
-              , groupno, fk_seq, depthno
-		 from tbl_board
-		 where status = 1
-     /*    
-         <choose>
-		   <when test='searchType == "subject" and searchWord != ""'>
-		      and lower(subject) like '%'||lower(#{searchWord})||'%' 
-		   </when>
-		   <when test='searchType == "content" and searchWord != ""'>
-		      and lower(content) like '%'||lower(#{searchWord})||'%' 
-		   </when>
-		   <when test='searchType == "subject_content" and searchWord != ""'>
-		      and (lower(subject) like '%'||lower(#{searchWord})||'%' or lower(content) like '%'||lower(#{searchWord})||'%')  
-		   </when>
-		   <when test='searchType == "name" and searchWord != ""'>
-		      and lower(name) like '%'||lower(#{searchWord})||'%' 
-		   </when>
-		   <otherwise></otherwise>
-		 </choose>
-       */  
-         start with fk_seq = 0
-         connect by prior seq = fk_seq
-         order siblings by groupno desc, seq asc
-         ) V
-    ) T     
+        from tbl_board
+        where status = 1
+    /*
+    <choose>
+        <when test="searchType == 'subject' and searchWord != ''">
+            and lower(subject) like '%' || lower(#{searchWord}) || '%'
+        </when>
+        <when test="searchType == 'content' and searchWord != ''">
+            and lower(content) like '%' || lower(#{searchWord}) || '%'
+        </when>
+        <when test="searchType == 'subject_content' and searchWord != ''">
+            and (lower(subject) like '%' || lower(#{searchWord}) || '%' or 
+                 lower(content) like '%' || lower(#{searchWord}) || '%')
+        </when>
+        <when test="searchType == 'name' and searchWord != ''">
+            and lower(name) like '%' || lower(#{searchWord}) || '%'
+        </when>
+        <otherwise></otherwise>
+    </choose>
+    */
+        start with fk_seq = 0
+        connect by prior seq = fk_seq
+        order siblings by groupno desc, seq asc
+    ) V
+) T  
 WHERE RNO between 1 and 10;
 /*
-   order by 로 정렬할 경우는 select 되어진 모든 데이터를 가지고 정렬을 하는 것이고,
-   order siblings by 각 계층별로 정렬을 하는 것이다. 
-   order by 로만 정렬을 하게 되면 계층구조가 깨질수 있기 때문에 계층구조는 그대로 유지하면서 동일 부모를 가진 자식행들 끼리의 정렬 기준을 주는 것이 order siblings by 이다.
+    order by 로 정렬할 경우는 select 된 모든 데이터를 가지고 정렬을 하는 것이고,
+    order siblings by 각 계층별로 정렬을 하는 것이다.
+    order by 로만 정렬을 하게 되면 계층 구조가 깨질 수 있기 때문에 계층구조는 그대로 유지하면서 동일 부모를 가진 자식 행들끼리의 정렬 기준을 주는 것이 order siblings by 이다.
 */
+
+
 
 select *
 from tbl_board
 order by seq desc;
 
 
+
 ----- **** ==== 댓글쓰기에 파일첨부까지 한 것 ==== **** -----
 alter table tbl_comment
-add fileName varchar2(255); -- WAS(톰캣)에 저장될 파일명(2024070109291535243254235235234.png)
+add fileName varchar2(255); -- WAS(톰캣)에 저장될 파일명(2023112409291535243254235235234.png)
 -- Table TBL_COMMENT이(가) 변경되었습니다.
 
 alter table tbl_comment
@@ -559,12 +638,31 @@ add fileSize number;  -- 파일크기
 
 select *
 from tbl_comment
-where parentseq = 215
+where parentSeq = 212
 order by seq desc;
 
 
 
---->>> 서울시 따릉이대여소 마스터 정보 <<<---
+-- 댓글 정보 가져오기 (commentList.action)
+SELECT seq, fk_userid, name, content, regDate
+     , fileName, orgFilename, fileSize
+FROM
+(
+    select row_number() over(order by seq desc) AS rno
+         , seq, fk_userid, name, content, to_char(regDate, 'yyyy-mm-dd hh24:mi:ss') AS regDate
+         , nvl(fileName, ' ') AS fileName
+         , nvl(orgFilename, ' ') AS orgFilename
+         , nvl(to_char(fileSize), ' ') AS fileSize
+    from tbl_comment
+    where status = 1 and parentSeq = 212
+) V
+where V.rno between 1 and 5;
+
+
+
+
+
+--- 서울시 따릉이대여소 마스터 정보 ---
 create table seoul_bicycle_rental
 (lendplace_id  varchar2(20)
 ,statn_addr1   Nvarchar2(100)
@@ -574,15 +672,15 @@ create table seoul_bicycle_rental
 );
 -- Table SEOUL_BICYCLE_RENTAL이(가) 생성되었습니다.
 
-select *
+
+select count(*)  -- 3296
 from seoul_bicycle_rental;
 
-select count(*)  -- 3296 
-from seoul_bicycle_rental;
+
 
 select statn_addr1
      , instr(statn_addr1, ' ', 1)+1
-     , substr(statn_addr1, instr(statn_addr1, ' ', 1)+1)
+     , substr(statn_addr1, instr(statn_addr1, ' ', 1)+1) -- 문자열에서 최초로 공백이 나올 때 그 다음의 문자열 위치를 알려주는 것(1부터 시작)
      
      , instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)
      , substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1)
@@ -591,15 +689,10 @@ select statn_addr1
 from seoul_bicycle_rental;
 
 
-select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU
-     , lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt   
-from seoul_bicycle_rental;
-
-
 SELECT *
-FROM 
+FROM
 (
-select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU   
+select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU
      , lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt   
 from seoul_bicycle_rental
 ) V
@@ -618,12 +711,13 @@ GROUP BY GU
 ORDER BY CNT DESC;
 
 
+
 WITH A 
 AS (
     SELECT GU, COUNT(*) AS CNT
     FROM 
     (
-    select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU 
+    select substr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), 1, instr(substr(statn_addr1, instr(statn_addr1, ' ', 1)+1), ' ', 1)-1) AS GU
          , lendplace_id, statn_addr1, statn_addr2, statn_lat, statn_lnt   
     from seoul_bicycle_rental
     ) V
@@ -635,28 +729,7 @@ SELECT A.GU, A.CNT, TO_CHAR( ROUND((A.CNT / B.TOTAL) * 100, 1), '990.0') AS PERC
 FROM A CROSS JOIN (SELECT SUM(CNT) AS TOTAL FROM A) B;
 
 
-select *
-from tbl_comment
-order by seq desc;
 
-
-
-SELECT seq, fk_userid, name, content, regdate
- , fileName, orgFilename, fileSize
-FROM 
-(
-select row_number() over(order by seq desc) AS rno 
-  , seq, fk_userid, name, content
-  , to_char(regdate, 'yyyy-mm-dd hh24:mi:ss') AS regdate
-  , nvl(fileName, ' ') AS fileName
-  , nvl(orgFilename, ' ') AS orgFilename
-  , nvl(to_char(fileSize), ' ') AS fileSize
-  
-from tbl_comment
-where status = 1 and parentSeq = 204
-order by seq desc
-) V
-WHERE rno BETWEEN 1 AND 2
 
 
 
@@ -719,9 +792,13 @@ ORDER BY 1, 2;
 
 
 
+
+
 ------------- >>>>>>>> 일정관리(풀캘린더) 시작 <<<<<<<< -------------
+
 show user;
 -- USER이(가) "MYMVC_USER"입니다.
+
 
 -- *** 캘린더 대분류(내캘린더, 사내캘린더  분류) ***
 create table tbl_calendar_large_category 
@@ -850,29 +927,16 @@ where name = '이순신';
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
------------------------------------------------------------------------
-
--- ***** 사원관리 ***** --
+-- ========================================================================= --
+-- ********************** 사원관리 ********************** --
 show user;
 -- USER이(가) "HR"입니다.
 
-select distinct nvl(department_id, -9999) as department_id
+select distinct nvl(department_id, -9999) AS department_id
 from employees
 order by department_id asc;
+
+
 
 
 SELECT E.department_id, D.department_name, E.employee_id, 
@@ -886,31 +950,20 @@ ON E.department_id = D.department_id
 ORDER BY E.department_id, E.employee_id;
 
 
+
+
 desc employees;
 
+
+
 select *
-from employees;
+from employees
+order by employee_id;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+select *
+from tbl_board
+where seq = 212;
 
 
 

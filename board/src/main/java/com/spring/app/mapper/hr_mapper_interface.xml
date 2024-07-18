@@ -3,40 +3,41 @@
 <!-- ==== #29. mapper 기본설정 ==== -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-
-<!-- === #206. SqlSessionTemplate(myBatis 3.0 이전 버전)을 사용하지 않는 Mapper Interface(myBatis 3.0 이상 버전 부터 사용가능함) 예제 === -->
-<!--           매퍼.xml 파일이 DAO인터페이스를 구현하는 DAO클래스의 역할을 대신해준다.  
-               namespace는 DAO인터페이스명으로 해야 한다. -->
+<!--  === #206. SqlSessionTemplate(myBatis 3.0 이전 버전)을 사용하지 않는 Mapper Interface(myBatis 3.0 이상 버전 부터 사용가능함) 예제 === -->
+<!--      매퍼.xml 파일이 DAO인터페이스를 구현하는 DAO클래스의 역할을 대신해준다.
+		  namespace 는 DAO 인터페이스명으로 해야 한다. -->
 <mapper namespace="com.spring.app.employees.model.EmpDAO">
-
-	<select id="deptIdList" resultType="String">
-		select distinct nvl(department_id, -9999) as department_id
+	
+	<select id="deptIdList" resultType="String"> <!-- id는 DAO 인터페이스 안에 있는 메소드명으로 해야 한다. -->
+		select distinct nvl(department_id, -9999) AS department_id
 		from employees
 		order by department_id asc
 	</select>
-	<!-- 각 쿼리문 태그에 id 값에 수행 내용이 일치하는 메소드가 참조할수 있도록  
-	     com.spring.app.employees.model.EmpDAO 인터페이스에 선언된 추상메소드의 메소드명과 동일한 문자열로 기입해야 한다. -->	
+	<!-- 각 쿼리문 태그에 id 값에 수행 내용이 일치하는 메소드가 참조할 수 있도록
+		 com.spring.app.employees.model.EmpDAO 인터페이스에 선언된 추상메소드의 메소드명과 동일한 문자열로 기입해야 한다. -->
 	
-   <resultMap type="HashMap" id="empDeptMap">
-      <result property="department_id"    column="department_id"       javaType="String" />
-      <result property="department_name"  column="department_name"    javaType="String" />
-      <result property="employee_id"       column="employee_id"       javaType="String" />
-      <result property="fullname"       column="fullname"          javaType="String" />
-      <result property="hire_date"       column="hire_date"          javaType="String" />
-      <result property="monthsal"       column="monthsal"          javaType="String" />
-      <result property="gender"          column="gender"          javaType="String" />
-      <result property="age"             column="age"             javaType="String" />
-   </resultMap>
+	
+	<!-- === employees 테이블에서 조건에 만족하는 사원들을 가져오기 === -->
+	<resultMap type="HashMap" id="empDeptMap">
+		<result property="department_id"    column="department_id"       javaType="String" />
+		<result property="department_name"  column="department_name"    javaType="String" />
+		<result property="employee_id"       column="employee_id"       javaType="String" />
+		<result property="fullname"       column="fullname"          javaType="String" />
+		<result property="hire_date"       column="hire_date"          javaType="String" />
+		<result property="monthsal"       column="monthsal"          javaType="String" />
+		<result property="gender"          column="gender"          javaType="String" />
+		<result property="age"             column="age"             javaType="String" />
+	</resultMap>
 	
 	<select id="employeeList" parameterType="HashMap" resultMap="empDeptMap">
-		SELECT nvl(to_char(E.department_id), ' ') AS department_id, 
-			   nvl(D.department_name, ' ') AS department_name, 
+		SELECT nvl(to_char(E.department_id), ' ') AS department_id, <!-- nvl()을 작성하지 않으면 서버에서 클라이언트로 department_id 자체가 넘어가지 않기 때문에 AJAX 처리 시 undefined로 나옴 -->
+			   nvl(D.department_name, ' ') AS department_name,
 			   E.employee_id, 
-	     	   E.first_name || ' ' || E.last_name AS fullname,
-	       	   to_char(E.hire_date, 'yyyy-mm-dd') AS hire_date,
-	       	   nvl(E.salary + E.salary*E.commission_pct, E.salary) AS monthsal,
-	           func_gender(E.jubun) as gender,
-	           func_age(E.jubun) as age
+			   E.first_name || ' ' || E.last_name AS fullname,
+			   to_char(E.hire_date, 'yyyy-mm-dd') AS hire_date,
+			   nvl(E.salary + E.salary*E.commission_pct, E.salary) AS monthsal,
+			   func_gender(E.jubun) as gender,
+			   func_age(E.jubun) as age
 		FROM employees E LEFT JOIN departments D
 		ON E.department_id = D.department_id
 		WHERE 1=1
@@ -53,14 +54,100 @@
 	</select>
 	
 	
+	<!-- === employees 테이블에서 부서명별 인원수 및 퍼센티지 가져오기 === -->
+	<resultMap type="HashMap" id="employeeCntByDeptname_Map">
+		<result property="department_name" column="department_name" javaType="String" />
+		<result property="cnt" column="cnt" javaType="String" />
+		<result property="percentage" column="percentage" javaType="String" />
+	</resultMap>
+   
+	<select id="employeeCntByDeptname" resultMap="employeeCntByDeptname_Map">
+		select NVL(D.department_name, '부서없음') AS department_name
+			 , count(*) AS cnt 
+			 , round(count(*)/(select count(*) from employees) * 100, 2) AS percentage 
+		from employees E left join departments D 
+		on E.department_id = D.department_id 
+		group by D.department_name
+		order by cnt desc, department_name asc
+	</select>
 	
 	
+	<!-- === employees 테이블에서 성별 인원수 및 퍼센티지 가져오기 === -->
+	<resultMap type="HashMap" id="employeeCntByGender_Map">
+		<result property="gender" column="gender" javaType="String" />
+		<result property="cnt" column="cnt" javaType="String" />
+		<result property="percentage" column="percentage" javaType="String" />
+	</resultMap>
+	
+	<select id="employeeCntByGender" resultMap="employeeCntByGender_Map">
+		SELECT gender
+			 , count(*) AS cnt
+			 , round(count(*)/(select count(*) from employees) * 100, 1) AS
+		percentage
+		FROM
+		(
+			select case when substr(jubun, 7, 1) in ('1','3')
+				   then '남' else '여' end AS gender
+			from employees
+		) V
+		GROUP BY gender
+	</select>
 	
 	
+	<!-- === employees 테이블에서 성별 입사년도별 인원수 가져오기 === -->
+	<resultMap type="HashMap" id="employeeCntByGenderHireYear_Map">
+		<result property="gender"    column="gender" javaType="String" />
+		<result property="Y2001"    column="Y2001"    javaType="String" />
+		<result property="Y2002"    column="Y2002"    javaType="String" />
+		<result property="Y2003"    column="Y2003"    javaType="String" />
+		<result property="Y2004"    column="Y2004"    javaType="String" />
+		<result property="Y2005"    column="Y2005"    javaType="String" />
+		<result property="Y2006"    column="Y2006"    javaType="String" />
+		<result property="Y2007"    column="Y2007"    javaType="String" />
+		<result property="Y2008"    column="Y2008"    javaType="String" />
+	</resultMap>
+	
+	<select id="employeeCntByGenderHireYear" resultMap="employeeCntByGenderHireYear_Map">
+		select func_gender(jubun) AS gender 
+		     , sum( decode( extract(year from hire_date), 2001, 1, 0) ) AS "Y2001" <!-- alias에서 숫자가 먼저 나올 경우 무조건!!! 큰따옴표("") 안에 작성 ★ -->
+		     , sum( decode( extract(year from hire_date), 2002, 1, 0) ) AS "Y2002"
+		     , sum( decode( extract(year from hire_date), 2003, 1, 0) ) AS "Y2003"
+		     , sum( decode( extract(year from hire_date), 2004, 1, 0) ) AS "Y2004"
+		     , sum( decode( extract(year from hire_date), 2005, 1, 0) ) AS "Y2005"
+		     , sum( decode( extract(year from hire_date), 2006, 1, 0) ) AS "Y2006"
+		     , sum( decode( extract(year from hire_date), 2007, 1, 0) ) AS "Y2007"
+		     , sum( decode( extract(year from hire_date), 2008, 1, 0) ) AS "Y2008"
+		from employees  
+		group by func_gender(jubun)
+		order by 1
+	</select>
 	
 	
-	
-	
+	<!-- === 특정 부서명에 근무하는 직원들의 성별 인원수 퍼센티지 가져오기 === -->
+	<select id="genderCntSpecialDeptname" parameterType="String" resultMap="employeeCntByGender_Map">
+		SELECT E.gender
+			 , count(*) AS cnt
+			 , ROUND(count(*)/(select count(*) from employees)*100, 2) AS percentage
+		FROM
+		(
+			select department_id
+				 , case when substr(jubun, 7, 1) in ('1','3')
+				   then '남' else '여' end AS gender
+			from employees
+		) E LEFT JOIN departments D
+		ON E.department_id = D.department_id
+		
+		<if test="deptname != '부서없음'">
+			WHERE D.department_name = #{deptname}
+		</if>
+		
+		<if test="deptname == '부서없음'">
+			WHERE D.department_name is null
+		</if>
+		
+		GROUP BY E.gender
+		ORDER BY gender
+	</select>
 	
 	
 	

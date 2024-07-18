@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-// === #232. 웹채팅관련15 === //
+// === #233. 웹채팅관련15 ===
 @Service
 public class ChattingMongoOperations {
 

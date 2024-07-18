@@ -21,14 +21,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.spring.app.board.model.BoardDAO;
 import com.spring.app.employees.model.EmpDAO;
 import com.spring.app.employees.model2.EmpDAO2;
 
-
 @Service
 public class EmpService_imple implements EmpService {
-
+	
 	@Autowired
 	private EmpDAO dao;
 	
@@ -39,36 +41,35 @@ public class EmpService_imple implements EmpService {
 	private BoardDAO dao3;
 
 	
-	// employees 테이블에서 근무중인 사원들의 부서번호 가져오기 
+	// employees 테이블에서 근무중인 사원들의 부서번호 가져오기
 	@Override
 	public List<String> deptIdList() {
 		
 		List<String> deptIdList = dao.deptIdList();
-		return deptIdList;
 		
-	} // end of public List<String> deptIdList
-	
+		return deptIdList;
+	}
 
 	
-   // employees 테이블에서 조건에 만족하는 사원들을 가져오기
-   @Override
-   public List<Map<String, String>> employeeList(Map<String, Object> paraMap) {
-	   
-      List<Map<String, String>> employeeList = dao.employeeList(paraMap);
-      return employeeList;
-      
-   } // end of public List<Map<String, String>> employeeList()
+	// employees 테이블에서 조건에 만족하는 사원들을 가져오기
+	@Override
+	public List<Map<String, String>> employeeList(Map<String, Object> paraMap) {
+
+		List<Map<String, String>> employeeList = dao.employeeList(paraMap);
+		return employeeList;
+
+	} // end of public List<Map<String, String>> employeeList() -----------------
 
 
 	// employees 테이블에서 조건에 만족하는 사원들을 가져와서 Excel 파일로 만들기
 	@Override
 	public void employeeList_to_Excel(Map<String, Object> paraMap, Model model) {
-		
+	
 		// === 조회결과물인 empList 를 가지고 엑셀 시트 생성하기 ===
 	    // 시트를 생성하고, 행을 생성하고, 셀을 생성하고, 셀안에 내용을 넣어주면 된다.
 		SXSSFWorkbook workbook = new SXSSFWorkbook();	// workbook은 엑셀파일을 말함
 		
-		// 시트생성
+		// 시트 생성
 	    SXSSFSheet sheet = workbook.createSheet("HR사원정보");
 		
 	    // 시트 열 너비 설정
@@ -146,16 +147,16 @@ public class EmpService_imple implements EmpService {
         
 	    
 	    // 병합할 행에 "우리회사 사원정보" 로 셀을 만들어 셀에 스타일을 주기
-	    	for(int i=0; i<8; i++) {
+    	for(int i=0; i<8; i++) {
 	    		
-	    		Cell cell = mergeRow.createCell(i);
-	    		
-	    		cell.setCellStyle(mergeRowStyle);
-	    		cell.setCellValue("우리회사 사원정보");
-	    		
-	      }// end of for-------------------------
-	    
-	    
+			Cell cell = mergeRow.createCell(i);
+			
+			cell.setCellStyle(mergeRowStyle);
+			cell.setCellValue("우리회사 사원정보");
+			
+    	}// end of for-------------------------
+    
+    
 	    // 셀 병합하기
 	    sheet.addMergedRegion(new CellRangeAddress(rowLocation, rowLocation, 0, 7)); // 시작 행, 끝 행, 시작 열, 끝 열 
 
@@ -260,40 +261,175 @@ public class EmpService_imple implements EmpService {
         model.addAttribute("workbook", workbook);
         model.addAttribute("workbookName", "HR사원정보");
     	
-	} // end of public void employeeList_to_Excel
+	} // end of public void employeeList_to_Excel(Map<String, Object> paraMap, Model model) ---------------
 
 
-	
-	
-	// Excel 파일을 업로드 하면 엑셀데이터를 데이터베이스 테이블에 insert 해주는 예제
+	// === #212. Excel 파일을 업로드하면 엑셀 데이터를 데이터베이스 테이블에 insert 해주는 예제 ===
 	@Override
-	public int add_employee_list(List<Map<String, String>> paraMapList) {
+	public int add_employeeList(List<Map<String, String>> paraMapList) {
 		
-		int insert_count = dao2.add_employee_list(paraMapList);
+		int insert_count = dao2.add_employeeList(paraMapList);
 		
 		return insert_count;
-		
-	} // end of public int add_employee_list
+	}
 
-	
 
-	// #216. 인사관리 페이지에 접속한 이후에, 인사관리 페이지에 접속한 페이지URL, 사용자ID, 접속IP주소, 접속시간을 기록으로 DB에 tbl_empManger_accessTime 테이블에 insert 하도록 한다.
+	// === #216. 인사관리 페이지에 접속한 이후에, 인사관리 페이지에 접속한 페이지URL, 사용자ID, 접속IP주소, 접속시간을 기록으로 DB에 tbl_empManger_accessTime 테이블에 insert 하도록 한다.
 	@Override
 	public void insert_accessTime(Map<String, String> paraMap) {
 		
 		dao3.insert_accessTime(paraMap);
 		
-	} // end of public void insert_accessTime
+	}
 
 	
+	// employees 테이블에서 부서명별 인원수 및 퍼센티지 가져오기
+	@Override
+	public List<Map<String, String>> employeeCntByDeptname() {
+		
+		List<Map<String, String>> deptnamePercentageList = dao.employeeCntByDeptname();
+		
+		return deptnamePercentageList;
+	}
 	
 	
+	// employees 테이블에서 성별 인원수 및 퍼센티지 가져오기
+	@Override
+	public List<Map<String, String>> employeeCntByGender() {
+		
+		List<Map<String, String>> genderPercentageList = dao.employeeCntByGender();
+		
+		return genderPercentageList;
+	}
 	
-	
-	
-	
-	
-	
+
+	// employees 테이블에서 성별 입사년도별 인원수 가져오기
+	@Override
+	public String employeeCntByGenderHireYear() {
+		
+		List<Map<String, String>> genderHireYearList = dao.employeeCntByGenderHireYear();
+
+		JsonArray jsonArr = new JsonArray(); // []
+
+		for (Map<String, String> map : genderHireYearList) {
+	          JsonObject jsonObj = new JsonObject(); // {} 
+	          jsonObj.addProperty("gender", map.get("gender")); // {"gender":"남"} 
+	          jsonObj.addProperty("Y2001", map.get("Y2001"));   // {"gender":"남","Y2001":"0"}
+	          jsonObj.addProperty("Y2002", map.get("Y2002"));   // {"gender":"남","Y2001":"0","Y2002":"2"}
+	          jsonObj.addProperty("Y2003", map.get("Y2003"));   // {"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4"}
+	          jsonObj.addProperty("Y2004", map.get("Y2004"));   // {"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4","Y2004":"4"}
+	          jsonObj.addProperty("Y2005", map.get("Y2005"));   // {"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4","Y2004":"4","Y2005":"15"}
+	          jsonObj.addProperty("Y2006", map.get("Y2006"));   // {"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4","Y2004":"4","Y2005":"15","Y2006":"17"}
+	          jsonObj.addProperty("Y2007", map.get("Y2007"));   // {"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4","Y2004":"4","Y2005":"15","Y2006":"17","Y2007":"8"}
+	          jsonObj.addProperty("Y2008", map.get("Y2008"));   // {"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4","Y2004":"4","Y2005":"15","Y2006":"17","Y2007":"8","Y2008":"6"} 
+	          
+	          jsonArr.add(jsonObj); // [{"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4","Y2004":"4","Y2005":"15","Y2006":"17","Y2007":"8","Y2008":"6"}]
+		} // end of for-------------------------
+   
+	    /*   
+	       Gson gson = new Gson();
+	       gson.toJson(jsonArr); // "[{"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4","Y2004":"4","Y2005":"15","Y2006":"17","Y2007":"8","Y2008":"6"}]" 
+	       return gson.toJson(jsonArr);  
+	    */   
+		return new Gson().toJson(jsonArr); // "[{"gender":"남","Y2001":"0","Y2002":"2","Y2003":"4","Y2004":"4","Y2005":"15","Y2006":"17","Y2007":"8","Y2008":"6"}]"    
+	}
+
+
+	// 특정 부서명에 근무하는 직원들의 성별 인원수 퍼센티지 가져오기
+	@Override
+	public String genderCntSpecialDeptname(String deptname) {
+		
+		List<Map<String, String>> genderPercentageList = dao.genderCntSpecialDeptname(deptname);
+
+		JsonArray jsonArr = new JsonArray();
+
+		if (genderPercentageList != null && genderPercentageList.size() > 0) {
+			
+			for (Map<String, String> map : genderPercentageList) {
+				
+				JsonObject jsonObj = new JsonObject();
+				jsonObj.addProperty("gender", map.get("gender"));
+				jsonObj.addProperty("cnt", map.get("cnt"));
+				jsonObj.addProperty("percentage", map.get("percentage"));
+
+				jsonArr.add(jsonObj);
+				
+			} // end of for------------------------------
+		}
+
+		return new Gson().toJson(jsonArr);
+	}
+
+
+	// 페이지별 사용자별 접속통계 가져오기
+	@Override
+	public String pageurlUsername() {
+
+		List<Map<String, String>> pageurlUsernameList = dao3.pageurlUsername();
+		/*
+	         map의 키 =>   pagename  name   cnt
+	         map의 값 =>   직원목록      관리자      17
+	         map의 값 =>   직원목록      김다영      97
+	         map의 값 =>   통계차트      관리자      5
+	         map의 값 =>   통계차트      서영학      109
+		*/
+
+		JsonObject jsonObj = new JsonObject(); // {}
+
+		JsonArray categories = new JsonArray(); // []
+		JsonArray series = new JsonArray(); // []
+
+		Gson gson = new Gson();
+
+		for (int i = 0; i < pageurlUsernameList.size(); i++) {
+			if (i == 0) {
+				categories.add(pageurlUsernameList.get(i).get("pagename"));
+			}
+
+			if (i > 0 && !pageurlUsernameList.get(i - 1).get("pagename")
+					.equals(pageurlUsernameList.get(i).get("pagename"))) {
+				categories.add(pageurlUsernameList.get(i).get("pagename"));
+			}
+
+	         /////////////////////////////////////////////////////////////////
+	         
+	         JsonObject sub_jsonObj = new JsonObject(); // {}
+	         
+	         sub_jsonObj.addProperty("name", pageurlUsernameList.get(i).get("name"));
+	         
+	         JsonArray data_jsonArr = new JsonArray(); // []
+	         data_jsonArr.add(pageurlUsernameList.get(i).get("cnt"));
+	         sub_jsonObj.addProperty("data", gson.toJson(data_jsonArr));
+	         
+	         series.add(sub_jsonObj); 
+
+		} // end of for------------------------------------------------------------
+
+	   //   System.out.println("~~~~ 확인용 gson.toJson(categories) => " + gson.toJson(categories));
+	      //  ~~~~ 확인용 gson.toJson(categories) => ["직원목록","통계차트"]
+	            
+	   //   System.out.println("~~~~ 확인용 gson.toJson(series) => " + gson.toJson(series));
+	      /*  ~~~~ 확인용 gson.toJson(series) => [{"name":"관리자","data":"[\"17\"]"}
+	                                           ,{"name":"서영학","data":"[\"97\"]"}
+	                                           ,{"name":"관리자","data":"[\"5\"]"}
+	                                           ,{"name":"서영학","data":"[\"109\"]"}]
+	      */
+	      
+	      jsonObj.addProperty("categories", gson.toJson(categories));
+	      jsonObj.addProperty("series", gson.toJson(series));
+	      
+	   //   System.out.println("~~~~ 확인용 gson.toJson(jsonObj) => " + gson.toJson(jsonObj));
+	      /*
+	       ~~~~ 확인용 gson.toJson(jsonObj) => {"categories":"[\"직원목록\",\"통계차트\"]"
+	                                         ,"series":"[{\"name\":\"관리자\",\"data\":\"[\\\"17\\\"]\"}
+	                                                    ,{\"name\":\"서영학\",\"data\":\"[\\\"97\\\"]\"}
+	                                                    ,{\"name\":\"관리자\",\"data\":\"[\\\"5\\\"]\"}
+	                                                    ,{\"name\":\"서영학\",\"data\":\"[\\\"109\\\"]\"}]"}
+	      */
+	       
+	      return gson.toJson(jsonObj);
+	}
+
 	
 	
 	

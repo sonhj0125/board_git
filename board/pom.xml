@@ -8,32 +8,28 @@
 	<packaging>war</packaging>
 	<version>1.0.0-BUILD-SNAPSHOT</version>
 	<properties>
-		<java-version>11</java-version>
-		<jaxb.version>2.2.11</jaxb.version>  <!-- JDK 1.8 까지는 내장되었던 JAXB를 JDK 11 에서는 내장하고 있지 않기 때문에  JDK 11 에서 제거 되었던 JAXB를 사용할 수 있도록 하는 것. 참고로 2.2.11 버전은 JAXB가 모듈화 되기 직전 최신버전임. --> 
+		<java-version>11</java-version> <!-- JDK 11 용 -->
+		<jaxb.version>2.2.11</jaxb.version>  <!-- JDK 1.8 까지는 내장되었던 JAXB를 JDK 11 에서는 내장하고 있지 않기 때문에  JDK 11 에서 제거 되었던 JAXB를 사용할 수 있도록 하는 것. 참고로 2.2.11 버전은 JAXB가 모듈화 되기 직전 최신버전임. -->
 		<org.springframework-version>5.3.22</org.springframework-version>
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.6.6</org.slf4j-version>
 		<org.apache.tiles-version>3.0.7</org.apache.tiles-version> <!-- ===== #9. Spring 프레임워크 버전 4.x 이상시  tiles 관련 추가하기 ===== -->
 		
-		
-		<!-- =====#228. 채팅관련10  몽고디비(mongodb) : 버전을 변경할 경우 확인 해야함 ===== -->
+		<!-- ===== #228. (웹채팅관련10) 몽고디비(mongodb) : 버전을 변경할 경우 확인해야 함 ===== -->
 		<org.mongodb-version>3.12.10</org.mongodb-version>
 		<org.spring-data-commons-version>2.5.6</org.spring-data-commons-version>
 		<org.spring-data-mongodb-version>3.2.6</org.spring-data-mongodb-version>
-		
-		
-		
 	</properties>
 	
 	<!-- ===== #1. 네이버 스마트 에디터에서 사진첨부 관련하여 이미지의 크기를 구하기위한 라이브러리 다운받는곳 =====  -->
 	<repositories> 
 	    <repository>
-		    <id>osgeo</id>
-		    <name>OSGeo Release Repository</name>
-		    <url>https://repo.osgeo.org/repository/release/</url>
-		    <snapshots><enabled>false</enabled></snapshots>
-		    <releases><enabled>true</enabled></releases>
-  		</repository>
+	       <id>osgeo</id>
+	       <name>OSGeo Release Repository</name>
+	       <url>https://repo.osgeo.org/repository/release/</url>
+	       <snapshots><enabled>false</enabled></snapshots>
+	       <releases><enabled>true</enabled></releases>
+	     </repository>
 	</repositories>
 	
 	<dependencies>
@@ -117,7 +113,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>4.0.1</version> <!-- 다이나믹 웹 모듈 4.0 서블릿 만들기. 전제조건은 Java 1.8 버전 이상과  Servlet API 4.0 버전(servlet-api-4.0.0.jar) 이 있는 Tomcat 9 버전 이상이어야 함 --> 
+			<version>4.0.1</version> <!-- 다이나믹 웹 모듈 4.0 서블릿 만들기. 전제조건은 Java 1.8 버전 이상과  Servlet API 4.0 버전(servlet-api-4.0.0.jar) 이 있는 Tomcat 9 버전 이상이어야 함 -->
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -139,55 +135,57 @@
 			<version>4.7</version>
 			<scope>test</scope>
 		</dependency>
-		
-    <!-- JDK 11 용 시작 -->
-    <!-- JDK 1.8 까지는 내장되었던 JAXB를 JDK 11 에서는 내장하고 있지 않기 때문에  JDK 11 에서 제거 되었던 JAXB를 사용할 수 있도록 하는 것-->
-	    <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-core</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-impl</artifactId>
-            <version>${jaxb.version}</version>
-        </dependency>
-        <dependency>
-	        <groupId>com.sun.activation</groupId>
-            <artifactId>javax.activation</artifactId>
-	        <version>1.2.0</version>
-	    </dependency>
 
-        <!-- 현재 JDK 11 사용중인데, @Resource 어노테이션은 JDK 1.8 까지만 지원되고 그 이후로는 지원이 안되므로 JDK 11 에서 사용하려면 아래와 같이 추가해주어야 한다. -->
-	    <dependency>
-	        <groupId>javax.annotation</groupId>
-	        <artifactId>javax.annotation-api</artifactId>
-	        <version>1.3.1</version>
-	    </dependency>
-   <!-- JDK 11 용 끝 -->
-   
-   <!-- ===== #2. myBatis 관련 jar 추가하기 ===== -->
+		<!-- JDK 11 용 시작 -->
+		<!-- JDK 1.8 까지는 내장되었던 JAXB를 JDK 11 에서는 내장하고 있지 않기 때문에 JDK 11 에서 제거 되었던 
+			JAXB를 사용할 수 있도록 하는 것 -->
 		<dependency>
-    		<groupId>org.springframework</groupId>
-    		<artifactId>spring-orm</artifactId>
-    		<version>${org.springframework-version}</version>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>${jaxb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<version>${jaxb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
+			<version>${jaxb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>javax.activation</artifactId>
+			<version>1.2.0</version>
+		</dependency>
+		
+		<!-- 현재 JDK 11 사용중인데, @Resource 어노테이션은 JDK 1.8 까지만 지원되고 그 이후로는 지원이 되지 않으므로 
+			JDK 11 에서 사용하려면 아래와 같이 추가해주어야 한다. -->
+		<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+		<!-- JDK 11 용 끝 -->
+		
+		<!-- ===== #2. myBatis 관련 jar 추가하기 ===== -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-orm</artifactId>
+		    <version>${org.springframework-version}</version>
 		</dependency>
 		
 		<dependency>
-    		<groupId>org.mybatis</groupId>
-    		<artifactId>mybatis</artifactId>
-    		<version>3.5.11</version>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis</artifactId>
+		    <version>3.5.11</version>
 		</dependency>
-	 	
+		 
 		<dependency>
-    		<groupId>org.mybatis</groupId>
-    		<artifactId>mybatis-spring</artifactId>
-    		<version>2.0.7</version>
+		    <groupId>org.mybatis</groupId>
+		    <artifactId>mybatis-spring</artifactId>
+		    <version>2.0.7</version>
 		</dependency>
 		
 		<!-- https://mvnrepository.com/artifact/com.oracle.database.jdbc/ojdbc8 -->
@@ -197,24 +195,24 @@
 		    <version>18.3.0.0</version>
 		</dependency>
 		
-	  <!-- DBCP2(Data Base Connection Pool)  -->
-      <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-dbcp2</artifactId>
-          <version>2.11.0</version>
-      </dependency>
-      <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-pool2</artifactId>
-          <version>2.12.0</version>
-      </dependency>
-      
-      <!-- ===== #3. dependency aspectjweaver 추가하기 ===== -->
-      <dependency>
-         <groupId>org.aspectj</groupId>
-         <artifactId>aspectjweaver</artifactId>
-         <version>${org.aspectj-version}</version>
-      </dependency>
+		<!-- DBCP2(Data Base Connection Pool)  -->
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-dbcp2</artifactId>
+		    <version>2.11.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-pool2</artifactId>
+		    <version>2.12.0</version>
+		</dependency>
+		
+		<!-- ===== #3. dependency aspectjweaver 추가하기 ===== -->
+		<dependency>
+		   <groupId>org.aspectj</groupId>
+		   <artifactId>aspectjweaver</artifactId>
+		   <version>${org.aspectj-version}</version>
+		</dependency>
       
       <!-- 추가하기 -->
       <!-- CGLib 소개
@@ -242,69 +240,69 @@
          -->
         <!-- ===== #4. AOP 구현시 필요한 프록시객체 생성관련 jar 추가하기 ===== -->
         <!-- (#스프링보안02) Spring Security 어노테이션을 사용하기 위해서는 cglib 가 필요하다. -->
-      <dependency>
-         <groupId>cglib</groupId>
-         <artifactId>cglib</artifactId>
-         <version>3.3.0</version>
-      </dependency>
-      
-      <!-- ===== #5. Spring jdbc 추가 ===== -->
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-jdbc</artifactId>
-         <version>${org.springframework-version}</version>
-      </dependency> 
-      
-      <!-- ===== #6. Spring TX 추가  ===== -->
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-tx</artifactId>
-         <version>${org.springframework-version}</version>
-      </dependency> 
-      
-      <!-- ===== #7. JSON 관련 jar 추가하기 =====  --> 
-      <dependency>
-         <groupId>org.json</groupId>
-         <artifactId>json</artifactId>
-         <version>20220320</version>
-      </dependency>
-      
-      <dependency>
-         <groupId>com.googlecode.json-simple</groupId>
-         <artifactId>json-simple</artifactId>
-         <version>1.1.1</version>
-      </dependency>
-      
-      <!-- =====  #8. JSON 관련 jar 추가하기 =====  -->
-      <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-      <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
-          <version>2.10.0</version> 
-      </dependency>
-      
-      <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-      <dependency>
-          <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
-          <version>2.10.0</version>
-      </dependency>
-      
-      <!-- =====  JSON 관련 jar 추가하기 =====  -->
-      <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-      <dependency>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-          <version>2.9.1</version>
-      </dependency>
-      
-      <!-- ===== #10. tiles 관련 jar 추가하기 ===== -->
-      <dependency>
-         <groupId>org.springframework</groupId>
-         <artifactId>spring-test</artifactId>
-         <version>${org.springframework-version}</version>
-      </dependency>
-      <dependency>
+		<dependency>
+		   <groupId>cglib</groupId>
+		   <artifactId>cglib</artifactId>
+		   <version>3.3.0</version>
+		</dependency>
+		
+		<!-- ===== #5. Spring jdbc 추가 ===== -->
+		<dependency>
+		   <groupId>org.springframework</groupId>
+		   <artifactId>spring-jdbc</artifactId>
+		   <version>${org.springframework-version}</version>
+		</dependency> 
+		
+		<!-- ===== #6. Spring TX 추가  ===== -->
+		<dependency>
+		   <groupId>org.springframework</groupId>
+		   <artifactId>spring-tx</artifactId>
+		   <version>${org.springframework-version}</version>
+		</dependency> 
+		
+		<!-- ===== #7. JSON 관련 jar 추가하기 =====  --> 
+		<dependency>
+		   <groupId>org.json</groupId>
+		   <artifactId>json</artifactId>
+		   <version>20220320</version>
+		</dependency>
+
+       	<dependency>
+     		<groupId>com.googlecode.json-simple</groupId>
+         	<artifactId>json-simple</artifactId>
+         	<version>1.1.1</version>
+      	</dependency>
+
+		<!-- =====  #8. JSON 관련 jar 추가하기 =====  -->
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.10.0</version> 
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>2.10.0</version>
+		</dependency>
+		
+		<!-- =====  JSON 관련 jar 추가하기 =====  -->
+		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+		<dependency>
+		    <groupId>com.google.code.gson</groupId>
+		    <artifactId>gson</artifactId>
+		    <version>2.9.1</version>
+		</dependency>
+		
+		<!-- ===== #10.  tiles 관련 jar 추가하기 ===== -->
+		<dependency>
+		   <groupId>org.springframework</groupId>
+		   <artifactId>spring-test</artifactId>
+		   <version>${org.springframework-version}</version>
+		</dependency>
+		<dependency>
             <groupId>org.apache.tiles</groupId>
             <artifactId>tiles-core</artifactId>
             <version>${org.apache.tiles-version}</version>
@@ -325,147 +323,142 @@
             <version>${org.apache.tiles-version}</version>
         </dependency>
               
-      <!-- ===== #11. 파일업로드 및 다운로드 관련 jar 추가하기 commons-fileupload 와 commons-io ===== -->
-      <!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
-      <dependency>
-          <groupId>commons-fileupload</groupId>
-          <artifactId>commons-fileupload</artifactId>
-          <version>1.5</version>
-      </dependency>
+		<!-- ===== #11. 파일업로드 및 다운로드 관련 jar 추가하기 commons-fileupload 와 commons-io ===== -->
+		<!-- https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
+		<dependency>
+		    <groupId>commons-fileupload</groupId>
+		    <artifactId>commons-fileupload</artifactId>
+		    <version>1.5</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+		    <groupId>commons-io</groupId>
+		    <artifactId>commons-io</artifactId>
+		    <version>2.11.0</version>
+		</dependency>
       
-      <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
-      <dependency>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-          <version>2.11.0</version>
-      </dependency>
+		<!-- 아파치 POI(Apache POI)는 아파치 소프트웨어 재단에서 만든 라이브러리로서 마이크로소프트 오피스파일 포맷을 순수 자바 언어로서 읽고 쓰는 기능을 제공한다. 
+		     주로 워드, 엑셀, 파워포인트와 파일을 지원하며 최근의 오피스 포맷인 Office Open XML File Formats(OOXML, 즉 xml 기반의 *.docx, *.xlsx, *.pptx 등) 이나 아웃룩, 비지오, 퍼블리셔 등으로 지원 파일 포맷을 늘려가고 있다. 
+		    poi-ooxml은 excel 2007이후 버전이며 이때 schemas도 같이 porting을 해줘야 xlsx 파일을 읽어들인다. 
+		    poi는 excel 2007포함한 이전 버전이다.  -->
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas -->
+		
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>5.2.3</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>5.2.3</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
+		<dependency>
+			<groupId>org.apache.xmlbeans</groupId>
+			<artifactId>xmlbeans</artifactId>
+			<version>5.2.0</version>
+		</dependency>
+		
+		<!-- ===== #12. log4j 관련1 jar 추가하기 ===== -->
+		<dependency>
+		   <groupId>org.lazyluke</groupId>
+		   <artifactId>log4jdbc-remix</artifactId>
+		   <version>0.2.7</version>
+		</dependency>
+		
+		<!-- ==== #165.-2 이미지 썸네일 생성 라이브러리인 Thumbnailator 라이브러리 추가하기 ==== -->
+		<dependency>
+		    <groupId>net.coobird</groupId>
+		    <artifactId>thumbnailator</artifactId>
+		    <version>0.4.8</version>
+		</dependency>
+		
+		
+		<!-- === #219. Spring websocket dependency를 에 추가(웹채팅관련1) === -->
+		<dependency>
+		     <groupId>org.springframework</groupId>
+		     <artifactId>spring-websocket</artifactId>
+		     <version>${org.springframework-version}</version>
+		</dependency>
+		
+		
+		<!-- === #220. (웹채팅관련2) Gson 은 Java 객체를 JSON 표현식으로 변환할 수 있게 해주는 Java 라이브러리임. 
+		         또한 거꾸로 JSON 표현식 형태의 String 을 Java 객체로 변환도 가능하게 해주는 라이브러리임.
+		=== -->
+		<dependency>
+		    <groupId>com.google.code.gson</groupId>
+		    <artifactId>gson</artifactId>
+		    <version>2.9.1</version>
+		</dependency>
+		
+		<!-- === e메일 관련 === -->
+		<dependency>
+		    <groupId>javax.activation</groupId>
+		    <artifactId>activation</artifactId>
+		    <version>1.1.1</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.sun.mail</groupId>
+		    <artifactId>javax.mail</artifactId>
+		    <version>1.6.2</version>
+		</dependency>
+		
+		<!-- ===== AES-256을 사용하여 양방향 암호화/복호화 하기 위한 라이브러리 ===== -->
+		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+		<dependency>
+		    <groupId>commons-codec</groupId>
+		    <artifactId>commons-codec</artifactId>
+		    <version>1.16.0</version>
+		</dependency>
+		
+		
+		<!-- ===== 네이버 스마트 에디터에서 사진첨부 관련하여 이미지의 크기를 구하기위한 라이브러리 ===== -->
+		<dependency>
+		    <groupId>javax.media</groupId>
+		    <artifactId>jai_core</artifactId>
+		    <version>1.1.3</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>javax.media</groupId>
+		    <artifactId>jai_codec</artifactId>
+		    <version>1.1.3</version>
+		</dependency>
+		
+		<!-- Lombok(롬복)은 Domain(Entity)클래스(VO 클래스, DTO 클래스) 생성시 
+		        반복되는 getter, setter, toString 등의 메소드 작성 코드를 줄여주는 라이브러리 이다. -->       
+		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<dependency>
+		    <groupId>org.projectlombok</groupId>
+		    <artifactId>lombok</artifactId>
+		    <version>1.18.24</version>
+		    <scope>provided</scope>
+		</dependency>
       
-      <!-- 아파치 POI(Apache POI)는 아파치 소프트웨어 재단에서 만든 라이브러리로서 마이크로소프트 오피스파일 포맷을 순수 자바 언어로서 읽고 쓰는 기능을 제공한다. 
-                          주로 워드, 엑셀, 파워포인트와 파일을 지원하며 최근의 오피스 포맷인 Office Open XML File Formats(OOXML, 즉 xml 기반의 *.docx, *.xlsx, *.pptx 등) 이나 아웃룩, 비지오, 퍼블리셔 등으로 지원 파일 포맷을 늘려가고 있다. 
-           poi-ooxml은 excel 2007이후 버전이며 이때 schemas도 같이 porting을 해줘야 xlsx 파일을 읽어들인다. 
-           poi는 excel 2007포함한 이전 버전이다.  -->
-      <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas -->
-
-      
-      <!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
-      <dependency>
-          <groupId>org.apache.poi</groupId>
-          <artifactId>poi</artifactId>
-          <version>5.2.3</version>
-      </dependency>
-
-
-      <!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
-      <dependency>
-          <groupId>org.apache.poi</groupId>
-          <artifactId>poi-ooxml</artifactId>
-          <version>5.2.3</version>
-      </dependency>
-
-      
-      <!-- https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans -->
-   	  <dependency>
-        <groupId>org.apache.xmlbeans</groupId>
-        <artifactId>xmlbeans</artifactId>
-        <version>5.2.0</version>
-      </dependency>
-      
-      
-      <!-- ===== #12. log4j 관련1 jar 추가하기 ===== -->
-      <dependency>
-         <groupId>org.lazyluke</groupId>
-         <artifactId>log4jdbc-remix</artifactId>
-         <version>0.2.7</version>
-      </dependency>
-      
-      <!-- ==== #165.-2 이미지 썸네일 생성 라이브러리인 Thumbnailator 라이브러리 추가하기 ==== -->
-      <dependency>
-          <groupId>net.coobird</groupId>
-          <artifactId>thumbnailator</artifactId>
-          <version>0.4.8</version>
-      </dependency>
-      
-      
-      <!-- === #191-2. Spring websocket dependency를 에 추가(웹채팅관련1) === -->
-      <dependency>
-           <groupId>org.springframework</groupId>
-           <artifactId>spring-websocket</artifactId>
-           <version>${org.springframework-version}</version>
-      </dependency>
-      
-      
-      <!-- === #192-2. (웹채팅관련2) Gson 은 Java 객체를 JSON 표현식으로 변환할 수 있게 해주는 Java 라이브러리임. 
-               또한 거꾸로 JSON 표현식 형태의 String 을 Java 객체로 변환도 가능하게 해주는 라이브러리임.
-      === -->
-      <dependency>
-          <groupId>com.google.code.gson</groupId>
-          <artifactId>gson</artifactId>
-          <version>2.9.1</version>
-      </dependency>
-      
-      <!-- === e메일 관련 === -->
-      <dependency>
-          <groupId>javax.activation</groupId>
-          <artifactId>activation</artifactId>
-          <version>1.1.1</version>
-      </dependency>
-      
-      <dependency>
-          <groupId>com.sun.mail</groupId>
-          <artifactId>javax.mail</artifactId>
-          <version>1.6.2</version>
-      </dependency>
-      
-      <!-- ===== AES-256을 사용하여 양방향 암호화/복호화 하기 위한 라이브러리 ===== -->
-       <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
-      <dependency>
-          <groupId>commons-codec</groupId>
-          <artifactId>commons-codec</artifactId>
-          <version>1.16.0</version>
-      </dependency>
-      
-      
-      <!-- ===== 네이버 스마트 에디터에서 사진첨부 관련하여 이미지의 크기를 구하기위한 라이브러리 ===== -->
-       <dependency>
-           <groupId>javax.media</groupId>
-           <artifactId>jai_core</artifactId>
-           <version>1.1.3</version>
-       </dependency>
-   
-       <dependency>
-           <groupId>javax.media</groupId>
-           <artifactId>jai_codec</artifactId>
-           <version>1.1.3</version>
-       </dependency>
-       
-      <!-- Lombok(롬복)은 Domain(Entity)클래스(VO 클래스, DTO 클래스) 생성시 
-                             반복되는 getter, setter, toString 등의 메소드 작성 코드를 줄여주는 라이브러리 이다. -->       
-      <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-      <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.24</version>
-          <scope>provided</scope>
-      </dependency>
-		        
-		        
-	  <!-- ===== #229. 채팅관련11  몽고디비(mongodb) ===== -->
-      <dependency>
-         <groupId>org.mongodb</groupId>
-         <artifactId>mongo-java-driver</artifactId>
-         <version>${org.mongodb-version}</version>
-      </dependency>
-      <dependency>
-         <groupId>org.springframework.data</groupId>
-         <artifactId>spring-data-commons</artifactId>
-         <version>${org.spring-data-commons-version}</version>
-      </dependency>      
-      <dependency>
-         <groupId>org.springframework.data</groupId>
-         <artifactId>spring-data-mongodb</artifactId>
-         <version>${org.spring-data-mongodb-version}</version>
-      </dependency>	   
-      
+   		<!-- ===== #229. (웹채팅관련11) 몽고디비(mongodb) ===== -->
+		<dependency>
+		   <groupId>org.mongodb</groupId>
+		   <artifactId>mongo-java-driver</artifactId>
+		   <version>${org.mongodb-version}</version>
+		</dependency>
+		<dependency>
+		   <groupId>org.springframework.data</groupId>
+		   <artifactId>spring-data-commons</artifactId>
+		   <version>${org.spring-data-commons-version}</version>
+		</dependency>      
+		<dependency>
+		   <groupId>org.springframework.data</groupId>
+		   <artifactId>spring-data-mongodb</artifactId>
+		   <version>${org.spring-data-mongodb-version}</version>
+		</dependency>
 	</dependencies>
     <build>
         <plugins>
