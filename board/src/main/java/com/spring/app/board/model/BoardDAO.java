@@ -107,18 +107,18 @@ public interface BoardDAO {
 	// 인사관리 페이지에 접속한 이후에, 인사관리 페이지에 접속한 페이지URL, 사용자ID, 접속IP주소, 접속시간을 기록으로 DB에 tbl_empManger_accessTime 테이블에 insert 하도록 한다.
 	void insert_accessTime(Map<String, String> paraMap);
 
-	
-	
-	
 	// === 서울 따릉이 위치 정보 오라클 입력하기 ===
 	int insert_seoul_bicycle_rental(Seoul_bicycle_rental_VO vo);
 
 	// === 서울 따릉이 위치 정보 오라클 조회하기 ===
 	List<Map<String, String>> select_seoul_bicycle_rental();
 
-
 	// 페이지별 사용자별 접속통계 가져오기 (emp)
 	List<Map<String, String>> pageurlUsername();
+	
+	// === Spring Scheduler(스프링 스케줄러)를 사용한 email 발송하기 === // 
+	List<Map<String, String>> getReservationList();
+	void updateMailSendCheck(Map<String, String[]> paraMap);	// e메일을 발송한 행은 발송했다는 표시해주기
 
 	
 }

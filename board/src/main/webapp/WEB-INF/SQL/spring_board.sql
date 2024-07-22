@@ -923,10 +923,6 @@ where name = '이순신';
 ------------- >>>>>>>> 일정관리(풀캘린더) 끝 <<<<<<<< -------------
 
 
-
-
-
-
 -- ========================================================================= --
 -- ********************** 사원관리 ********************** --
 show user;
@@ -935,8 +931,6 @@ show user;
 select distinct nvl(department_id, -9999) AS department_id
 from employees
 order by department_id asc;
-
-
 
 
 SELECT E.department_id, D.department_name, E.employee_id, 
@@ -951,19 +945,114 @@ ORDER BY E.department_id, E.employee_id;
 
 
 
-
 desc employees;
-
 
 
 select *
 from employees
 order by employee_id;
 
-
 select *
 from tbl_board
 where seq = 212;
+
+
+
+------ ==== Spring Scheduler(스프링 스케줄러)를 사용한 email 자동 발송하기 ==== ------
+show user;
+-- USER이(가) "MYMVC_USER"입니다.
+
+desc tbl_member;
+
+create table tbl_reservation
+(reservationSeq    number        not null
+,fk_userid         varchar2(40)  not null
+,reservationDate   date          not null
+,mailSendCheck     number default 0 not null  -- 메일발송 했으면 1, 메일발송을 안했으면 0 으로 한다.
+,constraint PK_tbl_reservation primary key(reservationSeq)
+,constraint FK_tbl_reservation foreign key(fk_userid) references tbl_member(userid)
+,constraint CK_tbl_reservation check(mailSendCheck in(0,1))
+);
+-- Table TBL_RESERVATION이(가) 생성되었습니다.
+
+create sequence seq_reservation
+start with 1
+increment by 1
+nomaxvalue
+nominvalue
+nocycle
+nocache;
+-- Sequence SEQ_RESERVATION이(가) 생성되었습니다.
+
+select userid, email
+from tbl_member
+where userid in('ejss0125', 'eomjh');
+
+
+select to_char(sysdate, 'yyyy-mm-dd') AS 오늘날짜
+from dual;  -- 2024-07-19
+
+insert into tbl_reservation(reservationSeq, fk_userid, reservationDate)
+values(seq_reservation.nextval, 'ejss0125', to_date('2024-07-21 13:00', 'yyyy-mm-dd hh24:mi'));
+-- 1 행 이(가) 삽입되었습니다.
+
+insert into tbl_reservation(reservationSeq, fk_userid, reservationDate)
+values(seq_reservation.nextval, 'eomjh', to_date('2024-07-21 14:00', 'yyyy-mm-dd hh24:mi'));
+-- 1 행 이(가) 삽입되었습니다.
+
+insert into tbl_reservation(reservationSeq, fk_userid, reservationDate)
+values(seq_reservation.nextval, 'ejss0125', to_date('2024-07-22 11:00', 'yyyy-mm-dd hh24:mi'));
+-- 1 행 이(가) 삽입되었습니다.
+
+insert into tbl_reservation(reservationSeq, fk_userid, reservationDate)
+values(seq_reservation.nextval, 'eomjh', to_date('2024-07-22 15:00', 'yyyy-mm-dd hh24:mi'));
+-- 1 행 이(가) 삽입되었습니다.
+
+commit;
+
+
+select reservationSeq, fk_userid, 
+       to_char(reservationDate, 'yyyy-mm-dd hh24:mi:ss') as reservationDate, 
+       mailSendCheck
+from tbl_reservation
+order by reservationSeq desc;
+
+
+-- *** 오늘로 부터 2일(이틀) 뒤에 예약되어진 회원들을 조회하기 *** --
+
+-- 예약번호, 고객ID, 고객명, 이메일주소, 예약일자 시간
+
+
+
+select reservationSeq, fk_userid, name, email, to_char(reservationDate, 'yyyy-mm-dd hh24:mi:ss') AS reservationDate
+from tbl_member M join 
+(
+    select *
+    from tbl_reservation 
+    where mailSendCheck = 0 and to_char(reservationDate, 'yyyymmdd') = to_char(sysdate + 2, 'yyyymmdd')
+) R
+on R.fk_userid = M.userid
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

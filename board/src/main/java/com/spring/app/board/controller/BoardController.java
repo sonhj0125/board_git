@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.beans.factory.annotation.Qualifier;
 // import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +45,7 @@ import com.spring.app.board.domain.TestVO;
 import com.spring.app.board.domain.TestVO2;
 import com.spring.app.board.service.BoardService;
 import com.spring.app.common.FileManager;
+import com.spring.app.common.GoogleMail;
 import com.spring.app.common.MyUtil;
 import com.spring.app.common.Sha256;
 
@@ -2080,7 +2082,7 @@ public class BoardController {
 	      }
 	      // =========== !!! 첨부파일 업로드 끝 !!! ============ //
 		
-		// 댓글쓰기에 첨부파일이 있는 경우 
+		// 댓글쓰기에 첨부파일이 없는 경우 
 		
 		int n = 0;
 		
@@ -2360,6 +2362,193 @@ public class BoardController {
 	}
 	///////////////////// === #인터셉터관련1. 끝 === ///////////////////////////////////////////////   
 		
+	
+	
+	// === #241. 다중 파일첨부가 있는 복수 사용자에게 이메일 보내기 시작 === //
+	@GetMapping(value="/emailWrite.action")
+	   public String emailWrite() {
+	      
+	      return "email/emailWrite.tiles1";
+	       //  /WEB-INF/views/tiles1/email/emailWrite.jsp 페이지를 만들어야 한다.
+	}
+	
+	
+	// === #243. 빈으로 등록 되어진 GoogleMail 클래스 DI(주입) 하기 === //
+	@Autowired
+	private GoogleMail mail;
+	
+	
+	
+	@ResponseBody
+	@PostMapping(value="/emailWrite.action", produces="text/plain;charset=UTF-8")
+	public String emailWrite(MultipartHttpServletRequest mtp_request) {
+		
+		String recipient = mtp_request.getParameter("recipient");
+		String subject = mtp_request.getParameter("subject");
+		String content = mtp_request.getParameter("content");
+		
+		List<MultipartFile> fileList = mtp_request.getFiles("file_arr");		// !! 주의 !!  getFile은 1개만 받는 것. getFiles는 다중(List)의 파일로 받음
+		// "file_arr" 은 /board/src/main/webapp/WEB-INF/views/tiles1/email/emailWrite.jsp 페이지의 314 라인에 보여지는 formData.append("file_arr", item); 의 값이다.
+		// MultipartFile interface는 Spring에서 업로드된 파일을 다룰 때 사용되는 인터페이스로 파일의 이름과 실제 데이터, 파일 크기 등을 구할 수 있다.
+	       
+		
+		
+		/*
+		   >>>> 첨부파일이 업로드 되어질 특정 경로(폴더)지정해주기
+		                    우리는 WAS 의 webapp/resources/email_attach_file 라는 폴더로 지정해준다.
+		*/
+		// WAS 의 webapp 의 절대경로를 알아와야 한다.
+		HttpSession session = mtp_request.getSession();
+		String root = session.getServletContext().getRealPath("/");
+		String path = root + "resources"+File.separator+"email_attach_file";
+		// path 가 첨부파일들을 저장할 WAS(톰캣)의 폴더가 된다.
+		  
+		// System.out.println("~~~~ 확인용 path => " + path);
+		// ~~~~ 확인용  path 의 절대경로 => C:\NCS\workspace_spring_framework\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\board\resources\email_attach_file
+				
+		File dir = new File(path);	// email_attach_file 폴더가 없으면 최초로 만들기
+		if(!dir.exists()) {
+			dir.mkdirs();
+		}
+		
+		// >>>> 첨부파일을 위의 path 경로에 올리기 <<<< //
+	    String[] arr_attachFilename = null; // 첨부파일명들을 기록하기 위한 용도
+		
+	    if(fileList != null && fileList.size() > 0) {
+	    	
+	    	arr_attachFilename = new String[fileList.size()];
+	    	
+	    	for(int i=0; i<fileList.size(); i++) {
+	    		MultipartFile mtfile = fileList.get(i);
+	    		// System.out.println("파일명 : " + mtfile.getOriginalFilename() + " / 파일크기 : " + mtfile.getSize());
+	    		/*
+	    		  	파일명 : 01.png / 파일크기 : 93231
+					파일명 : 02.png / 파일크기 : 70876
+					파일명 : 03.png / 파일크기 : 223414
+	    		*/
+	    		
+	    		try {
+	    			/*
+	                   	File 클래스는 java.io 패키지에 포함되며, 입출력에 필요한 파일이나 디렉터리를 제어하는 데 사용된다.
+            			파일과 디렉터리의 접근 권한, 생성된 시간, 경로 등의 정보를 얻을 수 있는 메소드가 있으며, 
+                		새로운 파일 및 디렉터리 생성, 삭제 등 다양한 조작 메서드를 가지고 있다.
+	                */
+	    			
+		    		// === MultipartFile 을 File 로 변환하여 탐색기 저장폴더에 저장하기 시작 === //
+		    		File attachFile = new File(path + File.separator + mtfile.getOriginalFilename());
+		    		mtfile.transferTo(attachFile);	// !!!! 이것이 파일을 업로드 해주는 것이다 !!!! 
+		    		/*
+	                  	form 태그로 부터 전송받은 MultipartFile mtfile 파일을 지정된 대상 파일(attachFile)로 전송한다.
+                   		만약에 대상 파일(attachFile)이 이미 존재하는 경우 먼저 삭제된다.
+		    		*/
+		    		// 탐색기에서  C:\NCS\workspace_spring_framework\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\board\resources\email_attach_file에 가보면
+		    		// 첨부한 파일이 생성되어져 있음을 확인할 수 있다.
+		    		// === MultipartFile 을 File 로 변환하여 탐색기 저장폴더에 저장하기 끝 === //
+		    		
+		    		arr_attachFilename[i] = mtfile.getOriginalFilename();	// 배열속에 첨부파일명들을 기록한다.
+		    		
+	    		} catch(Exception e) {
+	    			e.printStackTrace();
+	    		}
+	    		
+	    	} // end of for
+	    	
+	    }
+
+    	//System.out.println("recipient : " + recipient);
+    	//System.out.println("subject : " + subject);
+    	//System.out.println("content : " + content);
+    	/*
+    	  	recipient : gpwjd1wldms@naver.com;ejss0125@naver.com
+			subject : 첨부파일이 있는 메일 보내기 연습
+			content : <p>첨부파일이 있는 메일 보내기 연습 입니다.&nbsp;</p>
+    	*/
+    	
+	    JSONObject jsonObj = new JSONObject();
+	    
+	    String[] arr_recipient = recipient.split("\\;");
+	    
+	    for(String recipient_email : arr_recipient) {
+	    	
+	    	Map<String, Object> paraMap = new HashMap<>();
+	    	paraMap.put("recipient", recipient_email);
+	    	paraMap.put("subject", subject);
+	    	paraMap.put("content", content);
+	    	
+	    	if(fileList != null && fileList.size() > 0) {
+	    		paraMap.put("path", path);		// path 는 첨부파일들이 저장된 WAS(톰캣)의 폴더의 경로명이다.
+	    		paraMap.put("arr_attachFilename", arr_attachFilename);		// arr_attachFilename 은 첨부파일명들이 저장된 배열이다. 
+	    	}
+	    	
+	    	try {
+	    		
+				mail.sendmail_withFile(paraMap);
+				
+				jsonObj.put("result", 1);		// 정상이라면,
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				
+				jsonObj.put("result", 0);		// 정상이 아니면,
+				break;
+			}
+	    	
+	    } // end of for
+	    
+	    
+	    // 메일 전송 후 업로드한 첨부파일 지우기
+	    if(arr_attachFilename != null) {
+	    	
+	         for(String attachFilename : arr_attachFilename) {
+	            try {
+	               fileManager.doFileDelete(attachFilename, path);
+	            } catch (Exception e) {
+	               e.printStackTrace();
+	            }
+	         } // end of for----------------------
+	         
+	      }
+	    
+		return jsonObj.toString();	// "{"result":1}"
+		 
+	}
+	// =======  다중 파일첨부가 있는 복수 사용자에게 이메일 보내기 끝  ======= //
+	
+	
+	@GetMapping(value="/emailWrite/done.action")
+	public String emailWrite_done() {
+      
+		return "email/emailWrite_done.tiles1";
+		//  /WEB-INF/views/tiles1/email/emailWrite_done.jsp 페이지를 만들어야 한다.
+	}
+	
+	
+	// === #245. Spring Scheduler(스프링스케줄러02)를 사용하여 특정 URL 사이트로 연결하기 === //
+	@GetMapping("/branchTimeAlarm.action")
+	public ModelAndView branchTimeAlarm(ModelAndView mav, HttpServletRequest request) {
+		String message = "12시 50분!! 즐거운 점심시간입니다.";
+		String loc = request.getContextPath() + "/index.action";
+		
+		mav.addObject("message", message);
+		mav.addObject("loc", loc);
+		
+		mav.setViewName("msg");
+		
+		return mav;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }
 
 

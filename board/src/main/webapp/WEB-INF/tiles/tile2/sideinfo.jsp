@@ -56,10 +56,10 @@
 
 </style>
 
-<script src="<%= ctxPath%>/resources/Highcharts-10.3.3/code/highcharts.js"></script>
-<script src="<%= ctxPath%>/resources/Highcharts-10.3.3/code/modules/exporting.js"></script>
-<script src="<%= ctxPath%>/resources/Highcharts-10.3.3/code/modules/export-data.js"></script>
-<script src="<%= ctxPath%>/resources/Highcharts-10.3.3/code/modules/accessibility.js"></script>
+<script src="<%= ctxPath%>/resources/Highcharts-10.3.1/code/highcharts.js"></script>
+<script src="<%= ctxPath%>/resources/Highcharts-10.3.1/code/modules/exporting.js"></script>
+<script src="<%= ctxPath%>/resources/Highcharts-10.3.1/code/modules/export-data.js"></script>
+<script src="<%= ctxPath%>/resources/Highcharts-10.3.1/code/modules/accessibility.js"></script>
 
 <script type="text/javascript">
 
@@ -67,7 +67,7 @@
 		
 		loopshowNowTime();
 		
-//		showWeather();
+		showWeather();
 		
 	});// end of $(document).ready(function(){});------------
 	
@@ -136,12 +136,12 @@
 	function showWeather(){
 		
 		$.ajax({
-			url:"<%= ctxPath%>/opendata/weatherXML.action",
+			url:"<%= ctxPath%>/weather/weatherXML.action",
 			type:"get",
 			dataType:"xml",
 			success:function(xml){
-				const rootElement = $(xml).find(":root"); 
-			//	console.log("확인용 : " + $(rootElement).prop("tagName") );
+				const rootElement = $(xml).find(":root");
+			//  console.log("확인용 : " + $(rootElement).prop("tagName") );
 				// 확인용 : current
 				
 				const weather = rootElement.find("weather"); 
@@ -173,7 +173,7 @@
 					      마치 배열의 인덱스(index)로 값(value)를 찾는 것과 같은 효과를 낸다.
 					*/
 					
-			    //	console.log( $(local).text() + " stn_id:" + $(local).attr("stn_id") + " icon:" + $(local).attr("icon") + " desc:" + $(local).attr("desc") + " ta:" + $(local).attr("ta") ); 
+			      // console.log( $(local).text() + " stn_id:" + $(local).attr("stn_id") + " icon:" + $(local).attr("icon") + " desc:" + $(local).attr("desc") + " ta:" + $(local).attr("ta") ); 
 			      //	속초 stn_id:90 icon:03 desc:구름많음 ta:-2.5
 			      //	북춘천 stn_id:93 icon:03 desc:구름많음 ta:-7.0
 			    	
@@ -188,9 +188,9 @@
 			        
 					
 					// ====== XML 을 JSON 으로 변경하기  시작 ====== //
-					   var jsonObj = {"locationName":$(local).text(), "ta":$(local).attr("ta")};
+					var jsonObj = {"locationName":$(local).text(), "ta":$(local).attr("ta")};
 					   
-					   jsonObjArr.push(jsonObj);
+					jsonObjArr.push(jsonObj);
 					// ====== XML 을 JSON 으로 변경하기  끝 ====== //
 					
 			    }// end of for------------------------ 
@@ -199,19 +199,19 @@
 			    
 			    $("div#displayWeather").html(html);
 			    
-			    
+			   
 			 // ====== XML 을 JSON 으로 변경된 데이터를 가지고 차트그리기 시작  ====== //
 				var str_jsonObjArr = JSON.stringify(jsonObjArr); 
 				                  // JSON객체인 jsonObjArr를 String(문자열) 타입으로 변경해주는 것 
 				                  
 				$.ajax({
-					url:"<%= request.getContextPath()%>/opendata/weatherXMLtoJSON.action",
+					url:"<%= request.getContextPath()%>/weather/weatherXMLtoJSON.action",
 					type:"POST",
 					data:{"str_jsonObjArr":str_jsonObjArr},
 					dataType:"JSON",
 					success:function(json){
 						
-					//	alert(json.length);
+						//alert(json.length);
 						
 						// ======== chart 그리기 ========= // 
 						var dataArr = [];
@@ -277,7 +277,7 @@
 					}
 				});                  
 				///////////////////////////////////////////////////
-				
+			
 			},// end of success: function(xml){ }------------------
 			
 			error: function(request, status, error){

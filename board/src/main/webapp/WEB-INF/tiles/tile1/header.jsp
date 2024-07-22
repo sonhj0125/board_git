@@ -85,8 +85,6 @@
 		        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
 		           <a class="dropdown-item" href="<%=ctxPath%>/emp/employeeList.action">직원목록</a>
 		           <a class="dropdown-item" href="<%=ctxPath%>/emp/chart.action">통계차트</a>
-		           <a class="dropdown-item" href="<%=ctxPath%>/emp/mapperInterface/exmaple.action">Mapper Interface예제</a> 
-				   <a class="dropdown-item" href="<%=ctxPath%>/emp/geocoder.action">주소를위경도변경</a>
 		        </div>
 		     </li>
 		     
@@ -130,10 +128,36 @@
 		      
       
 			<!-- ==== (#스프링보안14) Spring Security(스프링 보안) 알아보기 ====  -->
-			
-			
-			
-			
+			<li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">스프링 보안</a>  
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                 
+               <sec:authorize access="isAnonymous()">
+                  <a class="dropdown-item" href="<%=ctxPath%>/security/member/memberRegister.action">회원가입</a>
+                  <a class="dropdown-item" href="<%=ctxPath%>/security/member/login.action">로그인</a>
+               </sec:authorize>
+            
+               <sec:authorize access="isAuthenticated()">
+                  <a class="dropdown-item" href="<%=ctxPath%>/security/member/logout.action">로그아웃</a>
+               </sec:authorize>
+                 
+                 <sec:authorize access="permitAll">   
+                   <a class="dropdown-item" href="<%=ctxPath%>/security/everybody.action">누구나</a>
+               </sec:authorize>
+               
+               <sec:authorize access="hasAnyRole('ROLE_ADMIN','ROLE_USER_SPECIAL','ROLE_USER')"> <%-- 역할(권한)이 'ROLE_ADMIN','ROLE_USER_SPECIAL','ROLE_USER' 중에 하나라도 있는 회원은 아래의 메뉴가 보여지도록 한다. --%>
+                   <a class="dropdown-item" href="<%=ctxPath%>/security/member/memberOnly.action">회원전용</a>
+               </sec:authorize>
+               
+               <sec:authorize access="hasAnyRole('ROLE_ADMIN','ROLE_USER_SPECIAL','ROLE_USER')"> <%-- 역할(권한)이 'ROLE_ADMIN','ROLE_USER_SPECIAL','ROLE_USER' 중에 하나라도 있는 회원은 아래의 메뉴가 보여지도록 한다. --%> 
+                   <a class="dropdown-item" href="<%=ctxPath%>/security/member/special/special_memberOnly.action">특별회원전용</a> 
+               </sec:authorize>
+               
+               <sec:authorize access="hasRole('ROLE_ADMIN')">  
+                   <a class="dropdown-item" href="<%=ctxPath%>/security/admin/adminOnly.action">관리자전용</a>
+               </sec:authorize>
+              </div>
+          	</li>
 			
      	 </ul>
        </div>

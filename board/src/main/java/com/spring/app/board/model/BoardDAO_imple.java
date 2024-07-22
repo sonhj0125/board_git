@@ -451,6 +451,25 @@ public class BoardDAO_imple implements BoardDAO {
 		
 		return pageurlUsernameList;
 	}
+
+
+	// === #251. Spring Scheduler(스프링 스케줄러08)를 사용한 email 발송하기 === // 
+	@Override
+	public List<Map<String, String>> getReservationList() {
+		
+		List<Map<String, String>> reservationList = sqlsession.selectList("board.getReservationList");
+		
+		return reservationList;
+	}
+
+
+	// e메일을 발송한 행은 발송했다는 표시해주기
+	@Override
+	public void updateMailSendCheck(Map<String, String[]> paraMap) {
+		
+		sqlsession.update("board.updateMailSendCheck", paraMap);
+		
+	}
 	
 	
 }
