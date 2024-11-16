@@ -9,6 +9,10 @@
 	<configs>
 	</configs>
 	<autoconfigs>
+		<config>src/main/webapp/WEB-INF/spring/config/websocketContext.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/mongo-connection.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/appServlet/servlet-context.xml</config>
+		<config>src/main/webapp/WEB-INF/spring/root-context.xml</config>
 	</autoconfigs>
 	<configSets>
 	</configSets>

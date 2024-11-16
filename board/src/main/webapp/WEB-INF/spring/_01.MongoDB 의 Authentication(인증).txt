@@ -1,0 +1,1018 @@
+
+===== >>> MongoDB 의 Authentication(인증) <<< =====
+security:
+  authorization: enabled
+
+mongod.conf 파일에 해당 부분을 활성해 주면 MongoDB 서버 간의 통신을 위한 내부 인증뿐만 아니라, 사용자의 로그인을 위한 인증까지 모두 활성화 된다.
+
+해당 기능을 활성화 한 상태에서 MongoDB를 구동하게 되면 단순히 OS 셸에서 mongo 명령어로 접속했을때 MongoDB로 접속은 가능하나, 내부에 있는 데이터 확인이나 모든 use 나 로그인 관련 명령어를 제외하고는 동작하지 않게 된다.
+
+MongoDB의 자체적인 사용자 인증은 다른 DBMS와 같이 ID/Password 기반의 인증을 사용하는데, MongoDB 서버는 인증 데이터베이스 정보를 추가로 요구한다. 사용자를 생성할 때 반드시 특정 데이터베이스로 이동해서 생성해야하는데, 이때 데이터베이스를 인증 데이터베이스(Authentication Database)라고 한다. 인증 데이터베이스는 사용자 계정으로 로그인할 때 인증을 위해서만 필요로하기 때문에 하나의 데이터베이스만 존재 할 수 있다.
+
+
+
+● MongoDB의 root 권한을 갖는 계정생성 및 admin 계정 생성하기
+
+   MongoDB의 경우 보안을 위해서 가장 먼저해야 하는 것이 admin 계정을 생성해주는 것이다.
+   admin 계정을 생성하지 않고 기본 포트인 27017포트를 이용해 DB를 사용한다면 각종 해킹 위험에 노출되어 있는 상태가 되어진다.
+
+   MongoDB 서버에 포트만 열려 있으면, 처음에는 /etc/mongo.conf 안의 Bind IP 설정이 허용하는대로 모든 접속을 허용한다.
+   이로 인해, 계정 정보를 넣지 않아도 admin 권한을 가지고 로그인 할 수 있기에 해커가 들어와서 DB 데이터를 삭제할 수 있다.
+
+   MongoDB 의 초기상태는 Authentication(인증) 이 없는 상태이다.    
+   그래서, MongoDB 를 Authentication(인증) 이 있는 상태로 바꾸려면, 일반 계정을 생성해주고 security.authorization 옵션 활성화 해주어야 한다. 그런데, 일반 계정을 생성하기 위해서는 먼저, admin 계정을 생성해야 하고, admin 계정을 활성화 한 후에 일반 계정을 생성해주어야 한다.
+
+
+
+>>> 자신이 슈퍼 유저이며, MongoDB 를 관리하는 총 책임자라고 한다면 root role(권한들의집합)을 부여하여 생성한다. 
+    이 경우 MongoDB 의 모든 권한을 가진 슈퍼유저 계정이 된다. <<<
+
+C:\Users\user1>mongosh
+
+Enterprise test> show dbs
+admin          40.00 KiB
+config         84.00 KiB
+local         112.00 KiB
+movies         72.00 KiB
+mydb          392.00 KiB
+universitydb  160.00 KiB
+video          72.00 KiB
+
+Enterprise test> use admin
+switched to db admin
+
+
+Enterprise admin> db.createUser(
+... {
+...    user: "dba",
+...    pwd: passwordPrompt(),
+...    roles: ["root"]
+... })
+Enter password
+*********{ ok: 1 }
+암호는 qwer1234$ 로 했음
+
+== 또는 ==
+
+Enterprise admin> db.createUser(
+... {
+...    user: "dba",
+...    pwd: "qwer1234$",
+...    roles: ["root"]
+... })
+{ ok: 1 }
+
+
+
+>>> 자신이 슈퍼 유저는 아니지만, 사용자와 role(역할)을 생성하고 수정할 수 있으며, 
+    모든 데이터베이스에서 읽고 쓰기가 가능한 권한을 가진 계정을 생성하고자 한다면 아래와 같이 한다. <<<
+Enterprise admin> db.createUser(
+... {
+...    user: 'admin',
+...    pwd: passwordPrompt(),
+...    roles: [
+...             {role: 'userAdminAnyDatabase', db: 'admin'},
+...             {role: 'readWriteAnyDatabase', db: 'admin'}
+...           ]
+... })
+Enter password
+*********{ ok: 1 }
+암호는 qwer1234$ 로 했음
+
+===> userAdminAnyDatabase 롤은 config 와 local 을 제외한 모든 데이터베이스에서 role(역할)과 사용자를 생성 및 수정할 수 있다.
+===> readWriteAnyDatabase 롤은 config 와 local 을 제외한 모든 데이터베이스에서 읽고, 쓸수 있다.
+
+
+
+
+● MongoDB 에 생성된 계정들 모두 보기 첫번째 방법
+
+Enterprise admin> show users
+[
+  {
+    _id: 'admin.admin',
+    userId: new UUID("d6585197-3cbd-445a-8ef6-866f958a7b4f"),
+    user: 'admin',
+    db: 'admin',
+    roles: [
+      { role: 'readWriteAnyDatabase', db: 'admin' },
+      { role: 'userAdminAnyDatabase', db: 'admin' }
+    ],
+    mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
+  },
+  {
+    _id: 'admin.dba',
+    userId: new UUID("0720c2d2-947c-4e88-826b-2305c16f83c0"),
+    user: 'dba',
+    db: 'admin',
+    roles: [ { role: 'root', db: 'admin' } ],
+    mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
+  }
+]
+
+
+
+● MongoDB 에 생성된 계정들 모두 보기 두번째 방법
+
+Enterprise admin> db.getUsers()
+{
+  users: [
+    {
+      _id: 'admin.admin',
+      userId: new UUID("d6585197-3cbd-445a-8ef6-866f958a7b4f"),
+      user: 'admin',
+      db: 'admin',
+      roles: [
+        { role: 'readWriteAnyDatabase', db: 'admin' },
+        { role: 'userAdminAnyDatabase', db: 'admin' }
+      ],
+      mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
+    },
+    {
+      _id: 'admin.dba',
+      userId: new UUID("0720c2d2-947c-4e88-826b-2305c16f83c0"),
+      user: 'dba',
+      db: 'admin',
+      roles: [ { role: 'root', db: 'admin' } ],
+      mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
+    }
+  ],
+  ok: 1
+}
+
+
+
+● 특정 계정(지금은 admin)의 정보와 권한 보기 
+
+Enterprise admin> db.getUser("admin", {showPrivileges: true})
+{
+  _id: 'admin.admin',
+  userId: new UUID("d6585197-3cbd-445a-8ef6-866f958a7b4f"),
+  user: 'admin',
+  db: 'admin',
+  mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ],
+  roles: [
+    { role: 'readWriteAnyDatabase', db: 'admin' },
+    { role: 'userAdminAnyDatabase', db: 'admin' }
+  ],
+  inheritedRoles: [
+    { role: 'readWriteAnyDatabase', db: 'admin' },
+    { role: 'userAdminAnyDatabase', db: 'admin' }
+  ],
+  inheritedPrivileges: [
+    {
+      resource: { db: '', collection: '' },
+      actions: [
+        'changeCustomData',
+        'changePassword',
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'createRole',
+        'createUser',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'dropRole',
+        'dropUser',
+        'find',
+        'grantRole',
+        'insert',
+        'killCursors',
+        'listCachedAndActiveUsers',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'revokeRole',
+        'setAuthenticationRestriction',
+        'update',
+        'viewRole',
+        'viewUser'
+      ]
+    },
+    {
+      resource: { cluster: true },
+      actions: [
+        'authSchemaUpgrade',
+        'invalidateUserCache',
+        'listDatabases',
+        'viewUser'
+      ]
+    },
+    {
+      resource: { db: '', collection: 'system.js' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'find',
+        'insert',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'update'
+      ]
+    },
+    {
+      resource: { system_buckets: '' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'find',
+        'insert',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'update'
+      ]
+    },
+    {
+      resource: { db: 'local', collection: '' },
+      actions: [
+        'changeCustomData',
+        'changePassword',
+        'createRole',
+        'createUser',
+        'dropRole',
+        'dropUser',
+        'grantRole',
+        'revokeRole',
+        'setAuthenticationRestriction',
+        'viewRole',
+        'viewUser'
+      ]
+    },
+    {
+      resource: { db: 'config', collection: '' },
+      actions: [
+        'changeCustomData',
+        'changePassword',
+        'createRole',
+        'createUser',
+        'dropRole',
+        'dropUser',
+        'grantRole',
+        'revokeRole',
+        'setAuthenticationRestriction',
+        'viewRole',
+        'viewUser'
+      ]
+    },
+    {
+      resource: { db: '', collection: 'system.users' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'dbHash',
+        'dbStats',
+        'find',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead'
+      ]
+    },
+    {
+      resource: { db: 'admin', collection: 'system.users' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropIndex',
+        'find',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead'
+      ]
+    },
+    {
+      resource: { db: 'admin', collection: 'system.roles' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropIndex',
+        'find',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead'
+      ]
+    },
+    {
+      resource: { db: 'admin', collection: 'system.version' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'dbHash',
+        'dbStats',
+        'find',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead'
+      ]
+    },
+    {
+      resource: { db: 'admin', collection: 'system.backup_users' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'dbHash',
+        'dbStats',
+        'find',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead'
+      ]
+    }
+  ],
+  inheritedAuthenticationRestrictions: []
+}
+
+
+
+
+● MongoDB의 일반 계정 생성하기
+
+   일반 계정은 admin 권한을 가져서는 안된다. 단순히 데이터를 읽어가는 read 권한이나, 개발에 필요한 readWrite 권한만 부여하는 등 각각 사용자 용도에 맞는 권한만을 부여해야 한다.
+
+
+>>> 일반계정의 생성은 아래와 같이 실행한다.(실습하면 안되고 이해만 하는것임)
+test> use admin
+admin> db.createUser({ user: "testuser", pwd: passwordPrompt(), roles: [ "dbAdmin" ] })
+
+계정을 생성하기 위해서 use admin 명령을 통해 admin DB로 이동했는데, 이 admin db가 인증 데이터베이스가 되는 것이다. 
+반드시 admin 데이터베이스만 사용해야 하는 것은 아니고, 자신이 생성한 데이터베이스를 사용해도 된다.
+
+
+● 몽고DB의 사용자 계정관리은 Mongo DB 내부에 생성된 Database 마다 별도로 관리된다.
+
+!! [주의] !! 
+MongoDB의 사용자 계정은 인증 데이터가 달라지면 다른 계정으로 인식한다. 
+아래 예제와 같이 2개의 사용자 계정을 생성했다면 사용자 계정과 패스워드가 같다 하더라도, MongoDB는 다른 계정으로 인식한다.
+
+test> use test01  (실습하면 안되고 이해만 하는것임)
+test01> db.createUser({ user: "test01", pwd: "mypassword", roles: [ "readWrite" ]})
+
+test> use admin   (실습하면 안되고 이해만 하는것임)
+admin> db.createUser({ user: "test01", pwd: "mypassword", roles: [ "readWrite" ]})
+
+두 계정은 사용자 계정명 과 패스워드가 같지만, 계정 인증 데이터베이스 정보가 다르기 때문에 다른 계정으로 인식하게 된다.
+
+
+
+>>> MongoDB 에서 Role(역할)은 권한들의 집합이다.
+
+>>> 새로운 사용자 정의 역할 만들기
+    아래는 새로운 역할(role)을 만드는 2가지 방법을 보여주고 있다.
+ -- 역할을 만드는 첫번째 방법 : 아래처럼 roles 필드에  기존의 role(역할)을 맵핑 시키는 방법
+
+db.createRole(
+  {
+    role: "serviceDev",
+    privileges: [],
+    roles: [
+             { role: "readWrite", db: "test01"}
+           ]
+  } )
+
+
+ -- 역할을 만드는 두번째 방법 :  아래처럼 privileges 필드에 액션을 직접 부여해서 만드는 방법
+
+db.createRole(
+  {
+    role: "serviceDev",
+    privileges: [
+                  { resource: { db: "test01", collection: "" }, 
+                    actions: [ "find", "update", "insert", "remove" ]
+                  }
+                ],
+    roles: []
+  }
+)
+
+
+role(역할) 만들기는 db.createRole() 명령을 이용하며, 
+생성된 사용자 역할에 새로운 액션을 추가하는 것은 db.grantPrivilegesToRole() 명령을 이용하며
+생성된 사용자 역할에 액션을 제거하는것은 db.revokePrivilegesFromRole() 명령으로 한다.
+
+
+
+● >>> 개발용 계정을 만드는 예제 <<<
+    사용자 정의 역할을 이용해 계정 생성하도록 한다.
+
+-- ● 먼저 Role를 만들어준다.
+-- 개발용 계정은 DB와 컬렉션에 대한 정보를 읽을수 있어야 하며, 새로운 컬렉션 및 도큐먼트를 생성할 수 있어야 한다. 
+   그래서 readWrite role 를 계정이 접속하여 사용하고자 하는 DB에 부여 했다.
+
+Enterprise admin> use mydb    <--- 이것이 중요하다.!!!! 여기서는 인증 데이터베이스가 mydb 가 된다.
+switched to db mydb
+
+Enterprise mydb> db.createRole(
+... {
+...   role: "devrole",
+...   privileges: [],
+...   roles: [
+...           {role: "readWrite", db: "mydb"}
+...          ]
+... }
+... )
+{ ok: 1 }
+
+
+
+>>> 생성된 롤 조회하기 <<<
+
+Enterprise mydb> db.getRoles()
+{
+  roles: [
+    {
+      _id: 'mydb.devrole',
+      role: 'devrole',
+      db: 'mydb',
+      roles: [ { role: 'readWrite', db: 'mydb' } ],
+      isBuiltin: false,
+      inheritedRoles: [ { role: 'readWrite', db: 'mydb' } ]
+    }
+  ],
+  ok: 1
+}
+
+
+
+Enterprise mydb> db.createUser(
+... {
+...   user: "devuser",
+...   pwd: passwordPrompt(),
+...   roles: [
+...           {role: "devrole", db: "mydb"}
+...          ]
+... }
+... )
+Enter password
+*********{ ok: 1 }
+암호는 qwer1234$ 으로 하였음.
+
+passwordPrompt()를 이용하면, 직접 패스워드를 넣음으로서 입력하는 암호가 노출되는 현상을 피해 암호가 보이지 않도록 보안 Prompt를 사용할 수 있다.
+
+
+
+Enterprise mydb> show users
+[
+  {
+    _id: 'mydb.devuser',
+    userId: new UUID("2dd5ec7e-628b-40da-83f6-c19a2f876557"),
+    user: 'devuser',
+    db: 'mydb',
+    roles: [ { role: 'devrole', db: 'mydb' } ],
+    mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
+  }
+]
+
+Enterprise mydb> db.getUsers()
+{
+  users: [
+    {
+      _id: 'mydb.devuser',
+      userId: new UUID("2dd5ec7e-628b-40da-83f6-c19a2f876557"),
+      user: 'devuser',
+      db: 'mydb',
+      roles: [ { role: 'devrole', db: 'mydb' } ],
+      mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ]
+    }
+  ],
+  ok: 1
+}
+
+
+Enterprise mydb> db.getUser("devuser", {showPrivileges: true})
+{
+  _id: 'mydb.devuser',
+  userId: new UUID("2dd5ec7e-628b-40da-83f6-c19a2f876557"),
+  user: 'devuser',
+  db: 'mydb',
+  mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ],
+  roles: [ { role: 'devrole', db: 'mydb' } ],
+  inheritedRoles: [
+    { role: 'devrole', db: 'mydb' },
+    { role: 'readWrite', db: 'mydb' }
+  ],
+  inheritedPrivileges: [
+    {
+      resource: { db: 'mydb', collection: '' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'find',
+        'insert',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'update'
+      ]
+    },
+    {
+      resource: { db: 'mydb', collection: 'system.js' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'find',
+        'insert',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'update'
+      ]
+    }
+  ],
+  inheritedAuthenticationRestrictions: []
+}
+
+
+
+
+● MongoDB의 Authentication(인증) 활성화 하기
+
+security:
+  authorization: enabled
+여기서 조심할 것은 공백을 2개만 띄우고 authorization: enabled 을 써야 한다.
+
+/etc/mongo.conf 파일 안에 security.authorization 옵션을 활성화 시켜줘야 Authentication 이 동작을 하기 때문에 파일을 수정해야 한다.
+
+그런 다음에 반드시 MongoDB를 재구동 해야한다.
+
+
+mongod.conf 파일에 security.authorization 옵션을 활성화해 주면 MongoDB 서버 간의 통신을 위한 내부 인증뿐만 아니라 사용자의 로그인을 위한 인증까지 모두 활성화 된다.
+
+해당 기능을 활성화 한 상태에서 MongoDB를 구동하게 되면 단순히 OS 셸에서 mongo 명령어로 접속했을때 MongoDB로 접속은 가능하나, 내부에 있는 데이터 확인이나 모든 use나 로그인 관련 명령어를 제외하고는 동작하지 않게 된다.
+
+MongoDB의 자체적인 사용자 인증은 다른 DBMS와 같이 ID/Password 기반의 인증을 사용하는데, MongoDB 서버는 인증 데이터베이스 정보를 추가로 요구합니다. 사용자를 생성할 때 반드시 특정 데이터베이스로 이동해서 생성해야하는데, 이때 데이터베이스를 인증 데이터베이스(Authentication Database)라고 합니다. 인증 데이터베이스는 사용자 계정으로 로그인할 때 인증을 위해서만 필요로하기 때문에 하나의 데이터베이스만 존재 할 수 있다.
+
+
+>>> C:\Program Files\MongoDB\Server\6.0\bin\mongod.cfg 파일을 바탕화면에 복사하여 
+
+security:
+  authorization: enabled
+
+으로 변경한 후 저장한다. 바탕화면에 있던 mongod.cfg 파일을 C:\Program Files\MongoDB\Server\6.0\bin\ 으로 덮어씌우면 된다.
+
+
+>>> 다음으로 반드시 MongoDB를 재구동 해야한다.
+
+리눅스는
+$ sudo systemctl restart mongod
+
+윈도우즈는
+서비스에서 몽고DB 서비스를 중지했다가 시작한다.
+
+C:\Users\user1>mongosh
+Current Mongosh Log ID: 669a9fdafc1c333e5e5c78fd
+Connecting to:          mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.6.1
+Using MongoDB:          6.0.3
+Using Mongosh:          1.6.1
+
+For mongosh info see: https://docs.mongodb.com/mongodb-shell/
+
+Enterprise test> use mydb
+switched to db mydb
+
+Enterprise mydb> show collections
+MongoServerError: command listCollections requires authentication
+인증을 필요로 하여 볼 수가 없게 된다.
+
+
+● 이렇게 생성된 계정으로 client tool에서는 계정명, 패스워드, 인증DB 정보만 가지고 접근할 수 있고, 터미널(명령프롬프트)에서는 아래와 같은 명령으로 인증이 통과되어야만 접속을 할 수 있다.
+
+C:\Users\user1>mongosh -u "devuser" --authenticationDatabase "mydb"
+Enter password: *********
+
+Enterprise test> use mydb
+
+Enterprise mydb>
+switched to db mydb
+
+Enterprise test> exit
+
+
+>>> 또는 아래와 같이 해도 mongo shell 을 실행한 후 해도 된다.
+
+db.auth( "username", passwordPrompt() ) 또는 db.auth( "username", "password" )
+
+
+C:\Users\user1>mongosh
+
+Enterprise test> use mydb   <== 반드시 인증데이터베이스에 들어가야 한다.
+switched to db mydb
+Enterprise mydb> db.auth("devuser", passwordPrompt())
+Enter password
+*********{ ok: 1 }  암호가 qwer1234$ 임
+Enterprise mydb> show collections
+chatting
+score
+SeoulSubway
+sistquestion
+subway
+TestQuestions
+
+Enterprise test> use mydb
+switched to db mydb
+Enterprise mydb> db.auth("devuser", "qwer1234$")
+{ ok: 1 }
+
+
+
+● >>> mongodb 사용자 계정(여기서는 devuser) 비밀번호 변경하기 <<<
+
+C:\Users\user1>mongosh -u "admin" --authenticationDatabase "admin"
+Enter password: *********
+
+Enterprise test> use mydb
+switched to db mydb
+Enterprise mydb> db.changeUserPassword("devuser","abcd0070$")
+{ ok: 1 }
+
+
+
+
+● >>> mongodb 사용자 계정(여기서는 devuser) 삭제하기 <<<
+
+C:\Users\user1>mongosh -u "admin" --authenticationDatabase "admin"
+Enter password: *********
+
+Enterprise test> use mydb
+switched to db mydb
+
+Enterprise mydb> db.dropUser("devuser")
+{ ok: 1 }
+
+Enterprise mydb> show users
+[]
+
+
+
+● >>> mongodb 사용자 계정(여기서는 devuser) 생성하기 <<<
+
+C:\Users\user1>mongosh -u "admin" --authenticationDatabase "admin"
+Enter password: *********
+
+Enterprise test> use mydb
+switched to db mydb
+
+Enterprise mydb> db.createUser(
+... {
+...   user: "devuser",
+...   pwd: "qwer1234$",
+...   roles: [
+...           {role: "devrole", db: "mydb"}
+...          ]
+... }
+... )
+{ ok: 1 }
+
+
+
+
+● >>> 특정 데이터베이스에 role(역할) 생성하기 <<<
+
+C:\Users\user1>mongosh -u "admin" --authenticationDatabase "admin"
+Enter password: *********
+
+Enterprise test> use mydb
+switched to db mydb
+
+Enterprise mydb> db.createRole(
+... {
+...   role: "role1",
+...   privileges: [],
+...   roles: [
+...           {role: "read", db: "mydb"}
+...          ]
+... }
+... )
+{ ok: 1 }
+
+
+Enterprise mydb> db.createRole(
+... {
+...   role: "role2",
+...   privileges: [],
+...   roles: [
+...           {role: "readWrite", db: "mydb"}
+...          ]
+... }
+... )
+{ ok: 1 }
+
+
+
+● >>> 생성된 롤 조회하기 <<<
+
+Enterprise mydb> db.getRoles()
+{
+  roles: [
+    {
+      _id: 'mydb.devrole',
+      role: 'devrole',
+      db: 'mydb',
+      roles: [ { role: 'readWrite', db: 'mydb' } ],
+      isBuiltin: false,
+      inheritedRoles: [ { role: 'readWrite', db: 'mydb' } ]
+    },
+    {
+      _id: 'mydb.role1',
+      role: 'role1',
+      db: 'mydb',
+      roles: [ { role: 'read', db: 'mydb' } ],
+      isBuiltin: false,
+      inheritedRoles: [ { role: 'read', db: 'mydb' } ]
+    },
+    {
+      _id: 'mydb.role2',
+      role: 'role2',
+      db: 'mydb',
+      roles: [ { role: 'readWrite', db: 'mydb' } ],
+      isBuiltin: false,
+      inheritedRoles: [ { role: 'readWrite', db: 'mydb' } ]
+    }
+  ],
+  ok: 1
+}
+
+
+
+● >>> 특정 데이터베이스에 있는 특정 role(역할) 삭제하기 <<<
+
+Enterprise mydb> db.dropRole("role1")
+{ ok: 1 }
+
+Enterprise mydb> db.getRoles()
+{
+  roles: [
+    {
+      _id: 'mydb.devrole',
+      role: 'devrole',
+      db: 'mydb',
+      roles: [ { role: 'readWrite', db: 'mydb' } ],
+      isBuiltin: false,
+      inheritedRoles: [ { role: 'readWrite', db: 'mydb' } ]
+    },
+    {
+      _id: 'mydb.role2',
+      role: 'role2',
+      db: 'mydb',
+      roles: [ { role: 'readWrite', db: 'mydb' } ],
+      isBuiltin: false,
+      inheritedRoles: [ { role: 'readWrite', db: 'mydb' } ]
+    }
+  ],
+  ok: 1
+}
+
+
+
+● >>> 특정 데이터베이스에 있는 모든 role(역할) 삭제하기 <<<
+
+Enterprise mydb> db.dropAllRoles()
+{ n: 2, ok: 1 }
+
+Enterprise mydb> db.getRoles()
+{ roles: [], ok: 1 }
+
+
+
+● >>> 특정 데이터베이스의 특정 사용자에게 특정 role(역할) 회수하기 <<<
+
+Enterprise mydb> db.createRole( { role: "devrole", privileges: [], roles: [ { role: "readWrite", db: "mydb" }] })
+{ ok: 1 }
+
+Enterprise mydb> db.getUser("devuser", {showPrivileges: true})
+{
+  _id: 'mydb.devuser',
+  userId: new UUID("037dd4f1-2908-49b0-b970-13dbaa5a86e8"),
+  user: 'devuser',
+  db: 'mydb',
+  mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ],
+  roles: [ { role: 'devrole', db: 'mydb' } ],
+  inheritedRoles: [
+    { role: 'devrole', db: 'mydb' },
+    { role: 'readWrite', db: 'mydb' }
+  ],
+  inheritedPrivileges: [
+    {
+      resource: { db: 'mydb', collection: '' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'find',
+        'insert',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'update'
+      ]
+    },
+    {
+      resource: { db: 'mydb', collection: 'system.js' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'find',
+        'insert',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'update'
+      ]
+    }
+  ],
+  inheritedAuthenticationRestrictions: []
+}
+
+
+
+Enterprise mydb> db.revokeRolesFromUser("devuser",[
+    { role:"devrole", db:"mydb" }
+   ]
+ )
+
+
+Enterprise mydb> db.getUser("devuser", {showPrivileges: true})
+{
+  _id: 'mydb.devuser',
+  userId: new UUID("037dd4f1-2908-49b0-b970-13dbaa5a86e8"),
+  user: 'devuser',
+  db: 'mydb',
+  mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ],
+  roles: [],
+  inheritedRoles: [],
+  inheritedPrivileges: [],
+  inheritedAuthenticationRestrictions: []
+}
+
+
+
+
+● >>> 특정 데이터베이스의 특정 사용자에게 특정 role(역할) 부여하기 <<<
+
+Enterprise mydb> db.grantRolesToUser("devuser",[
+...     {role:"devrole", db:"mydb"}
+...   ]
+... )
+{ ok: 1 }
+
+
+Enterprise mydb> db.getUser("devuser", {showPrivileges: true})
+{
+  _id: 'mydb.devuser',
+  userId: new UUID("037dd4f1-2908-49b0-b970-13dbaa5a86e8"),
+  user: 'devuser',
+  db: 'mydb',
+  mechanisms: [ 'SCRAM-SHA-1', 'SCRAM-SHA-256' ],
+  roles: [ { role: 'devrole', db: 'mydb' } ],
+  inheritedRoles: [
+    { role: 'readWrite', db: 'mydb' },
+    { role: 'devrole', db: 'mydb' }
+  ],
+  inheritedPrivileges: [
+    {
+      resource: { db: 'mydb', collection: '' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'find',
+        'insert',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'update'
+      ]
+    },
+    {
+      resource: { db: 'mydb', collection: 'system.js' },
+      actions: [
+        'changeStream',
+        'collStats',
+        'compactStructuredEncryptionData',
+        'convertToCapped',
+        'createCollection',
+        'createIndex',
+        'dbHash',
+        'dbStats',
+        'dropCollection',
+        'dropIndex',
+        'find',
+        'insert',
+        'killCursors',
+        'listCollections',
+        'listIndexes',
+        'planCacheRead',
+        'remove',
+        'renameCollectionSameDB',
+        'update'
+      ]
+    }
+  ],
+  inheritedAuthenticationRestrictions: []
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

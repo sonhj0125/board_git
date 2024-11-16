@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/security
+		http://www.springframework.org/schema/security/spring-security-4.2.xsd"> <!-- ===== #262. 스프링보안09 ===== -->
+    <!-- 아래 251 번째 줄에 bean 으로 올라온 authenticationSuccessHandler 객체인
+     com.spring.app.security.loginsuccess.MyAuthenticationSuccessHandler 클래스에서 사용될 의존성 객체인
+     com.spring.app.security.service.MemberService_imple 와 
+     com.spring.app.security.model.MemberDAO_imple 를 bean 으로 올려야 하므로 base-package="com.spring.app.security" 으로 하여  
+     component-scan 해야 한다. 
+    -->      
+    <context:component-scan base-package="com.spring.app.security"/>
+    
+    <!-- 로그인 성공시 우측상단에 email을 표시해주어야 하므로 복호화 해주는 AES256 클래스의 bean 이 필요하다. -->    
+    <beans:bean id="aES256" class="com.spring.app.common.AES256">
+		<beans:constructor-arg>
+			<beans:value>abcd0070#gclass$</beans:value>    
+		</beans:constructor-arg>
+	</beans:bean>
+   
+
+<!-- 
+    ============== #263. 스프링보안10 ============== 
+	
+	아래에 나오는 http 태그(엘리먼트)는 Spring Security의 접근 권한을 설정하는 부분이다.
+	http 태그(엘리먼트) auto-config 속성에 auto-config="true" 을 하여  스프링 Security 어노테이션을 사용할 수 있도록 한다.  
+	
+	1. Spring security 를 추가하면 기본적으로 csrf 에 대해 사용으로 설정되기 때문에 POST 가 정상적으로 수행되지 않는다. 그래서 우리는 사용하지 않도록 한다. 
+	   <csrf 태그는 위변조 방지에 대한 사용유무를 체크하는 것으로 여기서 우리는 사용하지 않도록 설정 한다.
+        csrf 란? 
+               사이트 간 요청 위조(또는 크로스 사이트 요청 위조, 영어: Cross-Site Request Forgery, CSRF, XSRF)는 
+               웹사이트 취약점 공격의 하나로, 사용자가 자신의 의지와는 무관하게 공격자가 의도한 행위(수정, 삭제, 등록 등)를 특정 웹사이트에 요청하게 하는 공격을 말한다.
+               즉, 해킹공격코드를 자신도 모르게 설치된 사용자는 원본사이트에 로그인하여 글쓰기를 할때 해킹코드에 의해 원본사이트와 동일하게 만든 피싱사이트(URL 주소가 거의 비슷하고, 내용물은 동일한 사이트)에 접속하게 되어
+               글내용을 전송하더라도 실제 전송되는 내용은 hidden 타입으로 숨겨진 데이터들이 전송되도록 하는 공격을 말한다.
+               
+              유명 경매 사이트인 옥션에서 발생한 개인정보 유출 사건에서 사용된 공격 방식 중 하나다.
+              사이트 간 스크립팅(XSS)을 이용한 공격이 사용자가 특정 웹사이트를 신용하는 점을 노린 것이라면, 
+              사이트간 요청 위조는 특정 웹사이트가 사용자의 웹 브라우저를 신용하는 상태를 노린 것이다. 
+              일단 사용자가 웹사이트에 로그인한 상태에서 사이트간 요청 위조 공격 코드가 삽입된 페이지를 열면, 
+              공격 대상이 되는 웹사이트는 위조된 공격 명령이 믿을 수 있는 사용자로부터 발송된 것으로 판단하게 되어 공격에 노출된다.
+        
+       Spring Security에서는 기본적으로 CSRF 공격을 방어하는데, GET 방식은 허용해주고 POST 방식에 대해서 방어해서 막아버린다.
+       - CSRF Token을 설정해주지 않으면 jsp에서 보내는 POST 요청을 모두 막기 때문에 로그인, 회원가입 기능이 작동하지 않아 인증 과정을 진행할 수 없다.
+       - 이를 위해 JSP에서 POST 요청을 보낼 때 CSRF Token에 값을 넣어 함께 보내고, Spring Security가 token 값을 확인하여 자신이 내려준 값이 맞는지 확인하는 방식으로 CSRF 공격을 판단한다.
+
+       <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />  ==> CSRF Token 에 값을 넣어주는 코드임.
+       - POST 요청을 보내도 Token에 담긴 값으로 CSRF 공격이 아니라고 판단하여 POST 요청을 막지 않고 허용해준다. 
+       
+             또는 번거롭게 <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" /> 을 넣을 필요없이 대신에 form 태그속에 security 태그인 <s:csrfInput/> 을 넣어주면 된다. 
+       
+             이와같이  CSRF 토큰 필터는 GET 방식의 데이터 전송에는 관여하지 않고, GET 방식의 데이터 전송에만 관여한다.       	        
+       
+             참조사이트 : https://velog.io/@wooryung/Spring-Boot-Spring-Security%EB%A5%BC-%EC%A0%81%EC%9A%A9%ED%95%98%EC%97%AC-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0
+                 https://codevang.tistory.com/282
+                 
+	
+	2. access="ROLE_USER" 라는 것은 ROLE_USER 라는 권한을 부여한다는 말이다.
+	      여기서 중요한 것이 access 의 첫문자 패턴은 ROLE_ 시작하도록 한다는 것이다. 
+	      변경이 가능하나, 굳이 그럴필요가 없기 때문에 모든 권한은 ROLE_ 시작할 수 있게끔 구성하도록 한다.
+	        
+		▶▶ Spring EL 표현식
+		http 설정에서 use-expressions=true 한 경우에만 SpEL(Spring EL expressions) 를 사용할 수 있다. 
+		기본 값은 false 이다.
+		
+		스프링 표현 언어(SpEL) 에 대한 자세한 설명은 아래와 같다.
+		
+		===================================================================================================
+		표현식             	                                 설명
+		===================================================================================================
+		hasRole(role1)	                         인자로 들어간 권한(role1)을 가지고 있는 경우 true 를 리턴한다. 
+		
+		hasAnyRole(role1,role2)	         인자로 들어간 권한들(role1, role2) 중 하나라도 가지고 있을 경우 true 를 리턴한다.
+		                            (인자로 들어가는 권한의 갯수는 제한이 없다. 
+		                                                       예시를 보이기 위해 2개만 넣은 것이지 실제로 들어가는 권한의 갯수는 제한이 없다)   
+		
+		permitAll	                                 권한이 있든 없든 모두 접근이 가능하다.
+		
+		denyAll	                                         권한이 있든 없든 모두 접근이 불가능하다.
+		
+		isAnonymous()	             Anonymous 사용자일 경우 true를 리턴한다.
+		
+		isRememberMe()	             Spring Security 의 Remember-me 기능으로 로그인 한 사용자일 경우 true 를 리턴한다.
+		
+		isAuthenticated()	         Anonymous 사용자가 아닐 경우(로그인을 성공해서 인증에 성공한 경우) true 를 리턴한다.
+		
+		isFullyAuthenticated()	     Anonymous 사용자가 아니고 Remember-me 기능으로 로그인 하지 않은 사용자일 경우 true 를 리턴한다. 
+		
+		principal	                 Allows direct access to the principal object representing the current user
+		
+		authentication	             Allows direct access to the current Authentication object obtained from the SecurityContext
+		
+	    [출처] : 스프링 프레임워크 시큐리티 도움말 3.1.x (http://docs.spring.io/spring-security/site/docs/3.1.x/reference/el-access.html)	        
+	        
+	 	     
+	         ▶▶ SpEL 방식이 아닌 경우 아래와 같은 설정할 수 있다.
+		=========================================================
+		AUTHORITY								   DESCRIPTION
+		=========================================================
+		IS_AUTHENTICATED_ANONYMOUSLY			      익명 사용자
+		IS_AUTHENTICATED_REMEMBERED	REMEMBERED 	      사용자
+		IS_AUTHENTICATED_FULLY					      인증된 사용자
+		
+		[출처] : 전자정부프레임워크 도움말 (http://www.egovframe.go.kr/wiki/doku.php?id=egovframework:rte:fdl:server_security:architecture#security_configuration)	     
+
+
+
+
+                웹 개발을 진행하다 보면 대부분 url mapping 설정을 ant pattern으로 한다.
+		스프링에서 mvc:resources mapping="/static/**" 또는
+		security:intercept-url pattern="/user/**" 이 그러하다. 
+		설정에 대한 표현식으로 ant pattern을 사용하기 때문에 *, **, ? 의 의미를 확실히 알아둘 필요가 있다.
+
+		  ? : 1개의 문자와 매칭 (matches single character)
+		  * : 0개 이상의 문자와 매칭 (matches zero or more characters)
+		 ** : 0개 이상의 디렉토리와 파일 매칭 (matches all files / directories)
+
+
+    3. <intercept-url> 태그는 Spring Security(스프링 보안)이 감시해야 할 URL 과 이 URL이 접근가능한 권한을 정의하는 태그이다.
+              한마디로 말하자면 <intercept-url> 태그는 인증과 권한 중 권한에 해당하는 작업을 설정해주는 것 이다. 
+       access 속성은 해당 URL 패턴에 접근할 수 있는 권한을 지정하는 부분이다.
+       
+       !!! >>>> 중요 <<<< !!!
+       <intercept-url> 태그를 지정할때는 주의점이 하나 있다. 
+              바로 설정 순서인데, "구체적인 URL 패턴을 먼저 설정하고 덜 구체적인 패턴을 나중에 설정해야 한다는 것"이다.
+       pattern="/admin/**" 와  pattern="/**" 을 비교해보자.
+       /admin/** 는 admin 디렉토리 밑을 가리키는 모든 디렉토리와 파일을 의미하는 패턴이다. 
+              그런데 /** 는 모든 디렉토리와 파일을 가르키는 패턴이다.
+              즉, /admin/** 패턴이  /** 보다 더 구체적인 패턴이다. 
+       Spring Security 는 먼저 URL이 /admin/** 패턴을 만족하는지 검사하고, 그것을 만족하지 않을 경우 /** 을 보게 되는 것이다. 
+              만약 /** 을 먼저 지정해 버리면, 모든 URL이 /** 을 만족하기 때문에 URL이 admin 디렉토리 하위를 가르키는것 이라 해도 
+       /** 를 먼저 만족시켜 버리기 때문에 ROLE_USER 권한을 가지고 있으면 admin 디렉토리와 그 하위를 접근해버리는 오동작을 하게 되는 것이다.
+ 
+    
+    4. 사용자가 정의하는 로그인 폼을 사용하기 위해서는 반드시 <http> 태그 안에 <form-login> 태그를 넣어야 한다.
+	       ▶  login-page                  속성은 로그인 화면 URL을 말한다.
+	       ▶  username-parameter          속성은 로그인 화면에서 사용자 아이디를 입력받는 input 태그 text 타입의 name 을 말한다.
+	       ▶  password-parameter          속성은 로그인 화면에서 사용자 암호를 입력받는 input 태그 password 타입의 name 을 말한다.
+	       ▶  login-processing-url        속성은 로그인 페이지 form 에 action 에 입력할 URL 주소를 말한다.
+	       ▶  authentication-failure-url  속성은 로그인 인증이 실패했을 경우 보여주는 화면의 URL 주소를 지정하는 부분이다.
+	       ▶  default-target-url          속성은 로그인 인증이 성공했을 경우 보여주는 화면의 URL 주소를 지정하는 부분이다.
+		  만약에  default-target-url="/index.action" 이라고 설정해두고 
+		  사용자가 처음 접속시부터 로그인에 성공하든지, 
+		  아니면 로그인을 하지 않은 상태에서 로그인해야만 볼수 있는 페이지에 접근하여 강제로 로그인을 하도록 하여 로그인에 성공하든지 간에 
+		  어쨌든 둘 모두 사용자가 로그인 인증에 성공하기만 하면 
+		 default-target-url 속성에 설정해둔 /index.action 페이지로 이동하도록 하려면
+		 always-use-default-target="true" 라고 설정하면 된다.
+	     always-use-default-target 의 속성값은 기본이 "false" 이다.
+	                
+	        ▶ authentication-success-handler-ref 속성이란?
+	     ===> 로그인 작업이 성공을 하든, 실패를 하든 부가적인 작업이 필요한 상황이 올 수 있다.
+	                    예를 들면, 로그인을 성공했으면 이를 하루 방문자수에 더한다거나, 
+	                    로그인 한 사람의 로그인 횟수를 통계 목적을 위해 기록할 수도 있을 것이다.
+	                	  	                	  
+	                    이와 같이 로그인 작업이 성공했을때 뭔가 부가적인 작업을 하고 싶을 경우 Spring Security 에서 제공하는 
+	           org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler 클래스를  
+	                    상속받아 만든 클래스를 생성한 뒤에 이 클래스를 Spring Bean 으로 등록한다.
+	                    그런 다음에  <form-login> 태그의  authentication-success-handler-ref 속성에 Spring Bean 으로 등록한 클래스의 id를 넣어주면 된다.             
+
+	          
+    5. Spring security 는 필터로 처리를 하기때문에 자동적으로 알아서 로그인, 로그아웃 처리를 해주도록 되어있다.
+	      즉, View단(여기서는 /webapp/WEB-INF/views/tiles1/security/security_login/loginform.jsp) 에서 
+	      로그인을 하기 위한 폼에 action 처리를 위한  url 주소를 "<%= ctxPath%>/security/member/loginEnd.action" 으로 해주고 
+	      여기 form-login 태그의 내용물에 login-processing-url="/security/member/loginEnd.action" 으로 적어 주기만 하면
+	   Spring security 는 사용자가 로그인 처리를 하려고 하는구나 라고 알아차리고
+	      자동적으로 아래의 jdbc-user-service 태그에 기술한 사용자 인증과 권한에 해당하는 2개의 select 쿼리문을 읽어다가 
+	      로그인 처리를 해주도록 필터처리가 되어있다.
+	      필터라는 것은 사용자가 어떤 요청을 해오면 그 요청을 가로채서 항상 그 요청보다 먼저 다른 작업 실행을 해주는 것을 말한다.  
+	  	  
+	      로그아웃도 마찬가지로  logout 태그에  logout-url="/security/member/logout.action" 라고 적어주고
+	   View단(여기서는 /webapp/WEB-INF/tiles/tile1/header.jsp)에 로그아웃에 해당하는 곳의 링크주소에      
+	   "/security/member/logout.action" 을 기재해주면 사용자가 로그아웃을 클릭하면 그 주소가 "/security/member/logout.action" 이므로
+	   Spring security 는 사용자가 로그아웃 처리를 하는구나 라고 알아차리고  
+	      자동적으로 logout 태그속에 기재된 내용인 invalidate-session="true" 등을 처리해준다.    
+
+
+    6. session-management 의 concurrency-control => 중복 로그인에 관련한 설정을 하는 부분이다. 
+	       
+	       ▶  max-sessions => 중복 로그인 가능한 세션 수.
+		                 max-sessions 를 1로 지정해야, 중복 로그인을 방지할 수 있다. 
+	       
+	       ▶  expired-url => 중복 로그인이 발생하면, 먼저 로그인한 세션이 끊어지게 되며,
+                                             세션이 끊어진 상태에서, 모든 url을 호출할 경우, 끊어진 원인을 알려줄 주소를 지정.
+-->	 
+    
+	<http auto-config="true" use-expressions="true">
+        
+        <csrf disabled="true"/>  <!-- Spring security 를 추가하면 기본적으로 csrf 에 대해 체크하기 때문에 POST 가 정상적으로 수행되지 않는다. 그래서 우리는 사용하지 않도록 한다. -->
+	
+	<!-- 모든 사용자 접근을 항상 승인 -->
+		<intercept-url pattern="/security/member/memberRegister.action" access="permitAll" />
+	    <intercept-url pattern="/security/member/member_id_check.action" access="permitAll" />
+	    <intercept-url pattern="/security/member/emailDuplicateCheck.action" access="permitAll" />
+	    <intercept-url pattern="/security/member/agree.action" access="permitAll" />
+		<intercept-url pattern="/security/member/memberRegisterEnd.action" access="permitAll" />
+		<intercept-url pattern="/security/member/login.action" access="permitAll" />
+	
+	<!-- 특별회원 전용 페이지 -->
+	    <intercept-url pattern="/security/member/special/**" access="hasRole('ROLE_USER_SPECIAL')" />	
+
+	<!-- 회원 전용 페이지 -->
+	    <intercept-url pattern="/security/member/**" access="hasRole('ROLE_USER')" />
+	    
+	<!-- 관리자 전용 페이지 -->
+		<intercept-url pattern="/security/admin/**" access="hasRole('ROLE_ADMIN')" />	        
+    
+    <!-- 이미지, javascript, css등 -->
+		<intercept-url pattern="/resources/**" access="permitAll" />
+	
+	<!-- 모든 페이지 -->
+	    <intercept-url pattern="/**" access="permitAll" />	
+             
+    <!-- 로그인 폼 -->     
+        <form-login login-page="/security/member/login.action"  
+             username-parameter="member_id"
+             password-parameter="member_pwd"
+             login-processing-url="/security/member/loginEnd.action"
+             authentication-failure-url="/security/member/login.action?loginFail=true" 
+             default-target-url="/index.action"
+             always-use-default-target="true" 
+             authentication-success-handler-ref="authenticationSuccessHandler" /> 
+        <!-- authentication-success-handler-ref 이 있으면 default-target-url 와  always-use-default-target 은 효과가 없음 -->     
+   
+   <!-- 로그아웃 -->        
+        <logout logout-url="/security/member/logout.action"
+                invalidate-session="true"
+                logout-success-url="/index.action" /> 
+	        
+	<!-- 접근권한이 필요한 페이지에 접근권한이 없는 유저가 접속할 경우 이동할 주소 지정 -->
+	    <access-denied-handler error-page="/security/noAuthorized.action"/>
+	        
+	<!-- 동일 아이디로 동시에 1명만 접속(새로운 세션을 접속하게 하고 기존에 접속한 세션은 죽인다) -->
+		<session-management>
+			<concurrency-control max-sessions="1"/>
+		</session-management>
+			
+	<!-- spring security 적용시 iframe 이 안될때 iframe 이 되도록 하는것임. -->
+		<headers>
+ 			<frame-options policy="SAMEORIGIN"/>
+		</headers>
+		
+	</http>
+
+    <beans:bean id="authenticationSuccessHandler" class="com.spring.app.security.loginsuccess.MyAuthenticationSuccessHandler">
+         <beans:property name="useReferer" value="true"/>   
+         <!-- 로그인이 성공한 뒤에 화면에 보여질 페이지의 URL 이다.
+              REFERER 헤더값을 사용할 것인지의 여부를 결정하는 것으로서 기본은 false 로 되어있는데 이 속성을 true 로 바꾸어 REFERER 헤더값을 사용하겠다고 만든다. 
+              MemberController 의  @RequestMapping login() 메소드를 볼것!!!!  -->
+         
+         <beans:property name="defaultUrl" value="/index.action" />  
+         <!-- 로그인 성공한 뒤에 화면에 보여질 페이지의 URL 이다.
+                          만약에 REFERER 헤더값이 없을 경우에는 보여질 기본페이지로 /index.action 으로 한다. -->
+    </beans:bean>           
+
+    <!--  
+    <jdbc-user-service 
+         data-source-ref="dataSource"
+         id="userService"
+         users-by-username-query="SELECT member_id AS username, member_pwd AS password, enabled FROM security_member WHERE member_id=?"
+         authorities-by-username-query="SELECT fk_member_id AS username, authority FROM security_member_authority WHERE fk_member_id=?" />
+    -->
+    <jdbc-user-service 
+         data-source-ref="dataSource"
+         id="userService"
+         users-by-username-query="SELECT member_id AS username, member_pwd AS password, enabled FROM security_member WHERE member_id=?"
+         authorities-by-username-query="SELECT fk_member_id AS username, authority FROM security_member_authority WHERE fk_member_id=?" />
+         
+    <!-- ==== authentication-manager 태그는 인증과 관련된 정보를 설정하는 부분이다. ==== -->
+	<authentication-manager>
+		<authentication-provider user-service-ref="userService">
+		     <password-encoder hash="sha-256" /> <!-- 패스워드는 스프링에서 제공하는 sha-256(Secure Hash Algorithm, 해시 알고리즘) 알고리즘을 이용하여 암호화한다. --> 
+		</authentication-provider>
+	</authentication-manager>
+	
+</beans:beans>

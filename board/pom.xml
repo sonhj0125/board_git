@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+	<modelVersion>4.0.0</modelVersion>	<!-- 이거는 maven버전 -->
 	<groupId>com.spring</groupId>
 	<artifactId>app</artifactId>
 	<name>board</name>
@@ -10,7 +10,7 @@
 	<properties>
 		<java-version>11</java-version> <!-- JDK 11 용 -->
 		<jaxb.version>2.2.11</jaxb.version>  <!-- JDK 1.8 까지는 내장되었던 JAXB를 JDK 11 에서는 내장하고 있지 않기 때문에  JDK 11 에서 제거 되었던 JAXB를 사용할 수 있도록 하는 것. 참고로 2.2.11 버전은 JAXB가 모듈화 되기 직전 최신버전임. -->
-		<org.springframework-version>5.3.22</org.springframework-version>
+		<org.springframework-version>5.3.22</org.springframework-version>	<!-- 이게 스프링 버전 -->
 		<org.aspectj-version>1.6.10</org.aspectj-version>
 		<org.slf4j-version>1.6.6</org.slf4j-version>
 		<org.apache.tiles-version>3.0.7</org.apache.tiles-version> <!-- ===== #9. Spring 프레임워크 버전 4.x 이상시  tiles 관련 추가하기 ===== -->
@@ -19,7 +19,14 @@
 		<org.mongodb-version>3.12.10</org.mongodb-version>
 		<org.spring-data-commons-version>2.5.6</org.spring-data-commons-version>
 		<org.spring-data-mongodb-version>3.2.6</org.spring-data-mongodb-version>
+		
+		
+		<!-- ===== #255. 스프링보안1 Spring Security ===== -->
+		<spring-security.version>4.2.2.RELEASE</spring-security.version>
+		
 	</properties>
+	
+	
 	
 	<!-- ===== #1. 네이버 스마트 에디터에서 사진첨부 관련하여 이미지의 크기를 구하기위한 라이브러리 다운받는곳 =====  -->
 	<repositories> 
@@ -459,6 +466,31 @@
 		   <artifactId>spring-data-mongodb</artifactId>
 		   <version>${org.spring-data-mongodb-version}</version>
 		</dependency>
+		
+		<!-- ===== (#스프링보안03) Spring Security ===== --> 
+      	<dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${spring-security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${spring-security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${spring-security.version}</version>
+        </dependency>
+		
+		<!-- ===== #257. 스프링보안04 Spring Security 태그들을 사용하기 위해 taglibs 라이브러리를 추가  ===== -->
+      	<dependency>
+          <groupId>org.springframework.security</groupId>
+          <artifactId>spring-security-taglibs</artifactId>
+          <version>${spring-security.version}</version>
+      	</dependency>
+		
 	</dependencies>
     <build>
         <plugins>

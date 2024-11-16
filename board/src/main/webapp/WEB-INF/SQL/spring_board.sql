@@ -1035,8 +1035,211 @@ on R.fk_userid = M.userid
 
 
 
+--===================================== 스프링 보안 시작 ================================================================
+
+/*
+   ============ >>>>>>>>> 스프링 보안(Spring Security) <<<<<<<<<< ============
+*/
+
+-- 기존 테이블이 존재할 경우를 대비해서 테이블 삭제
+DROP TABLE security_member_authority PURGE;
+DROP TABLE security_member PURGE;
+
+-- 기존 시퀀스가 존재할 경우를 대비해서 시퀀스 삭제
+DROP SEQUENCE member_authority_seq;
 
 
+----------------------------------------------------------------
+-- >>> 회원 테이블(인증 테이블) 생성하기 <<< --
+CREATE TABLE security_member (
+  member_id          VARCHAR2(20)  NOT NULL        -- 회원아이디
+ ,member_pwd         VARCHAR2(200) NOT NULL        -- 비밀번호 (Spring Security 에서 제공해주는 SHA-256 암호화를 사용하는 대상)
+ ,member_name        NVARCHAR2(30) NOT NULL        -- 회원명 
+ ,email              VARCHAR2(200) NOT NULL        -- 이메일 (AES-256 암호화/복호화 대상) 
+ ,mobile             VARCHAR2(200)                 -- 연락처 (AES-256 암호화/복호화 대상) 
+ ,postcode           VARCHAR2(10)                  -- 우편번호
+ ,address            VARCHAR2(200)                 -- 주소
+ ,detailaddress      VARCHAR2(200)                 -- 상세주소
+ ,extraaddress       VARCHAR2(200)                 -- 참고항목
+ ,gender             VARCHAR2(1)                   -- 성별   남자:1  / 여자:2
+ ,birthday           VARCHAR2(10)                  -- 생년월일   
+ ,registerday        DATE DEFAULT SYSDATE          -- 가입일자 
+ ,modify_date        DATE DEFAULT SYSDATE          -- 회원정보수정일자
+ ,lastpwdchangedate  DATE DEFAULT SYSDATE          -- 마지막으로 암호를 변경한 날짜
+ ,enabled            NUMBER(1) DEFAULT 1 NOT NULL  -- Spring Security 에서는 enabled 컬럼의 값이 1이어야만 회원이 존재하는것으로 인식한다. 반드시 enabled 컬럼이 존재해야만 한다.!!!
+ ,CONSTRAINT PK_security_member_member_id PRIMARY KEY(member_id)
+ ,CONSTRAINT UQ_security_member_email UNIQUE(email)
+ ,CONSTRAINT CK_security_member_gender CHECK( gender in('1','2') )
+);
+/*
+ enabled 컬럼 - Sring Security 에서는 계정활성화 여부를 알려주는 enabled를 반드시 넣어주어야 한다.
+               enabled 컬럼의 값이 false일 경우 로그인을 할 수 없도록 Sring Security 는 설계가 되어있기 때문이다.
+
+출처: http://goldenraccoon.tistory.com/entry/SPRING-SECURITY-DB-LOGIN [황금너구리 블로그] 
+*/
+-- Table SECURITY_MEMBER이(가) 생성되었습니다.
+
+
+
+-- >>> 어쏘러티(권한, 역할) 테이블 생성하기 <<< --
+CREATE TABLE security_member_authority (
+  num            NUMBER NOT NULL
+ ,fk_member_id   VARCHAR2(20) NOT NULL
+ ,authority      VARCHAR2(100) NOT NULL 
+ ,CONSTRAINT PK_security_member_authority PRIMARY KEY(num)
+ ,CONSTRAINT UQ_security_member_authority UNIQUE(fk_member_id, authority)
+ ,CONSTRAINT FK_security_member_authority FOREIGN KEY(fk_member_id) REFERENCES security_member(member_id) ON DELETE CASCADE
+);
+-- Table SECURITY_MEMBER_AUTHORITY이(가) 생성되었습니다.
+
+
+-- >>> 어쏘러티(권한, 역할) 테이블에 사용할 시퀀스 생성하기 <<< --
+DROP SEQUENCE member_authority_seq;
+-- Sequence MEMBER_AUTHORITY_SEQ이(가) 삭제되었습니다.
+
+
+CREATE SEQUENCE member_authority_seq
+START WITH 1
+INCREMENT BY 1
+NOMAXVALUE
+NOMINVALUE
+NOCYCLE
+NOCACHE;
+-- Sequence MEMBER_AUTHORITY_SEQ이(가) 생성되었습니다.
+
+---------------------------------------------------------------------------
+select *
+from security_member
+order by registerday desc;
+/*
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+MEMBER_ID  MEMBER_NAME  MEMBER_PWD                                                          BIRTH_DATE  ENABLED  EMAIL                                          TEL             POSTCODE  ADDR1                     ADDR2                           CREATED_DATE  MODIFY_DATE  LAST_LOGIN       
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   
+*/
+
+/*
+delete from security_loginhistory where fk_member_id = 'sec_admin2';
+delete from security_member_authority where fk_member_id = 'sec_admin2';
+delete from security_member where member_id = 'sec_admin2';
+commit;
+*/
+
+
+select *
+from security_member_authority
+order by fk_member_id;
+/*
+-----------------------------
+NUM  FK_MEMBER_ID  AUTHORITY
+-----------------------------
+
+*/
+
+---------------------------------------------------------------------------
+
+/*
+  !!! 중요 !!!  
+  한명의 사용자는 여러개의 권한을 가질 수 있다.(ROLE_USER, ROLE_ADMIN 등등)
+
+>>> SPRING SECURITY를 사용하지 않고 권한을 체크하는 경우 <<<
+회원별로 레벨을 부여하고 게시판 정보에 읽기권한레벨, 쓰기권한레벨을 넣어 준 뒤
+회원의 레벨이 게시판의 권한레벨보다 클 경우(부등호로 비교) 권한을 주는 방식이다.
+
+>>> 하지만 SPRING SECURITY는 레벨의 비교가 아닌(부등호로 비교하는 것이 아니라),
+    권한(String)이 일치(등호로 비교)하는 대상에 대해 권한을 주기 때문에
+관리자 권한 즉, ROLE_ADMIN을 보유하고 있더라도 사용자 권한인 ROLE_USER를 보유하고 있지 않을 경우 접근을 못하게 된다.
+따라서 한 유저는 여러개의 권한(1:n)을 보유할 수 있어야 한다.!!!!
+
+출처: http://goldenraccoon.tistory.com/entry/SPRING-SECURITY-DB-LOGIN [황금너구리 블로그]
+*/
+INSERT INTO security_member_authority(num, fk_member_id, authority) 
+VALUES (member_authority_seq.NEXTVAL, 'sec_user1', 'ROLE_USER');  -- 회원임.
+
+INSERT INTO security_member_authority(num, fk_member_id, authority) 
+VALUES (member_authority_seq.NEXTVAL, 'sec_user2', 'ROLE_USER_SPECIAL');  -- 특별회원임.
+
+INSERT INTO security_member_authority(num, fk_member_id, authority) 
+VALUES (member_authority_seq.NEXTVAL, 'sec_user2', 'ROLE_USER');  -- 특별회원임.
+
+INSERT INTO security_member_authority(num, fk_member_id, authority) 
+VALUES (member_authority_seq.NEXTVAL, 'sec_admin1', 'ROLE_USER_SPECIAL');  -- 관리자임.
+
+INSERT INTO security_member_authority(num, fk_member_id, authority) 
+VALUES (member_authority_seq.NEXTVAL, 'sec_admin1', 'ROLE_ADMIN');  -- 관리자임.
+
+INSERT INTO security_member_authority(num, fk_member_id, authority) 
+VALUES (member_authority_seq.NEXTVAL, 'sec_admin1', 'ROLE_USER');  -- 관리자임.
+
+COMMIT;
+
+
+drop table security_member_authority purge;
+-- Table SECURITY_MEMBER_AUTHORITY이(가) 삭제되었습니다.
+
+select *
+from security_member_authority
+order by fk_member_id;
+/*
+-----------------------------
+NUM  FK_MEMBER_ID  AUTHORITY
+-----------------------------
+6    sec_admin1      ROLE_ADMIN
+3    sec_admin1      ROLE_USER
+5    sec_admin1      ROLE_USER_SPECIAL
+1    sec_user1      ROLE_USER
+2    sec_user2      ROLE_USER
+4    sec_user2      ROLE_USER_SPECIAL
+*/
+
+create table security_loginhistory
+(historyno      number
+,fk_member_id   varchar2(20) not null          -- 회원아이디
+,logindate      date default sysdate not null  -- 로그인되어진 접속날짜및시간
+,clientip       varchar2(20) not null
+,constraint  PK_security_loginhistory primary key(historyno)
+,constraint  FK_security_loginhistory foreign key(fk_member_id) references security_member(member_id) on delete cascade
+);
+-- Table SECURITY_LOGINHISTORY이(가) 생성되었습니다.
+
+create sequence seq_security_loginhistory
+start with 1
+increment by 1
+nomaxvalue
+nominvalue
+nocycle
+nocache;
+-- Sequence SEQ_SECURITY_LOGINHISTORY이(가) 생성되었습니다.
+
+select historyno, fk_member_id, to_char(logindate, 'yyyy-mm-dd hh24:mi:ss') AS logindate, clientip 
+from security_loginhistory
+order by historyno desc;
+
+------------------------------------------------------------------------
+
+update security_member set enabled = 0
+where member_id = 'sec_user1';
+commit;
+
+update security_member set enabled = 1
+where member_id = 'sec_user1';
+commit;
+
+
+select A.member_id, A.member_name, A.member_pwd, A.enabled, B.authority
+from security_member A join security_member_authority B
+on A.member_id = B.fk_member_id
+order by B.num desc;
+
+
+select A.member_id, A.member_name, A.member_pwd, A.enabled, B.authority
+from security_member A join security_member_authority B
+on A.member_id = B.fk_member_id
+where B.fk_member_id in (select fk_member_id 
+                         from security_member_authority 
+                         group by fk_member_id
+                         having count(*) > 1)  -- 2개 이상의 권한을 가진 사용자 조회
+order by B.num desc;
 
 
 

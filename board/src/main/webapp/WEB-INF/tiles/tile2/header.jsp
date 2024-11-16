@@ -88,7 +88,7 @@
 		        </div>
 		    </li>
 		    
-	      	<!-- ==== (#스프링보안14) Spring Security(스프링 보안) 알아보기 ====  -->
+	      	<!-- ==== #266. 스프링보안13 Spring Security(스프링 보안) 알아보기 ====  -->
           	<li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdown" data-toggle="dropdown">스프링 보안</a>  
               <div class="dropdown-menu" aria-labelledby="navbarDropdown">

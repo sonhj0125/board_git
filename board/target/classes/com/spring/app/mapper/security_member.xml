@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd"> 
+
+<mapper namespace="security_member">
+
+	<select id="member_id_check" parameterType="String" resultType="Integer">
+    	SELECT count(*)
+        FROM security_member
+        WHERE member_id = #{member_id}
+    </select>
+    
+    <select id="emailDuplicateCheck" parameterType="String" resultType="Integer">
+    	SELECT count(*)
+        FROM security_member
+        WHERE email = #{email}
+    </select>
+
+	<insert id="insert_member" parameterType="com.spring.app.security.domain.LombokMemberVO">
+    	INSERT INTO security_member(member_id, member_pwd, member_name, email, mobile, postcode, address, detailaddress, extraaddress, gender, birthday, registerday, modify_date, lastpwdchangedate, enabled)  
+    	VALUES(#{member_id}, #{member_pwd}, #{member_name}, #{email}, #{mobile}, #{postcode}, #{address}, #{detailaddress}, #{extraaddress}, #{gender}, #{birthday}, default, default, default, default) 
+    </insert>
+	    
+    <insert id="insert_member_authority" parameterType="com.spring.app.security.domain.LombokMemberVO">
+    	INSERT INTO security_member_authority(num, fk_member_id, authority) 
+       	VALUES(member_authority_seq.nextval, #{member_id}, #{authority} )
+   <!-- 또는 
+       	VALUES(member_authority_seq.nextval, #{member_id}, 'ROLE_USER' )  
+   -->
+    </insert>
+    
+    <insert id="insert_security_loginhistory" parameterType="HashMap">
+        INSERT INTO security_loginhistory(historyno, fk_member_id, logindate, clientip)
+        VALUES(seq_security_loginhistory.nextval, #{member_id}, default, #{clientip})
+        <!-- HashMap 의 키값은 com.spring.app.security.loginsuccess.MyAuthenticationSuccessHandler 에서 정의해 둔것이다. --> 
+    </insert>
+    
+    <resultMap type="java.util.HashMap" id="get_member_Map">
+    	<result property="MEMBER_ID" 	column="member_id" 		javaType="String" />
+    	<result property="MEMBER_NAME" 	column="member_name" 	javaType="String" />
+    </resultMap>
+    <select id="get_member" parameterType="String" resultMap="get_member_Map">
+    	SELECT member_id, member_name
+        FROM security_member
+        WHERE member_id = #{member_id}
+    </select>
+    
+</mapper>
